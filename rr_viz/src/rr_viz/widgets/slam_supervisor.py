@@ -1,0 +1,181 @@
+import os
+import rospy
+import rospkg
+import tf
+import random
+import string
+import time
+from datetime import datetime, date
+from geometry_msgs.msg import PoseWithCovarianceStamped
+from std_msgs.msg import String
+from functools import partial
+from PyQt5 import QtGui, QtWidgets, uic, QtCore
+from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog, QMessageBox, QListWidgetItem
+from std_srvs.srv import Trigger, TriggerResponse, TriggerRequest
+from rr_node_tools_msgs.srv import String, StringResponse, StringRequest
+from rr_node_tools_msgs.msg import StringArray
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+Form, Base = uic.loadUiType(os.path.join(current_dir, "slam_supervisor.ui"))
+
+
+class SlamSupervisorWidget(Base, Form):
+    set_mission_status_label_signal = QtCore.pyqtSignal(str)
+
+    def __init__(self, parent=None):
+        super(self.__class__, self).__init__(parent)
+        self.setupUi(self)
+        print("SlamSupervisorWidget Loaded")
+        # Get slam_supervisor_node:
+        self.slam_sup_name = rospy.get_param(
+            "slam_supervisor_name", "slam_supervisor")
+        self.active_nodes_sub = rospy.Subscriber(
+            self.slam_sup_name+"/active_nodes", StringArray, self.active_nodes_sub_cb)
+        self.active_nodes = []
+
+        # check setup:
+        try:
+            self.slam_killnodes_srv = rospy.wait_for_service(
+                self.slam_sup_name+"/kill_nodes", rospy.Duration(3))
+        except:
+            self.setEnabled(False)
+            # Exit if theres no service
+            return
+
+        # Setting up services:
+        self.slam_killnodes_srv = rospy.ServiceProxy(
+            self.slam_sup_name+"/kill_nodes", Trigger)
+        self.slam_launch_mapping_srv = rospy.ServiceProxy(
+            self.slam_sup_name+"/launch_mapping", Trigger)
+        self.slam_launch_localization_srv = rospy.ServiceProxy(
+            self.slam_sup_name+"/launch_localization", String)
+        self.slam_list_maps_srv = rospy.ServiceProxy(
+            self.slam_sup_name+"/list_maps", Trigger)
+        self.slam_save_map_srv = rospy.ServiceProxy(
+            self.slam_sup_name+"/save_map", String)
+
+        # Connecting buttons:
+        self.switchToMappingButton.pressed.connect(self.switchToMappingSlot)
+        self.switchToLocalizationButton.pressed.connect(
+            self.switchToLocalizationSlot)
+        # self.saveLocally.pressed.connect(self.saveLocallySlot)
+        # self.saveLocally.setEnabled(False)
+        self.saveNav.pressed.connect(self.saveNavSlot)
+        # Map update:
+        self.map_list_update_timer = QtCore.QTimer(self)
+        self.map_list_update_timer.timeout.connect(self.map_list_update)
+        self.map_list_update_timer.start(1000)
+
+    def active_nodes_sub_cb(self, msg):
+        self.active_nodes = msg.data
+
+    def switchToMappingSlot(self):
+        trig_resp = self.slam_killnodes_srv.call(TriggerRequest())
+        if trig_resp.success:
+            print(trig_resp.message)
+            temp_timer = rospy.Timer(
+                rospy.Duration(.1), lambda _: self.waitTillDead_and_execute(self.runMapping), oneshot=True)
+        else:
+            print("failed calling slam_killnodes_srv")
+
+    def runMapping(self):
+        trig_resp = self.slam_launch_mapping_srv.call(TriggerRequest())
+        if trig_resp.success:
+            print(trig_resp.message)
+        else:
+            print("failedcalling slam_launch_mapping_srv")
+
+    def switchToLocalizationSlot(self):
+        trig_resp = self.slam_killnodes_srv.call(TriggerRequest())
+        if trig_resp.success:
+            print(trig_resp.message)
+            temp_timer = rospy.Timer(
+                rospy.Duration(.1), lambda _: self.waitTillDead_and_execute(self.runLocalization), oneshot=True)
+        else:
+            print("failed calling slam_killnodes_srv")
+
+    def runLocalization(self):
+        _str = StringRequest()
+        _str.str = self.mapListWidget.currentItem().text().split(".")[0]
+        trig_resp = self.slam_launch_localization_srv.call(_str)
+        if trig_resp.success:
+            print(trig_resp.message)
+        else:
+            print("failedcalling slam_launch_localization_srv")
+
+    # def saveLocallySlot(self):
+    #     rospy.loginfo("saveLocallySlot")
+    #     pass
+
+    def waitTillDead_and_execute(self, func):
+        # print("!!! Timer executed on func: {}".format(func))
+        if len(self.active_nodes) == 0:
+            # print("!!! Timer found nodes 0")
+            func()
+        else:
+            # print("!!! Timer found nodes >0 , new timer created")
+            rospy.Timer(
+                rospy.Duration(1), lambda _: self.waitTillDead_and_execute(func), oneshot=True)
+
+    def saveNavSlot(self):
+        _str = StringRequest()
+        _str.str = randomTimeString()
+        trig_resp = self.slam_save_map_srv.call(_str)
+        if trig_resp.success:
+            print(trig_resp.message)
+        else:
+            print("failedcalling slam_save_map_srv")
+            print(trig_resp.message)
+
+    def map_list_handle(self, remote_list):
+        local_maps = []
+        for index in range(self.mapListWidget.count()):
+            local_maps.append(self.mapListWidget.item(index).text())
+        # print("local: {}".format(local_maps))
+        # print("remote: {}".format(remote_list))
+        for _map in local_maps:
+            if _map not in remote_list:
+                self.mapListWidget.takeItem(local_maps.index(_map))
+                local_maps.remove(_map)
+        # print("local: {}".format(local_maps))
+        for _map in remote_list:
+            if _map not in local_maps:
+                self.mapListWidget.addItem(_map)
+
+    def map_list_update(self):
+        trig_resp = self.slam_list_maps_srv.call(TriggerRequest())
+        current_item = self.mapListWidget.currentItem()
+        self.switchToLocalizationButton.setEnabled(current_item is not None)
+        if trig_resp.success:
+            # print(trig_resp.message)
+            remote_maps = str(trig_resp.message).split(",")
+            remote_maps = [map.strip() for map in remote_maps]
+            self.map_list_handle(remote_maps)
+        else:
+            print("failed to fetch maps")
+
+
+def randomString(stringLength):
+    letters = string.ascii_letters
+    return ''.join(random.choice(letters) for i in range(stringLength))
+
+
+def randomTimeString():
+    # time.ctime() # 'Mon Oct 18 13:35:29 2010'
+    # ' 1:36PM EDT on Oct 18, 2010'
+    return "{:%m_%d_%H_%M_}".format(datetime.now())+randomString(4)
+
+
+# Services:
+# * ~kill_nodes - Trigger to kill all the nodes matching regex (.*slam)
+# * ~launch_mapping - Trigger to launch mapping node
+# * ~launch_localization - String to launch localization. Provide empty string to launch the default map, if using slam_toolbox provide the node name without suffix (e.g. `map`). If using any other SLAM package provide the map name with suffix (e.g. map.yaml)
+# * ~list_maps - Trigger that returns all the map files in the map directory
+# * ~save_map - String that saves map with a default name
+
+
+# Services:
+# * ~kill_nodes - Trigger, kill all nodes matching a regex
+# * ~launch_node - Trigger, start the launch_file
+# * ~purge_bags - Trigger, removes ALL bag files in the bag directory
+# * ~purge_single_bag - RemoveFileSrv, removes a single bag, requires an absolute path to the file

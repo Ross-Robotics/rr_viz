@@ -1,0 +1,7 @@
+<launch>
+  <node pkg="rr_viz" type="rr_viz_node.py" name="rr_viz" output="screen" required="true">
+    <!-- <param name="connect_movebase" value="true"/> -->
+  </node>
+  <!-- <include file="$(find rr_viz)/launch/textured_sphere.launch" /> -->
+
+</launch>

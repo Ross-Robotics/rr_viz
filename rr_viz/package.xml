@@ -1,0 +1,34 @@
+<package>
+  <name>rr_viz</name>
+  <version>0.3.0</version>
+  <description>
+         This is a PyQT/Rviz GUI stack for Ross Robotics. The intention is to enhance normal rviz functionalities with what is neccessary/comfortable for RR devs or RR advanced users
+  </description>
+  <maintainer email="julius@robosynthesis.com">Julius Sustarevas</maintainer>
+  <author email="julius@robosynthesis.com">Julius Sustarevas</author>
+  <license>Unlicense</license>
+  <url type="website"></url>
+  <url type="repository"></url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>actionlib</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>move_base_msgs</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>rospy_message_converter</build_depend>
+  <build_depend>rviz_textured_sphere</build_depend>
+  <build_depend>rr_diagnostics_msgs</build_depend>
+
+
+  <run_depend>actionlib</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>move_base_msgs</run_depend>
+  <run_depend>rospy</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>interactive_waypoints</run_depend>
+  <run_depend>rospy_message_converter</run_depend>
+  <run_depend>rviz_textured_sphere</run_depend>
+  <run_depend>rr_diagnostics_msgs</run_depend>
+
+</package>
