@@ -1,3 +1,6 @@
 [submodule "video_stream_opencv"]
 	path = video_stream_opencv
 	url = https://github.com/ros-drivers/video_stream_opencv.git
+[submodule "rviz_textured_sphere"]
+	path = rviz_textured_sphere
+	url = https://github.com/UTNuclearRoboticsPublic/rviz_textured_sphere.git
