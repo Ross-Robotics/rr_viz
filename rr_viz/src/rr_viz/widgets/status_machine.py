@@ -7,7 +7,7 @@ from std_msgs.msg import String
 from functools import partial
 from PyQt5 import QtGui, QtWidgets, uic, QtCore
 from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog, QMessageBox, QListWidgetItem
-from rr_diagnostics_msgs.msg import rr_machine_latency
+from rr_diagnostics.msg import rr_machine_latency
 import node_status
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
