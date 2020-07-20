@@ -1,9 +1,3 @@
-[submodule "video_stream_opencv"]
-	path = video_stream_opencv
-	url = https://github.com/ros-drivers/video_stream_opencv.git
-[submodule "rviz_textured_sphere"]
-	path = rviz_textured_sphere
-	url = https://github.com/UTNuclearRoboticsPublic/rviz_textured_sphere.git
 [submodule "interactive_waypoints"]
 	path = interactive_waypoints
 	url = https://github.com/JuliusSustarevas/interactive_waypoints.git
