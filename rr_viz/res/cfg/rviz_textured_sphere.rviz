@@ -4,8 +4,6 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
-        - /Image1
-        - /Image2
         - /SphereDisplay1
       Splitter Ratio: 0.5016129016876221
     Tree Height: 723
@@ -45,30 +43,6 @@ Visualization Manager:
       Plane: XY
       Plane Cell Count: 10
       Reference Frame: <Fixed Frame>
-      Value: false
-    - Class: rviz/Image
-      Enabled: false
-      Image Topic: /camera_front/cropped
-      Max Value: 1
-      Median window: 5
-      Min Value: 0
-      Name: Image
-      Normalize Range: true
-      Queue Size: 1
-      Transport Hint: compressed
-      Unreliable: false
-      Value: false
-    - Class: rviz/Image
-      Enabled: false
-      Image Topic: /camera_rear/cropped
-      Max Value: 1
-      Median window: 5
-      Min Value: 0
-      Name: Image
-      Normalize Range: true
-      Queue Size: 1
-      Transport Hint: compressed
-      Unreliable: false
       Value: false
     - Blend angle: 15
       Class: rviz_textured_sphere/SphereDisplay
