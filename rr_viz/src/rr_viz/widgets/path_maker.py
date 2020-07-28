@@ -3,6 +3,7 @@
 import os
 import rospy
 import rospkg
+import rosparam
 import tf
 from geometry_msgs.msg import PoseWithCovarianceStamped
 from functools import partial
@@ -13,6 +14,10 @@ from interactive_waypoints.waypoint_list import InteractiveWaypointList
 from interactive_waypoints.waypoint import Waypoint
 from rviz_minimap import RVizMinimap
 import managers.file_management as file_management
+from rr_viz.msg import TaskWaypoint
+from rospy_message_converter import message_converter
+from rr_viz.srv import BuildBT, BuildBTRequest
+from std_msgs.msg import String
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 rr_viz_dir = _dir = os.path.dirname(os.path.dirname(current_dir))
@@ -27,18 +32,37 @@ class QWaypointWidget(QWidget, Waypoint):
         QWidget.__init__(self, parentList)
         Waypoint.__init__(self, iw_srv, pose)
 
-        # create custom Waypoint display
+        # Extend fields of wp to include tax things
+        self.taskSrv = "None"
+        self.taskSubTree = "None"
+
+        self.allQHBoxLayout = QtWidgets.QHBoxLayout()  # Holding box
+
+        self.idQLabel = QtWidgets.QLabel()  # First elem holds order number
+        self.allQHBoxLayout.addWidget(self.idQLabel, 0)
+
+        # Second elem is box holding labels
         self.textQVBoxLayout = QtWidgets.QVBoxLayout()
-        self.textPoseQLabel = QtWidgets.QLabel()
-        self.textNameQLabel = QtWidgets.QLabel()
+        self.textPoseQLabel = QtWidgets.QLabel()  # pose info label
+        self.textNameQLabel = QtWidgets.QLabel()  # name  label
         self.textQVBoxLayout.addWidget(self.textPoseQLabel)
         self.textQVBoxLayout.addWidget(self.textNameQLabel)
-
-        self.allQHBoxLayout = QtWidgets.QHBoxLayout()
-        self.idQLabel = QtWidgets.QLabel()
-
-        self.allQHBoxLayout.addWidget(self.idQLabel, 0)
         self.allQHBoxLayout.addLayout(self.textQVBoxLayout, 1)
+
+        # Third elem is box holding drop downs
+        self.comboBoxQVBoxLayout = QtWidgets.QVBoxLayout()
+        self.taskSrvQComboBox = QtWidgets.QComboBox()
+        self.taskSrvQComboBox.addItems(["None", "/continue_mission"])
+        self.taskSrvQComboBox.currentIndexChanged.connect(self.taskSrvChange)
+        self.taskSubTreeQComboBox = QtWidgets.QComboBox()
+        self.taskSubTreeQComboBox.addItems(
+            ["None", "InflateCostmaps", "DeflateCostmaps"])
+        self.taskSubTreeQComboBox.currentIndexChanged.connect(
+            self.taskSubTreeChange)
+
+        self.comboBoxQVBoxLayout.addWidget(self.taskSrvQComboBox)
+        self.comboBoxQVBoxLayout.addWidget(self.taskSubTreeQComboBox)
+        self.allQHBoxLayout.addLayout(self.comboBoxQVBoxLayout, 2)
 
         self.setLayout(self.allQHBoxLayout)
 
@@ -64,7 +88,38 @@ class QWaypointWidget(QWidget, Waypoint):
     def _setIdText(self, text):
         self.idQLabel.setText(text)
 
-    # overriden methods:
+    def taskSrvChange(self, i):
+        self.taskSrv = self.taskSrvQComboBox.itemText(i)
+
+    def taskSubTreeChange(self, i):
+        self.taskSubTree = self.taskSubTreeQComboBox.itemText(i)
+
+    def set_taskSrv(self, txt):
+        index = self.taskSrvQComboBox.findText(
+            txt, QtCore.Qt.MatchFixedString)
+        if index >= 0:
+            self.taskSrvQComboBox.setCurrentIndex(index)
+        else:
+            rospy.logerr("Tried to set task srv to non existant field")
+
+    def set_taskSubTree(self, txt):
+        index = self.taskSubTreeQComboBox.findText(
+            txt, QtCore.Qt.MatchFixedString)
+        if index >= 0:
+            self.taskSubTreeQComboBox.setCurrentIndex(index)
+        else:
+            rospy.logerr("Tried to set task subtree to non existant field")
+
+    def toMsg(self):
+        # TODO to/from msg should be core funcion of taskwaypoints
+        tw = TaskWaypoint()
+        tw.pose = self.get_pose()
+        tw.tasksrv.data = str(self.taskSrv)
+        tw.tasksubtree.data = str(self.taskSubTree)
+        return tw
+
+        # overriden methods:
+
     def _update(self):
         ''' This is called by Waypoint side. When update from rviz is received '''
         Waypoint._update(self)
@@ -84,7 +139,7 @@ class QWaypointWidget(QWidget, Waypoint):
 
 
 class InteractivePathMng(InteractiveWaypointList):
-    ''' This class abstracts and adapts the InteractiveWaypointList to be suitable for  use with QT. 
+    ''' This class abstracts and adapts the InteractiveWaypointList to be suitable for  use with QT.
     Main note is: overridden methos splits logic into business and GUI. business is implemented via calls to super. gui via emiting to slots.'''
 
     def __init__(self, srv_name, qlistwidget, dup_signal, del_signal, ins_signal, chgid_signal):
@@ -162,7 +217,63 @@ class InteractivePathMng(InteractiveWaypointList):
     def changeID_slot(self, wp_old, new_id):
         # Due to complexitie, changeID must act as pop insert operation now.
         wp = self.pop(wp_old)
-        self.insert(new_id, self.get_new_wp(wp.get_pose()))
+        newwp = self.get_new_wp(wp.get_pose())
+        newwp.taskSrvQComboBox.setCurrentIndex(
+            newwp.taskSrvQComboBox.findText(wp.taskSrv))
+        newwp.taskSubTreeQComboBox.setCurrentIndex(
+            newwp.taskSubTreeQComboBox.findText(wp.taskSubTree))
+        self.insert(new_id, newwp)
+
+    def saveToPath(self, fullfilename):
+        if not fullfilename:
+            rospy.logerr("Cannot save, no Filename given")
+            return
+        rospy.loginfo(fullfilename)
+        rospy.loginfo("Saving waypoitns to: "+fullfilename)
+        # Clear local params
+        try:
+            rospy.delete_param('waypoint_list')
+        except KeyError:
+            pass
+        if os.path.isfile(fullfilename):
+            os.remove(fullfilename)  # Remove previous file of this name
+        for ii in range(self.len()):
+            wp = self.get_wp(ii)
+            tw = TaskWaypoint()
+            tw.pose = wp.get_pose()
+            tw.tasksrv.data = wp.taskSrv
+            tw.tasksubtree.data = wp.taskSubTree
+            rosparam.set_param_raw("waypoint_list/"+"waypoint_"+str(
+                ii), message_converter.convert_ros_message_to_dictionary(tw))
+        try:
+            rosparam.dump_params(fullfilename, "waypoint_list")
+        except:
+            rospy.logwarn("Writing waypoint param to file failed")
+
+    def loadFromPath(self, fullfilename):
+        if not fullfilename:
+            rospy.logerr("Cannot Load, no Filename given")
+            return
+        rospy.loginfo("Loading waypoitns from: "+fullfilename)
+        # Clear local params
+        try:
+            rospy.delete_param('waypoint_list')
+        except KeyError:
+            pass
+
+        for _ in range(self.len()):
+            self.remove(self.len()-1)
+        param_poses = rosparam.load_file(fullfilename)[0][0]
+        keys = param_poses.keys()
+        keys.sort()
+        # TODO use PoseStamped._type to do this type of stuff dynamically
+        for ks in keys:
+            tw = message_converter.convert_dictionary_to_ros_message(
+                'rr_viz/TaskWaypoint', param_poses[ks])
+            wp = self.get_new_wp(tw.pose)
+            wp.set_taskSrv(tw.tasksrv.data)
+            wp.set_taskSubTree(tw.tasksubtree.data)
+            self.append(wp)
 
 
 class PathMakerWidget(Base, Form):
@@ -198,11 +309,15 @@ class PathMakerWidget(Base, Form):
         self.deleteButton.clicked.connect(self.delete_this_slot)
         self.saveButton.clicked.connect(self.save_slot)
         self.loadButton.clicked.connect(self.load_slot)
+        self.sendMissionButton.clicked.connect(self.sendMissionButton_slot)
 
         # Setup subscriber  for pose spawning
         self.sub = rospy.Subscriber(
             "spawn_waypoint", PoseWithCovarianceStamped, lambda msg: self.spawn_waypoint_signal.emit(msg))
         self.spawn_waypoint_signal.connect(self.spawn_waypoint_slot)
+        rospy.loginfo("waiting for build_bt to start")
+        rospy.wait_for_service('build_bt')
+        self.build_bt_srv = rospy.ServiceProxy("build_bt", BuildBT)
 
         # Need to register a desctructor cuz QT object might live less than python.
         # https://machinekoder.com/how-to-not-shoot-yourself-in-the-foot-using-python-qt/
@@ -256,3 +371,18 @@ class PathMakerWidget(Base, Form):
             if filename[-5:] != ".yaml":
                 filename = filename + ".yaml"
             self.int_waypoints.saveToPath(filename)
+
+    def sendMissionButton_slot(self):
+        btbr = BuildBTRequest()
+        text, ok = QInputDialog.getText(
+            self, 'Send Mission Dialog', 'Enter mission name')
+        if ok:
+            btbr.name = String(str(text))
+            tasklist = []
+            for ii in range(self.int_waypoints.len()):
+                tasklist.append(self.int_waypoints.get_wp(ii).toMsg())
+
+            btbr.tasklist = tasklist
+            resp = self.build_bt_srv(btbr)
+            if not resp.success.data:
+                rospy.logerr("bt building failed")
