@@ -309,15 +309,19 @@ class PathMakerWidget(Base, Form):
         self.deleteButton.clicked.connect(self.delete_this_slot)
         self.saveButton.clicked.connect(self.save_slot)
         self.loadButton.clicked.connect(self.load_slot)
-        self.sendMissionButton.clicked.connect(self.sendMissionButton_slot)
 
         # Setup subscriber  for pose spawning
         self.sub = rospy.Subscriber(
             "spawn_waypoint", PoseWithCovarianceStamped, lambda msg: self.spawn_waypoint_signal.emit(msg))
         self.spawn_waypoint_signal.connect(self.spawn_waypoint_slot)
         rospy.loginfo("waiting for build_bt to start")
-        rospy.wait_for_service('build_bt')
-        self.build_bt_srv = rospy.ServiceProxy("build_bt", BuildBT)
+        try:
+            rospy.wait_for_service('build_bt', 3)
+            self.build_bt_srv = rospy.ServiceProxy("build_bt", BuildBT)
+            self.sendMissionButton.clicked.connect(self.sendMissionButton_slot)
+        except:
+            rospy.logwarn("Bt Builder not found")
+            self.sendMissionButton.setEnabled(False)
 
         # Need to register a desctructor cuz QT object might live less than python.
         # https://machinekoder.com/how-to-not-shoot-yourself-in-the-foot-using-python-qt/
