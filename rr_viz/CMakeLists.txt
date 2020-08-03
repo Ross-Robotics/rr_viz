@@ -9,13 +9,27 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   rviz_textured_sphere
+  message_generation
 )
 catkin_python_setup()
 
 
+add_message_files(
+  FILES
+  TaskWaypoint.msg
+)
+
+add_service_files(
+  FILES
+  BuildBT.srv
+)
+
+generate_messages(DEPENDENCIES geometry_msgs std_msgs rr_viz)
+
+
 catkin_package(
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS actionlib geometry_msgs move_base_msgs rospy std_msgs
+  CATKIN_DEPENDS actionlib geometry_msgs move_base_msgs rospy std_msgs message_runtime
 )
 
 #catkin_install_python(

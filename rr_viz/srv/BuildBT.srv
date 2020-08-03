@@ -1,0 +1,4 @@
+std_msgs/String name
+rr_viz/TaskWaypoint[] tasklist
+---
+std_msgs/Bool success
