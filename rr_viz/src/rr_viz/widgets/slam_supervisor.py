@@ -53,6 +53,7 @@ class SlamSupervisorWidget(Base, Form):
             self.slam_sup_name+"/list_maps", Trigger)
         self.slam_save_map_srv = rospy.ServiceProxy(
             self.slam_sup_name+"/save_map", String)
+        self.default_map_name = rospy.get_param("~default_map_name", "")
 
         # Connecting buttons:
         self.switchToMappingButton.pressed.connect(self.switchToMappingSlot)
@@ -119,12 +120,15 @@ class SlamSupervisorWidget(Base, Form):
 
     def saveNavSlot(self):
         _str = StringRequest()
-        _str.str = randomTimeString()
+        if not self.default_map_name:
+            _str.str = randomTimeString()
+        else:
+            _str.str = self.default_map_name
         trig_resp = self.slam_save_map_srv.call(_str)
         if trig_resp.success:
             print(trig_resp.message)
         else:
-            print("failedcalling slam_save_map_srv")
+            print("failed calling slam_save_map_srv")
             print(trig_resp.message)
 
     def map_list_handle(self, remote_list):
