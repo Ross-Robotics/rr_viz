@@ -14,13 +14,14 @@ from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFil
 from std_srvs.srv import Trigger, TriggerResponse, TriggerRequest
 from rr_node_tools_msgs.srv import String, StringResponse, StringRequest
 from rr_node_tools_msgs.msg import StringArray
+from helpers import rr_qt_helper
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 Form, Base = uic.loadUiType(os.path.join(current_dir, "slam_supervisor.ui"))
 
 
 class SlamSupervisorWidget(Base, Form):
-    set_mission_status_label_signal = QtCore.pyqtSignal(str)
+    set_enabled = QtCore.pyqtSignal(bool)
 
     def __init__(self, parent=None):
         super(self.__class__, self).__init__(parent)
@@ -33,15 +34,12 @@ class SlamSupervisorWidget(Base, Form):
             self.slam_sup_name+"/active_nodes", StringArray, self.active_nodes_sub_cb)
         self.active_nodes = []
 
-        # check setup:
-        try:
-            self.slam_killnodes_srv = rospy.wait_for_service(
-                self.slam_sup_name+"/kill_nodes", rospy.Duration(3))
-        except:
-            self.setEnabled(False)
-            # Exit if theres no service
-            return
-
+        # Setup state checker:
+        self.setEnabled(False)
+        self.set_enabled.connect(self.setEnabled)
+        self.state_checker = rr_qt_helper.StateCheckerTimer(
+            self.is_slam_supervisor_up, self.set_enabled, Hz=1./3.)
+        self.state_checker.start()
         # Setting up services:
         self.slam_killnodes_srv = rospy.ServiceProxy(
             self.slam_sup_name+"/kill_nodes", Trigger)
@@ -66,6 +64,15 @@ class SlamSupervisorWidget(Base, Form):
         self.map_list_update_timer = QtCore.QTimer(self)
         self.map_list_update_timer.timeout.connect(self.map_list_update)
         self.map_list_update_timer.start(1000)
+
+    def is_slam_supervisor_up(self):
+        try:
+            rospy.wait_for_service(
+                self.slam_sup_name+"/kill_nodes", rospy.Duration(3))
+            return True
+        except:
+            # Exit if theres no service
+            return False
 
     def active_nodes_sub_cb(self, msg):
         self.active_nodes = msg.data
@@ -109,7 +116,6 @@ class SlamSupervisorWidget(Base, Form):
     #     pass
 
     def waitTillDead_and_execute(self, func):
-        # print("!!! Timer executed on func: {}".format(func))
         if len(self.active_nodes) == 0:
             # print("!!! Timer found nodes 0")
             func()
@@ -147,16 +153,18 @@ class SlamSupervisorWidget(Base, Form):
                 self.mapListWidget.addItem(_map)
 
     def map_list_update(self):
-        trig_resp = self.slam_list_maps_srv.call(TriggerRequest())
-        current_item = self.mapListWidget.currentItem()
-        self.switchToLocalizationButton.setEnabled(current_item is not None)
-        if trig_resp.success:
-            # print(trig_resp.message)
-            remote_maps = str(trig_resp.message).split(",")
-            remote_maps = [map.strip() for map in remote_maps]
-            self.map_list_handle(remote_maps)
-        else:
-            print("failed to fetch maps")
+        if self.isEnabled():
+            trig_resp = self.slam_list_maps_srv.call(TriggerRequest())
+            current_item = self.mapListWidget.currentItem()
+            self.switchToLocalizationButton.setEnabled(
+                current_item is not None)
+            if trig_resp.success:
+                # print(trig_resp.message)
+                remote_maps = str(trig_resp.message).split(",")
+                remote_maps = [map.strip() for map in remote_maps]
+                self.map_list_handle(remote_maps)
+            else:
+                print("failed to fetch maps")
 
 
 def randomString(stringLength):
