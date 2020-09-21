@@ -1,0 +1,11 @@
+<launch>
+  <node pkg="rr_viz" type="rr_viz_node.py" name="rr_viz" output="screen" required="true">
+    <param name="default_map_name" value="map"/>
+    <!-- <param name="connect_movebase" value="true"/> -->
+  </node>
+
+  <!-- TEST NODES -->
+  <node pkg="rr_viz" type="mock_slam_supervisor.py" name="mock_slam_supervisor" output="screen" required="true"/>
+
+
+</launch>

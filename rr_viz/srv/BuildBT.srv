@@ -1,4 +1,4 @@
 std_msgs/String name
-rr_viz/TaskWaypoint[] tasklist
+rr_viz/RRTaskWaypoint[] tasklist
 ---
 std_msgs/Bool success
