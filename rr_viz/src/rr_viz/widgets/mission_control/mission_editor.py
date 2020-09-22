@@ -26,7 +26,11 @@ class MissionEditorWidget(Base, Form):
         self.setupUi(self)
 
         # Setup all button connections
-        self.addButton.clicked.connect(self.add_slot)  # TODO
+        self._pose_est = None
+        self._robot_pose_sub = rospy.Subscriber(
+            "/robot_pose", PoseStamped, self._robot_pose_cb)
+
+        self.addButton.clicked.connect(self.add_slot)
         self.duplicateButton.clicked.connect(self.duplicate_slot)
         self.deleteAllButton.clicked.connect(self.delete_all_slot)
         self.deleteButton.clicked.connect(self.delete_this_slot)
@@ -37,12 +41,14 @@ class MissionEditorWidget(Base, Form):
         # https://machinekoder.com/how-to-not-shoot-yourself-in-the-foot-using-python-qt/
         self.destroyed.connect(self._unregister)
 
+    def _robot_pose_cb(self, msg):
+        self._pose_est = msg
+
     def setup_spawn(self):
         # Setup subscriber  for pose spawning
         self.sub = rospy.Subscriber(
             "spawn_waypoint", PoseWithCovarianceStamped, lambda msg: self.spawn_waypoint_signal.emit(msg))
         self.spawn_waypoint_signal.connect(self.spawn_waypoint_slot)
-        rospy.loginfo("waiting for build_bt to start")
 
     def spawn_waypoint_slot(self, pwcs_msg):
         msg = TaskWaypointMsg()
@@ -57,14 +63,10 @@ class MissionEditorWidget(Base, Form):
         del(self.waypointList)
 
     def add_slot(self):
-        pose = PoseWithCovarianceStamped()
-        pose.pose.pose.orientation.w = 1.
-        if self.rviz_minimap_manager:
-            pose.header.frame_id = str(
-                self.rviz_minimap_manager.getFixedFrame())
+        if self._pose_est:
+            self.spawn_waypoint_signal.emit(self._pose_est)
         else:
-            pose.header.frame_id = 'map'
-        self.spawn_waypoint_signal.emit(pose)
+            rospy.logwarn("Robot pose not connected")
 
     def duplicate_slot(self):
         if self.waypointList.get_selected_wp():
