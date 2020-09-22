@@ -7,7 +7,6 @@ import string
 import time
 from datetime import datetime, date
 from geometry_msgs.msg import PoseWithCovarianceStamped
-from std_msgs.msg import String
 from functools import partial
 from PyQt5 import QtGui, QtWidgets, uic, QtCore
 from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog, QMessageBox, QListWidgetItem
@@ -164,7 +163,7 @@ class SlamSupervisorWidget(Base, Form):
                 remote_maps = [map.strip() for map in remote_maps]
                 self.map_list_handle(remote_maps)
             else:
-                print("failed to fetch maps")
+                rospy.logwarn_throttle(10, "failed to fetch maps")
 
 
 def randomString(stringLength):

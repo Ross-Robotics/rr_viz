@@ -2,10 +2,11 @@
 import os
 import rospy
 import rospkg
-from interactive_waypoints.waypoint import InteractiveWaypointList
-from rr_viz.msg import TaskWaypoint
+from interactive_waypoints.waypoint_list import InteractiveWaypointList
+from rr_viz.msg import TaskWaypoint as TaskWaypointMsg
+from rr_viz.msg import TaskWaypointList as TaskWaypointListMsg
 from ros_msgdict import msgdict
-import RRTaskWaypoint
+from RRTaskWaypoint import RRTaskWaypoint
 
 
 class RRTaskWaypointList(InteractiveWaypointList):
@@ -19,7 +20,7 @@ class RRTaskWaypointList(InteractiveWaypointList):
         Returns:
             [RRTaskWaypointList]: [ros message such that output of this function given to from_msg() would recreate the RRTaskWaypointList]
         """
-        msg = RRTaskWaypointList()
+        msg = TaskWaypointListMsg()
         if self.len() == 0:
             return msg
 
@@ -28,12 +29,15 @@ class RRTaskWaypointList(InteractiveWaypointList):
             msg.tasklist.append(wp_msg)
         return msg
 
+    def new_waypoint(self, msg=None):
+        return RRTaskWaypoint(msg)
+
     def load_from_msg(self, msg):
         """[Load from RRTaskWaypointList]
 
         Args:
             msg ([RRTaskWaypointList]): [appropriate message to load from]
         """
-        self.clear()
+        self.clearall()
         for wp_msg in msg.tasklist:
-            self.append(RRTaskWaypoint(wp_msg))
+            self.append(self.new_waypoint(wp_msg))

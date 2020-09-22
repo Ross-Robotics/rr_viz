@@ -6,8 +6,6 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import pyqtSlot
 
-# import rviz
-from rviz_frame import RViz_frame
 import managers.file_management as file_management
 from rr_diagnostics.msg import rr_machine_latency
 from rr_diagnostics.srv import rr_network_latency, rr_network_latencyResponse, rr_network_latencyRequest

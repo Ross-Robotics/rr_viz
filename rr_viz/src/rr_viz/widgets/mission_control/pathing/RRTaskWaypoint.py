@@ -3,11 +3,13 @@ import os
 import rospy
 import rospkg
 from interactive_waypoints.waypoint import Waypoint
-from rr_viz.msg import TaskWaypoint
+from interactive_waypoints import waypoint
+from rr_viz.msg import TaskWaypoint as TaskWaypointMsg
 from ros_msgdict import msgdict
 
-Waypoint.params = msgdict.yaml2msgdict(rospkg.RosPack().get_path(
-    "interactive_waypoints")+"/res/waypoint_params.yaml")
+params = msgdict.yaml2msgdict(rospkg.RosPack().get_path(
+    "rr_viz")+"/res/waypoint_params.yaml")
+waypoint.params = params
 
 
 class RRTaskWaypoint(Waypoint):
@@ -19,6 +21,15 @@ class RRTaskWaypoint(Waypoint):
         self.taskSubTree = "None"
         if msg:
             self.load_from_msg(msg)
+
+    def duplicate(self):
+        """[Create a new waypoint using the data of this waypoint. e.g. Duplicate]
+
+        Returns:
+            [type]: [description]
+        """
+        self.__class__(self.save_to_msg())
+        return self.__class__(self.save_to_msg())
 
     def set_taskSrv(self, taskSrv):
         self.taskSrv = taskSrv
@@ -35,7 +46,7 @@ class RRTaskWaypoint(Waypoint):
     def save_to_msg(self):
         """[See Waypoint.save_to_msg]
         """
-        msg = RRTaskWaypoint()
+        msg = TaskWaypointMsg()
         msg.pose_stamped = self.get_pose()
         msg.tasksrv = self.get_taskSrv()
         msg.tasksubtree = self.get_taskSubTree()
@@ -44,7 +55,7 @@ class RRTaskWaypoint(Waypoint):
     def load_from_msg(self, msg):
         """[See Waypoint.load_from_msg]
         """
-        if not isinstance(msg, RRTaskWaypoint):
+        if not isinstance(msg, TaskWaypointMsg):
             rospy.logerr("waypoint is create from RRTaskWaypoint msgs")
         self.set_pose(msg.pose_stamped)
         self.set_taskSrv(msg.tasksrv)

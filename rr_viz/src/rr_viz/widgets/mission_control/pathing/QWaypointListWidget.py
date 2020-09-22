@@ -2,33 +2,36 @@
 import os
 import rospy
 import rospkg
-from rr_viz.msg import TaskWaypoint
 from PyQt5 import QtGui, QtWidgets, uic, QtCore
 from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog, QMessageBox, QListWidgetItem, QListWidget
 from rr_viz.srv import BuildBT, BuildBTRequest
 from std_msgs.msg import String
-import QWaypointWidget
-import RRTaskWaypointList
+from QWaypointWidget import QWaypointWidget
+from RRTaskWaypointList import RRTaskWaypointList
+from interactive_waypoints.waypoint_actions import WaypointMoveBaseAction
 from ros_msgdict import msgdict
 
 
 class QWaypointListWidget(RRTaskWaypointList, QListWidget):
     ''' This class abstracts and adapts the RRTaskWaypointList to be suitable for  use with QT.
     Main note is: overridden methos splits logic into business and GUI. business is implemented via calls to super. gui via emiting to slots.'''
-    list_duplicate_signal = QtCore.pyqtSignal(QWaypointWidget)
-    list_delete_signal = QtCore.pyqtSignal(QWaypointWidget)
-    list_insert_signal = QtCore.pyqtSignal(int, QWaypointWidget)
-    list_changeid_signal = QtCore.pyqtSignal(QWaypointWidget, int)
+    duplicate_signal = QtCore.pyqtSignal(QWaypointWidget)
+    del_signal = QtCore.pyqtSignal(QWaypointWidget)
+    ins_signal = QtCore.pyqtSignal(int, QWaypointWidget)
+    chgid_signal = QtCore.pyqtSignal(QWaypointWidget, int)
+    waypoint_class = QWaypointWidget
 
-    def __init__(self):
+    def __init__(self, parent=None):
         RRTaskWaypointList.__init__(self)
         QListWidget.__init__(self)
         self.setSortingEnabled(False)
-
+        # Adding movebase action by default.it is always intended
+        self.mb_action = WaypointMoveBaseAction(
+            rospy.get_param("~move_base_namespace", "/move_base"))
         # Disabling these methods cuz inconsistent GUI
         self._menu_handler.reApply(self._server)
         self._server.applyChanges()
-        # general connegtions
+        # general connections
         self.currentItemChanged.connect(self._list_selected)
         # drop menu connections
         self.del_signal.connect(
@@ -37,6 +40,30 @@ class QWaypointListWidget(RRTaskWaypointList, QListWidget):
             lambda wp: RRTaskWaypointList.duplicate(self, wp))
         self.ins_signal.connect(self.insert_slot)
         self.chgid_signal.connect(self.changeID_slot)
+
+    def goto_selected_slot(self):
+        self.mb_action.goto_action(self, self.get_selected_wp())
+
+    def goto_all_slot(self):
+        self.mb_action.gotoall_action(self)
+
+    def attach_qbutton_action(self, qbutton, exec_cb, check_cb):
+        qbutton.clicked.connect(exec_cb)
+        setEnabledSignal = QtCore.pyqtSignal(bool)
+        setEnabledSignal.connect(qbutton.setEnabled)
+
+        self.action_state_timers.append(
+            rospy.Timer(rospy.Duration(1.0), lambda _: qbutton.setEnabledSignal.emit(check_cb())))
+        return setEnabledSignal
+
+    def attach_movebase_menu_actions(self):
+        # Add actions to context menu
+        self.waypointList.attach_menu_action(
+            "goto", self.mb_action.goto_action, self.mb_action.is_connected)
+        self.waypointList.attach_menu_action(
+            "gotoall", self.mb_action.gotoall_action, self.mb_action.is_connected)
+        self.waypointList.attach_menu_action(
+            "cancel goto", self.mb_action.cancel_goals_action, self.mb_action.is_connected)
 
     def _list_selected(self):
         # Highlight logic:
@@ -52,6 +79,9 @@ class QWaypointListWidget(RRTaskWaypointList, QListWidget):
             rospy.logwarn("Requested selected wp, but no wp was selected")
             return None
 
+    def new_waypoint(self, msg=None):
+        return QWaypointWidget(self, msg)
+
     def pop(self, wp):
         self.del_signal.emit(wp)
         wp = RRTaskWaypointList.pop(self, wp)
@@ -66,13 +96,11 @@ class QWaypointListWidget(RRTaskWaypointList, QListWidget):
         self.setItemWidget(wp.item, wp)
 
     def duplicate(self, wp):
-        # This is a workaround:
-        # duplicate creats a new waypoint item. This must be  done from QT thread. hence this is all wrapped
         self.duplicate_signal.emit(wp)
 
     def changeID(self, wp_old, new_id):
         # Due to complexitie, changeID must act as pop insert operation now.
-        if not isinstance(wp_old, Waypoint):  # if id or name passed
+        if not isinstance(wp_old, QWaypointWidget):  # if id or name passed
             wp_old = self.get_wp(wp_old)
         self.chgid_signal.emit(wp_old, new_id)
 

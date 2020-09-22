@@ -3,12 +3,11 @@ import os
 import rospy
 import rospkg
 import tf
-from rr_viz.msg import TaskWaypoint
 from PyQt5 import QtGui, QtWidgets, uic, QtCore
 from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog, QMessageBox, QListWidgetItem
 from rr_viz.srv import BuildBT, BuildBTRequest
 from std_msgs.msg import String
-import RRTaskWaypoint
+from RRTaskWaypoint import RRTaskWaypoint
 
 
 class QWaypointWidget(QWidget, RRTaskWaypoint):
@@ -16,8 +15,8 @@ class QWaypointWidget(QWidget, RRTaskWaypoint):
 
     def __init__(self, parentList, msg=None):
         # Direct constructor calls.
+        self.parentList = parentList
         QWidget.__init__(self, parentList)
-        RRTaskWaypoint.__init__(self, msg)
 
         self.allQHBoxLayout = QtWidgets.QHBoxLayout()  # Holding box
         self.idQLabel = QtWidgets.QLabel()  # First elem holds order number
@@ -59,7 +58,11 @@ class QWaypointWidget(QWidget, RRTaskWaypoint):
         # Must call this to make sure the size is ok
         self.item = QListWidgetItem(None)
         self.item.setSizeHint(self.sizeHint())
+        RRTaskWaypoint.__init__(self, msg)
         self._update()
+
+    def duplicate(self):
+        return QWaypointWidget(self.parentList, self.save_to_msg())
 
     def _setPoseText(self, text):
         self.textPoseQLabel.setText(text)
@@ -79,22 +82,28 @@ class QWaypointWidget(QWidget, RRTaskWaypoint):
     # overriden methods:
 
     def set_taskSrv(self, txt):
+        if not txt:
+            txt = "None"  # replce empy with None
         RRTaskWaypoint.set_taskSrv(self, txt)
         index = self.taskSrvQComboBox.findText(
             txt, QtCore.Qt.MatchFixedString)
         if index >= 0:
             self.taskSrvQComboBox.setCurrentIndex(index)
         else:
-            rospy.logerr("Tried to set task srv to non existant field")
+            rospy.logerr(
+                "Tried to set task srv to non existant field:{}".format(txt))
 
     def set_taskSubTree(self, txt):
+        if not txt:
+            txt = "None"  # replce empy with None
         RRTaskWaypoint.set_taskSubTree(self, txt)
         index = self.taskSubTreeQComboBox.findText(
             txt, QtCore.Qt.MatchFixedString)
         if index >= 0:
             self.taskSubTreeQComboBox.setCurrentIndex(index)
         else:
-            rospy.logerr("Tried to set task subtree to non existant field")
+            rospy.logerr(
+                "Tried to set task subtree to non existant field:{}".format(txt))
 
     def _update(self):
         ''' This is called by Waypoint side. When update from rviz is received '''

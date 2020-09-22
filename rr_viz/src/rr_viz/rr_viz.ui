@@ -65,7 +65,7 @@
   <customwidget>
    <class>ViewDiagnostics</class>
    <extends>QWidget</extends>
-   <header>widgets/view_diagnostics</header>
+   <header>widgets/networking/view_diagnostics</header>
    <container>1</container>
   </customwidget>
   <customwidget>
