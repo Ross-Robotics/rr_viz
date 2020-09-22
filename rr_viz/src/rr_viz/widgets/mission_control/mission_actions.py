@@ -12,15 +12,16 @@ class ServiceAction(object):
         self.srv_name = srv_name
         self._srv_connected = False
         # Timer for monitoring conenction
-        self.srv_timer = rospy.Timer(rospy.Duration(
-            5), lambda event: self.ping_srv)
         self._srv_client = rospy.ServiceProxy(
             srv_name, srvType)
+        self.srv_timer = rospy.Timer(rospy.Duration(
+            5), lambda event: self.ping_srv())
 
     def ping_srv(self):
         if not self._srv_client.wait_for_service(timeout=rospy.Duration(3.0)):
             rospy.loginfo_throttle(30,
-                                   "Lost Connection to {}".format(self.srv_name) if self._srv_connected else "Failed to connect to movebase")
+                                   "Lost Connection to {}".format(self.srv_name) if self._srv_connected else "Failed to connect to {}".format(self.srv_name))
+            self._srv_connected = False
         else:
             if not self._srv_connected:
                 rospy.loginfo('Connected to {}.'.format(self.srv_name))
@@ -33,7 +34,8 @@ class ServiceAction(object):
 class BuildBTAction(ServiceAction):
 
     def __init__(self):
-        ServiceAction.__init__(self, "build_bt", BuildBT)
+        ServiceAction.__init__(self, rospy.get_param(
+            "build_bt_srv", "/build_bt"), BuildBT)
 
     @on_own_thread
     def build_bt_action(self, waypoint_list):
