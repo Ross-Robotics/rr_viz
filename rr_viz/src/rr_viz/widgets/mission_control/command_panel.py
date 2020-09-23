@@ -14,7 +14,7 @@ from interactive_waypoints.waypoint_list import InteractiveWaypointList
 import managers.file_management as file_management
 from rospy_message_converter import message_converter
 from rr_viz.srv import BuildBT, BuildBTRequest
-from mission_actions import BuildBTAction
+from mission_actions import BuildBTAction, WaypointMoveBaseAction
 from helpers import rr_qt_helper
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -35,23 +35,23 @@ class MissionCommandPanelWidget(Base, Form):
         self.set_mission_send_enabled.connect(
             self.sendMissionButton.setEnabled)
         self.btAction = BuildBTAction()
+        self.mbAction = WaypointMoveBaseAction()
 
         # Setup state checker:
         self.bt_state_checker = rr_qt_helper.StateCheckerTimer(
             self.btAction.is_connected,  self.set_mission_send_enabled, Hz=1./3.)
         self.bt_state_checker.start()
-
-    def connectToWaypointList(self, waypointList):
-        self.sendMissionButton.clicked.connect(
-            lambda: self.btAction.build_bt_action(waypointList))
-
-        self.mbAction = waypointList.mb_action
         self.mb_state_checker = rr_qt_helper.StateCheckerTimer(
             self.mbAction.is_connected,  self.set_goto_enabled, Hz=1./3.)
         self.mb_state_checker.start()
 
-        self.goToButton.clicked.connect(waypointList.goto_selected_slot)
-        self.goToAllButton.clicked.connect(waypointList.goto_all_slot)
+    def connectToWaypointList(self, waypointList):
+        self.sendMissionButton.clicked.connect(
+            lambda: self.btAction.build_bt_action(waypointList))
+        self.goToButton.clicked.connect(
+            lambda: self.mbAction.goto_action(waypointList))
+        self.goToAllButton.clicked.connect(
+            lambda: self.mbAction.gotoall_action(waypointList))
 
     def setGotoButtonsEnabled(self, enabled):
         self.goToButton.setEnabled(enabled)
