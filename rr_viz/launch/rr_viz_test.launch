@@ -5,10 +5,16 @@
     <param name="connect_movebase" value="true"/>
     <param name="enable_saving" value="true"/>
     <param name="waypoint_server_name" value="mission_path_srv"/>
+    <param name="move_base_namespace" value="/move_base"/>
+    <param name="build_bt_srv" value="/build_bt"/>
   </node>
 
   <!-- TEST NODES -->
   <node pkg="rr_viz" type="mock_slam_supervisor.py" name="slam_supervisor" output="screen" required="true"/>
 
+  <node pkg="rr_viz" type="mock_move_base.py" name="move_base" output="screen" required="true"/>
 
+  <node pkg="rr_viz" type="mock_build_bt.py" name="bt_builder" output="screen" required="true"/>
+
+  <node pkg="rr_viz" type="mock_robot_pose.py" name="robot_pose" output="screen" required="true"/>
 </launch>
