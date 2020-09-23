@@ -64,7 +64,10 @@ class MissionEditorWidget(Base, Form):
 
     def add_slot(self):
         if self._pose_est:
-            self.spawn_waypoint_signal.emit(self._pose_est)
+            msg = PoseWithCovarianceStamped()
+            msg.header = self._pose_est.header
+            msg.pose.pose = self._pose_est.pose
+            self.spawn_waypoint_signal.emit(msg)
         else:
             rospy.logwarn("Robot pose not connected")
 
