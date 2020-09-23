@@ -19,6 +19,8 @@ class ServiceAction(object):
             5), lambda event: self.ping_srv())
 
     def ping_srv(self):
+        if rospy.is_shutdown():
+            return False
         try:
             self._srv_client.wait_for_service(timeout=rospy.Duration(3.0))
             if not self._srv_connected:
@@ -45,6 +47,8 @@ class ActionServerAction(object):
             5), lambda event: self.ping_act())
 
     def ping_act(self):
+        if rospy.is_shutdown():
+            return False
         if not self._act_client.wait_for_server(timeout=rospy.Duration(3.0)):
             rospy.loginfo_throttle(30,
                                    "Waypoint lost connection to {}".format(self.act_name) if self._act_connected else "Failed to connect to {}".format(self.act_name))
