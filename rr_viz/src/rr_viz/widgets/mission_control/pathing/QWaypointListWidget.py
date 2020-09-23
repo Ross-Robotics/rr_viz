@@ -40,12 +40,7 @@ class QWaypointListWidget(RRTaskWaypointList, QListWidget):
             lambda wp: RRTaskWaypointList.duplicate(self, wp))
         self.ins_signal.connect(self.insert_slot)
         self.chgid_signal.connect(self.changeID_slot)
-
-    def goto_selected_slot(self):
-        self.mb_action.goto_action(self, self.get_selected_wp())
-
-    def goto_all_slot(self):
-        self.mb_action.gotoall_action(self)
+        self.attach_movebase_menu_actions()
 
     def attach_qbutton_action(self, qbutton, exec_cb, check_cb):
         qbutton.clicked.connect(exec_cb)
@@ -58,11 +53,11 @@ class QWaypointListWidget(RRTaskWaypointList, QListWidget):
 
     def attach_movebase_menu_actions(self):
         # Add actions to context menu
-        self.waypointList.attach_menu_action(
+        self.attach_menu_action(
             "goto", self.mb_action.goto_action, self.mb_action.is_connected)
-        self.waypointList.attach_menu_action(
+        self.attach_menu_action(
             "gotoall", self.mb_action.gotoall_action, self.mb_action.is_connected)
-        self.waypointList.attach_menu_action(
+        self.attach_menu_action(
             "cancel goto", self.mb_action.cancel_goals_action, self.mb_action.is_connected)
 
     def _list_selected(self):
