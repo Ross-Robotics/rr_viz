@@ -18,7 +18,7 @@
     <item>
      <widget class="RRQTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <widget class="RVizDev" name="rvizView">
        <attribute name="title">
@@ -40,6 +40,16 @@
        <attribute name="title">
         <string>Diagnostics</string>
        </attribute>
+      </widget>
+      <widget class="QWidget" name="web_ui_tab">
+       <attribute name="title">
+        <string>WebUI</string>
+       </attribute>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="RRQWebView" name="webView" native="true"/>
+        </item>
+       </layout>
       </widget>
      </widget>
     </item>
@@ -78,6 +88,12 @@
    <class>RRQTabWidget</class>
    <extends>QTabWidget</extends>
    <header>widgets/rr_tab_widget</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>RRQWebView</class>
+   <extends>QWidget</extends>
+   <header>widgets/rr_webview</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
