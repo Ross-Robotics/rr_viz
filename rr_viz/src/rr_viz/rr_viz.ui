@@ -18,7 +18,7 @@
     <item>
      <widget class="RRQTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <widget class="RVizDev" name="rvizView">
        <attribute name="title">
@@ -30,44 +30,26 @@
         <string>Inspect View</string>
        </attribute>
       </widget>
-      <widget class="QWidget" name="MissionViewTab">
+      <widget class="MissionControlView" name="MissionViewTab">
        <attribute name="title">
         <string>Mission View</string>
        </attribute>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <widget class="RVizMinimap" name="mmWidget" native="true">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-            <horstretch>2</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QVBoxLayout" name="verticalLayout">
-          <item>
-           <widget class="SlamSupervisorWidget" name="slamSupervisor" native="true"/>
-          </item>
-          <item>
-           <widget class="PathMakerWidget" name="pmWidget_2" native="true">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-              <horstretch>1</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
+       <layout class="QHBoxLayout" name="horizontalLayout_2"/>
       </widget>
       <widget class="ViewDiagnostics" name="DiagnosticsViewTab">
        <attribute name="title">
         <string>Diagnostics</string>
        </attribute>
+      </widget>
+      <widget class="QWidget" name="web_ui_tab">
+       <attribute name="title">
+        <string>WebUI</string>
+       </attribute>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="RRQWebView" name="webView" native="true"/>
+        </item>
+       </layout>
       </widget>
      </widget>
     </item>
@@ -85,21 +67,15 @@
    </slots>
   </customwidget>
   <customwidget>
-   <class>PathMakerWidget</class>
+   <class>MissionControlView</class>
    <extends>QWidget</extends>
-   <header>widgets/path_maker</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>RVizMinimap</class>
-   <extends>QWidget</extends>
-   <header>widgets/rviz_minimap</header>
+   <header>widgets/mission_control/mission_control</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>ViewDiagnostics</class>
    <extends>QWidget</extends>
-   <header>widgets/view_diagnostics</header>
+   <header>widgets/networking/view_diagnostics</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -115,9 +91,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>SlamSupervisorWidget</class>
+   <class>RRQWebView</class>
    <extends>QWidget</extends>
-   <header>widgets/slam_supervisor</header>
+   <header>widgets/rr_webview</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

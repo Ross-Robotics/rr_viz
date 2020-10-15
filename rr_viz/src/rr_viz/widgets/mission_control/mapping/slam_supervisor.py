@@ -7,7 +7,6 @@ import string
 import time
 from datetime import datetime, date
 from geometry_msgs.msg import PoseWithCovarianceStamped
-from std_msgs.msg import String
 from functools import partial
 from PyQt5 import QtGui, QtWidgets, uic, QtCore
 from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog, QMessageBox, QListWidgetItem
@@ -66,6 +65,8 @@ class SlamSupervisorWidget(Base, Form):
         self.map_list_update_timer.start(1000)
 
     def is_slam_supervisor_up(self):
+        if rospy.is_shutdown():
+            return False
         try:
             rospy.wait_for_service(
                 self.slam_sup_name+"/kill_nodes", rospy.Duration(3))
@@ -153,8 +154,13 @@ class SlamSupervisorWidget(Base, Form):
                 self.mapListWidget.addItem(_map)
 
     def map_list_update(self):
-        if self.isEnabled():
-            trig_resp = self.slam_list_maps_srv.call(TriggerRequest())
+        if self.isEnabled() and not rospy.is_shutdown():
+            try:
+                trig_resp = self.slam_list_maps_srv.call(TriggerRequest())
+            except Exception as e:
+                rospy.logwarn_throttle(
+                    10, "failed to fetch maps: {}".format(e))
+                return
             current_item = self.mapListWidget.currentItem()
             self.switchToLocalizationButton.setEnabled(
                 current_item is not None)
@@ -164,7 +170,7 @@ class SlamSupervisorWidget(Base, Form):
                 remote_maps = [map.strip() for map in remote_maps]
                 self.map_list_handle(remote_maps)
             else:
-                print("failed to fetch maps")
+                rospy.logwarn_throttle(10, "failed to fetch maps")
 
 
 def randomString(stringLength):

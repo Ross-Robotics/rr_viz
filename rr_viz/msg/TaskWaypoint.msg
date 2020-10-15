@@ -1,4 +1,3 @@
-Header header
-geometry_msgs/PoseStamped pose
-std_msgs/String tasksrv
-std_msgs/String tasksubtree
+geometry_msgs/PoseStamped pose_stamped
+string tasksrv
+string tasksubtree

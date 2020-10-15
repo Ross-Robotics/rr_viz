@@ -17,6 +17,7 @@ catkin_python_setup()
 add_message_files(
   FILES
   TaskWaypoint.msg
+  TaskWaypointList.msg
 )
 
 add_service_files(

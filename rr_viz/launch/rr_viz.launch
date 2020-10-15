@@ -1,8 +1,14 @@
 <launch>
   <node pkg="rr_viz" type="rr_viz_node.py" name="rr_viz" output="screen" required="true">
     <param name="default_map_name" value="map"/>
-    <!-- <param name="connect_movebase" value="true"/> -->
-  </node>
-  <!-- <include file="$(find rr_viz)/launch/textured_sphere.launch" /> -->
+    <param name="add_waypoint_topic" value="/initialpose"/>
+    <param name="connect_movebase" value="true"/>
+    <param name="enable_saving" value="true"/>
+    <param name="waypoint_server_name" value="mission_path_srv"/>
+    <param name="web_ui_url" value="https://www.robosynthesis.com/"/>
 
+    <param name="move_base_namespace" value="/move_base"/>
+    <param name="build_bt_srv" value="/build_bt"/>
+
+  </node>
 </launch>
