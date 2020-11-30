@@ -3,8 +3,8 @@ import os
 import rospy
 import rospkg
 from interactive_waypoints.waypoint_list import InteractiveWaypointList
-from rr_viz.msg import TaskWaypoint as TaskWaypointMsg
-from rr_viz.msg import TaskWaypointList as TaskWaypointListMsg
+from rr_custom_msgs.msg import TaskWaypoint as TaskWaypointMsg
+from rr_custom_msgs.msg import TaskWaypointList as TaskWaypointListMsg
 from ros_msgdict import msgdict
 from RRTaskWaypoint import RRTaskWaypoint
 

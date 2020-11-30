@@ -2,7 +2,7 @@
 import rospy
 import actionlib
 import os
-from rr_viz.srv import BuildBT, BuildBTRequest
+from rr_custom_msgs.srv import BuildBT, BuildBTRequest
 from interactive_waypoints.waypoint_actions import on_own_thread, _movebase_command
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 

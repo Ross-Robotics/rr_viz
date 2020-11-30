@@ -1,3 +1,0 @@
-geometry_msgs/PoseStamped pose_stamped
-string tasksrv
-string tasksubtree
