@@ -7,8 +7,8 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import pyqtSlot
 
 import managers.file_management as file_management
-from rr_diagnostics.msg import rr_machine_latency
-from rr_diagnostics.srv import rr_network_latency, rr_network_latencyResponse, rr_network_latencyRequest
+from rr_custom_msgs.msg import rr_machine_latency
+from rr_custom_msgs.srv import rr_network_latency, rr_network_latencyResponse, rr_network_latencyRequest
 import status_machine
 
 
