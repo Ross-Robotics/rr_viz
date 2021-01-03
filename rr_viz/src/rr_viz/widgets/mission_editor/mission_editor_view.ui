@@ -29,16 +29,6 @@
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
-        <widget class="SlamSupervisorWidget" name="slam_supervisor" native="true"/>
-       </item>
-       <item>
-        <widget class="Line" name="line">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="MissionEditorWidget" name="mission_editor" native="true"/>
        </item>
        <item>
@@ -65,21 +55,15 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>SlamSupervisorWidget</class>
-   <extends>QWidget</extends>
-   <header>widgets/mission_control/mapping/slam_supervisor</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>MissionEditorWidget</class>
    <extends>QWidget</extends>
-   <header>widgets/mission_control/mission_editor</header>
+   <header>widgets/mission_editor/mission_editor</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>MissionCommandPanelWidget</class>
    <extends>QWidget</extends>
-   <header>widgets/mission_control/command_panel</header>
+   <header>widgets/mission_editor/command_panel</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
