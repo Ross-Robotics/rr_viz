@@ -51,7 +51,7 @@
      <item>
       <widget class="ROSTopicLabel" name="missionStatusLabel">
        <property name="text">
-        <string/>
+        <string>N/A</string>
        </property>
       </widget>
      </item>
@@ -73,21 +73,21 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="ROSServiceClientQButton" name="goToButton">
+      <widget class="ROSServiceClientQButton" name="startMissionButton">
        <property name="text">
         <string>Start Mission</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="ROSServiceClientQButton" name="goToAllButton">
+      <widget class="ROSServiceClientQButton" name="stopMissionButton">
        <property name="text">
         <string>Stop Mission</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="ROSServiceClientQButton" name="sendMissionButton">
+      <widget class="ROSServiceClientQButton" name="eStopButton">
        <property name="font">
         <font>
          <weight>75</weight>
@@ -96,6 +96,13 @@
        </property>
        <property name="text">
         <string>Emergency Stop</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ROSServiceClientQButton" name="eResumeButton">
+       <property name="text">
+        <string>PushButton</string>
        </property>
       </widget>
      </item>

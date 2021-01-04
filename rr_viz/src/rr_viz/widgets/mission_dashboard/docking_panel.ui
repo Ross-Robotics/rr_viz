@@ -36,14 +36,14 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="ROSServiceClientQButton" name="goToButton">
+      <widget class="ROSServiceClientQButton" name="setDockingPoseButton">
        <property name="text">
         <string>Set Docking Pose</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="ROSServiceClientQButton" name="goToAllButton">
+      <widget class="ROSServiceClientQButton" name="goToDockButton">
        <property name="text">
         <string>Go To Dock</string>
        </property>

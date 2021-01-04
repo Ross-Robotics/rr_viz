@@ -5,12 +5,9 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import pyqtSlot
 import rospy
-from rviz_minimap import RVizMinimap
-from ros_widgets import ROSServiceMonitor
-from rviz_dev import RVizDev
-from rviz_sphere import RVizSphere
-from std_msgs.srv import Trigger
-import rvi
+from ros_service_monitor import ROSServiceMonitor
+from std_srvs.srv import Trigger
+
 
 
 class ROSServiceClientQButton(QtWidgets.QPushButton):
@@ -44,23 +41,22 @@ class ROSServiceClientQButton(QtWidgets.QPushButton):
         if createRequestCb:
             self.createRequestCb = createRequestCb
         else:
-            self.createRequestCb = createEmptyRequest
-
+            self.createRequestCb = self.createEmptyRequest
+        
         # Enabled depends if the service is visible
-        self.stateMonitor = ROSServiceMonitor(
-            self.srvName, self.srvType, self.serviceStateCb)
+        self.stateMonitor = ROSServiceMonitor(None, self.srvName, self.srvType, self.serviceStateCb)
         self._srv_client = rospy.ServiceProxy(
             self.srvName, self.srvType)
         self.clicked.connect(self.call_service)
         self.isSetup = True
 
-    def serviceStateCB(self, state)
+    def serviceStateCb(self, state):
         """[executes when service changes state (connected/not)]
         """
         # This will likely not work because  it needs a signal will check
         self.setEnabled(state)
 
-    def createEmptyRequest(self)
+    def createEmptyRequest(self):
         """[Creates an empty request message with no arguments based on srvType]
 
         Returns:
@@ -68,5 +64,5 @@ class ROSServiceClientQButton(QtWidgets.QPushButton):
         """
         return self.srvType._request_class()
 
-    def call_service(self):
+    def call_service(self):        
         response=self._srv_client.call(self.createRequestCb())
