@@ -19,5 +19,5 @@ class ROSTopicLabel(QtWidgets.QLabel):
 
     def setup(self, topic):
         self.topic = topic
-        self.sub = rospy.Subscriber("~"+self.topic, String, lambda msg : self.setText(msg.data))
+        self.sub = rospy.Subscriber(self.topic, String, lambda msg : self.setText(msg.data))
         self.isSetup = True

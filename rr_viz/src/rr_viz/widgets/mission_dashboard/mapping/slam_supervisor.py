@@ -53,6 +53,9 @@ class SlamSupervisorWidget(Base, Form):
             self.slam_sup_name+"/save_map", String)
         self.default_map_name = rospy.get_param("~default_map_name", "")
 
+        # Setup rostopiclabel
+        self.modeLabel.setup(self.slam_sup_name+"/mode")
+
         # Connecting buttons:
         self.switchToMappingButton.pressed.connect(self.switchToMappingSlot)
         self.switchToLocalizationButton.pressed.connect(
