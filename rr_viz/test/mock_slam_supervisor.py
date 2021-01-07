@@ -19,12 +19,17 @@ class MockSlamSupervisor():
         self.kill_nodes = rospy.Service(
             '~launch_localization', String, self.handle_string)
         self.kill_nodes = rospy.Service(
-            '~list_maps', Trigger, self.handle_trigger)
+            '~list_maps', Trigger, self.handle_map_list_trigger)
         self.kill_nodes = rospy.Service(
             '~save_map', String, self.handle_string)
 
     def handle_trigger(self, _):
         return TriggerResponse()
+
+    def handle_map_list_trigger(self, _):
+        mock_files=["tomato.posegraph","potato.yaml","pomato.yaml","potato.posegraph","pomato.posegraph","tomato.yaml"]        
+        file_list_str = ",".join(mock_files)
+        return TriggerResponse(success=True, message=file_list_str)
 
     def handle_string(self, _):
         return StringResponse()
