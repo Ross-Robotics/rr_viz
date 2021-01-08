@@ -11,7 +11,7 @@ import std_msgs.msg
 from rr_node_tools_msgs.srv import String, StringResponse, StringRequest
 from rr_node_tools_msgs.msg import StringArray
 import actionlib
-from rr_2d_navigation.msg import RecordPathAction, RecordPathResult, RecordPathFeedback
+from rr_custom_msgs.msg import RecordPathAction, RecordPathResult, RecordPathFeedback
 from std_msgs.msg import String
 
 
