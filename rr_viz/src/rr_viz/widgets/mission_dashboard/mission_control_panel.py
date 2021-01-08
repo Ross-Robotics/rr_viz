@@ -17,6 +17,15 @@ class MissionControlPanelWidget(Base, Form):
     def __init__(self, parent=None):
         super(self.__class__, self).__init__(parent)
         self.setupUi(self)
+
+        self.startMissionButton = self.findChildren(QtWidgets.QPushButton, "startMissionButton")[0]
+        self.stopMissionButton = self.findChildren(QtWidgets.QPushButton, "stopMissionButton")[0]
+        self.eStopButton = self.findChildren(QtWidgets.QPushButton, "eStopButton")[0]
+        self.eResumeButton = self.findChildren(QtWidgets.QPushButton, "eResumeButton")[0]
+
+        self.missionStatusLabel = self.findChildren(QtWidgets.QLabel, "missionStatusLabel")[0]
+
+
         self.startMissionButton.setup(
             "/envirobot_Interface/start_mission", Trigger)
         self.stopMissionButton.setup(

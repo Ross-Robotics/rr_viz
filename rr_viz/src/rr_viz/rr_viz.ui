@@ -57,13 +57,65 @@
         <item>
          <layout class="QVBoxLayout" name="verticalLayout">
           <item>
-           <widget class="MissionControlPanelWidget" name="MissionControlPanel" native="true"/>
+           <widget class="DockingPanelWidget" name="DockingPanel" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>50</width>
+              <height>20</height>
+             </size>
+            </property>
+           </widget>
           </item>
           <item>
-           <widget class="DockingPanelWidget" name="DockingPanel" native="true"/>
+           <widget class="Line" name="line">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
           </item>
           <item>
-           <widget class="SlamSupervisorWidget" name="SlamSup" native="true"/>
+           <widget class="SlamSupervisorWidget" name="SlamSup" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>50</width>
+              <height>20</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="line_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="PathRecordPanelWidget" name="PathRecordPanel" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>50</width>
+              <height>20</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="line_3">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="MissionControlPanelWidget" name="MissionControlPanel" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>50</width>
+              <height>20</height>
+             </size>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
@@ -145,6 +197,12 @@
    <class>MissionControlPanelWidget</class>
    <extends>QWidget</extends>
    <header>widgets/mission_dashboard/mission_control_panel</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PathRecordPanelWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">widgets/mission_dashboard/path_record_panel</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

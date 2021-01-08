@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>640</width>
-    <height>73</height>
+    <height>101</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -30,9 +30,30 @@ border-right-color: rgb(136, 138, 133);}
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
-      <spacer name="horizontalSpacer">
+      <widget class="QLabel" name="label">
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Status</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ROSTopicLabel" name="statusLabel">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -45,7 +66,7 @@ border-right-color: rgb(136, 138, 133);}
       </spacer>
      </item>
      <item>
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="label_3">
        <property name="font">
         <font>
          <weight>75</weight>
@@ -53,7 +74,7 @@ border-right-color: rgb(136, 138, 133);}
         </font>
        </property>
        <property name="text">
-        <string>Docking</string>
+        <string>Path Recording</string>
        </property>
       </widget>
      </item>
@@ -62,16 +83,16 @@ border-right-color: rgb(136, 138, 133);}
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="ROSServiceClientQButton" name="setDockingPoseButton">
+      <widget class="QPushButton" name="startRecordingButton">
        <property name="text">
-        <string>Set Docking Pose</string>
+        <string>Start Recording</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="ROSServiceClientQButton" name="goToDockButton">
+      <widget class="ROSServiceClientQButton" name="stopRecordingButton">
        <property name="text">
-        <string>Go To Dock</string>
+        <string>Stop Recording</string>
        </property>
       </widget>
      </item>
@@ -91,6 +112,11 @@ border-right-color: rgb(136, 138, 133);}
    <class>ROSServiceClientQButton</class>
    <extends>QPushButton</extends>
    <header>widgets/ros_widgets/ros_service_client_button</header>
+  </customwidget>
+  <customwidget>
+   <class>ROSTopicLabel</class>
+   <extends>QLabel</extends>
+   <header>widgets/ros_widgets/ros_topic_label</header>
   </customwidget>
  </customwidgets>
  <resources/>

@@ -25,6 +25,7 @@ class SlamSupervisorWidget(Base, Form):
 
     def __init__(self, parent=None):
         super(self.__class__, self).__init__(parent)
+        self.setAttribute(QtCore.Qt.WA_StyledBackground)      
         self.setupUi(self)
         print("SlamSupervisorWidget Loaded")
         # Get slam_supervisor_node:

@@ -25,4 +25,6 @@
   <node pkg="rr_viz" type="mock_robot_pose.py" name="robot_pose" output="screen" required="true"/>
 
   <node pkg="rr_viz" type="mock_envirobot_interface.py" name="envirobot_Interface" output="screen" required="true"/>
+
+  <node pkg="rr_viz" type="mock_path_recorder.py" name="path_recorder" output="screen" required="true"/>
 </launch>

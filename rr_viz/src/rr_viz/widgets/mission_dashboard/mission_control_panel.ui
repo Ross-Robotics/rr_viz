@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>638</width>
-    <height>83</height>
+    <height>101</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,24 +19,41 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">QWidget[styleit=true] {border-style: solid;
+border-width: 2px;
+border-right-color: rgb(136, 138, 133);}
+</string>
+  </property>
+  <property name="styleit" stdset="0">
+   <bool>true</bool>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <layout class="QHBoxLayout" name="labelLayout">
      <item>
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="label_2">
        <property name="font">
         <font>
+         <pointsize>10</pointsize>
          <weight>75</weight>
          <bold>true</bold>
         </font>
        </property>
        <property name="text">
-        <string>Mission Controls:</string>
+        <string>Status</string>
        </property>
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer">
+      <widget class="ROSTopicLabel" name="missionStatusLabel">
+       <property name="text">
+        <string>N/A</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -49,14 +66,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="ROSTopicLabel" name="missionStatusLabel">
-       <property name="text">
-        <string>N/A</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_2">
+      <widget class="QLabel" name="label">
        <property name="font">
         <font>
          <weight>75</weight>
@@ -64,14 +74,14 @@
         </font>
        </property>
        <property name="text">
-        <string>:Mission Status</string>
+        <string>Mission Controls</string>
        </property>
       </widget>
      </item>
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="buttonLayout">
      <item>
       <widget class="ROSServiceClientQButton" name="startMissionButton">
        <property name="text">
@@ -102,7 +112,14 @@
      <item>
       <widget class="ROSServiceClientQButton" name="eResumeButton">
        <property name="text">
-        <string>PushButton</string>
+        <string>eStop Resume</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="line_2">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
        </property>
       </widget>
      </item>
