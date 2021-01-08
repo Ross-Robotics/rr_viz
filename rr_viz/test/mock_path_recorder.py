@@ -8,8 +8,9 @@ import string
 from functools import partial
 from std_srvs.srv import Trigger, TriggerResponse
 import std_msgs.msg
-from rr_node_tools_msgs.srv import String, StringResponse, StringRequest
-from rr_node_tools_msgs.msg import StringArray
+from rr_custom_msgs.msg import StringArray
+from rr_custom_msgs.srv import String, StringResponse, StringRequest
+
 import actionlib
 from rr_2d_navigation.msg import RecordPathAction, RecordPathResult, RecordPathFeedback
 from std_msgs.msg import String
@@ -22,6 +23,7 @@ def randomString(stringLength):
 
 class MockPathRecorder():
     def __init__(self):
+        self.finish_requested="false"
         self.finish_req_serv = rospy.Service(
             "~finish_path", Trigger, self.finish_path_cb)
         self._as = actionlib.SimpleActionServer(
@@ -30,11 +32,12 @@ class MockPathRecorder():
         self.status_pub = rospy.Publisher("~status", String, queue_size=10)
         self.status_pub_timer = rospy.Timer(rospy.Duration(1.), lambda _: self.status_pub.publish(
             "Recording" if self._as.is_active() else "Not Recording"))
+        
 
     def execute_cb(self, goal):
         ret = RecordPathResult()
         feedback = RecordPathFeedback()
-        self.r = rospy.Rate(1)
+        self.r = rospy.Rate(1./5.)
         while not rospy.is_shutdown():
             if self._as.is_preempt_requested() or self.finish_requested:
                 rospy.loginfo("action record was cancelled")

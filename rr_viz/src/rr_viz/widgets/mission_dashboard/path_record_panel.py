@@ -33,7 +33,9 @@ class PathRecordPanelWidget(Base, Form):
         return self._client.wait_for_server(timeout=rospy.Duration(2.))    
 
     def startRecordingSlot(self):
-        self._client.send_goal(RecordPathActionGoal()) #Assuming declared via param
+        goal=RecordPathActionGoal().goal        
+        goal.file_path=""
+        self._client.send_goal(goal) #Assuming declared via param
 
 # Actions:
 # path_recorder/record

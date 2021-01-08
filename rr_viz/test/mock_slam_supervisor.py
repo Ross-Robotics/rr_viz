@@ -8,8 +8,8 @@ import string
 from functools import partial
 from std_srvs.srv import Trigger, TriggerResponse
 import std_msgs.msg
-from rr_node_tools_msgs.srv import String, StringResponse, StringRequest
-from rr_node_tools_msgs.msg import StringArray
+from rr_custom_msgs.msg import StringArray
+from rr_custom_msgs.srv import String, StringResponse, StringRequest
 
 
 def randomString(stringLength):
