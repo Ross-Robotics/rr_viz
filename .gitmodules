@@ -1,0 +1,3 @@
+[submodule "submodules/rviz_textured_sphere"]
+	path = submodules/rviz_textured_sphere
+	url = https://github.com/UTNuclearRoboticsPublic/rviz_textured_sphere.git
