@@ -14,8 +14,6 @@ find_package(catkin REQUIRED COMPONENTS
 )
 catkin_python_setup()
 
-generate_messages(DEPENDENCIES geometry_msgs std_msgs)
-
 
 catkin_package(
   LIBRARIES ${PROJECT_NAME}
