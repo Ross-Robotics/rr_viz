@@ -114,7 +114,7 @@
   <customwidget>
    <class>QWaypointListWidget</class>
    <extends>QListWidget</extends>
-   <header>widgets/mission_control/pathing/QWaypointListWidget</header>
+   <header>widgets/mission_editor/pathing/QWaypointListWidget</header>
   </customwidget>
  </customwidgets>
  <resources/>

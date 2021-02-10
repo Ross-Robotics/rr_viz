@@ -5,6 +5,7 @@ import tf
 import random
 import string
 import time
+import operator
 from datetime import datetime, date
 from geometry_msgs.msg import PoseWithCovarianceStamped
 from functools import partial
@@ -24,6 +25,7 @@ class SlamSupervisorWidget(Base, Form):
 
     def __init__(self, parent=None):
         super(self.__class__, self).__init__(parent)
+        self.setAttribute(QtCore.Qt.WA_StyledBackground)      
         self.setupUi(self)
         print("SlamSupervisorWidget Loaded")
         # Get slam_supervisor_node:
@@ -51,6 +53,9 @@ class SlamSupervisorWidget(Base, Form):
         self.slam_save_map_srv = rospy.ServiceProxy(
             self.slam_sup_name+"/save_map", String)
         self.default_map_name = rospy.get_param("~default_map_name", "")
+
+        # Setup rostopiclabel
+        self.modeLabel.setup(self.slam_sup_name+"/mode")
 
         # Connecting buttons:
         self.switchToMappingButton.pressed.connect(self.switchToMappingSlot)
@@ -167,11 +172,11 @@ class SlamSupervisorWidget(Base, Form):
             if trig_resp.success:
                 # print(trig_resp.message)
                 remote_maps = str(trig_resp.message).split(",")
-                remote_maps = [map.strip() for map in remote_maps]
-                self.map_list_handle(remote_maps)
+                # remote_maps = [map.strip() for map in remote_maps]#Do not strip off filetypes                
+                sorted_remote_maps=sorted(remote_maps, key=lambda x: (x[x.index(".")+1] ,x[1])) #sort by filetype first then alphabetically
+                self.map_list_handle(sorted_remote_maps)
             else:
                 rospy.logwarn_throttle(10, "failed to fetch maps")
-
 
 def randomString(stringLength):
     letters = string.ascii_letters
