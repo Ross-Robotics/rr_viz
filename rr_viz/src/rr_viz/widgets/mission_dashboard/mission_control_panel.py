@@ -27,10 +27,10 @@ class MissionControlPanelWidget(Base, Form):
 
 
         self.startMissionButton.setup(
-            "/envirobot_Interface/start_mission", Trigger)
+            "/robot_interface/start_mission", Trigger)
         self.stopMissionButton.setup(
-            "/envirobot_Interface/stop_mission", Trigger)
-        self.eStopButton.setup("/envirobot_Interface/emergency_stop", Trigger)
+            "/robot_interface/stop_mission", Trigger)
+        self.eStopButton.setup("/robot_interface/emergency_stop", Trigger)
         self.eResumeButton.setup(
-            "/envirobot_Interface/cancel_emergency_stop", Trigger)
-        self.missionStatusLabel.setup("/envirobot_Interface/mission_status")
+            "/robot_interface/cancel_emergency_stop", Trigger)
+        self.missionStatusLabel.setup("/robot_interface/mission_status")

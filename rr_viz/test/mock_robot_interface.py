@@ -28,6 +28,6 @@ class MockEnvirobotInterface():
 
 
 if __name__ == '__main__':
-    rospy.init_node("envirobot_Interface")
+    rospy.init_node("robot_interface")
     m = MockEnvirobotInterface()
     rospy.spin()

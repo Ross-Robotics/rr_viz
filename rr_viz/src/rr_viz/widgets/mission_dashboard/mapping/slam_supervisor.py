@@ -25,7 +25,7 @@ class SlamSupervisorWidget(Base, Form):
 
     def __init__(self, parent=None):
         super(self.__class__, self).__init__(parent)
-        self.setAttribute(QtCore.Qt.WA_StyledBackground)      
+        self.setAttribute(QtCore.Qt.WA_StyledBackground)
         self.setupUi(self)
         print("SlamSupervisorWidget Loaded")
         # Get slam_supervisor_node:
@@ -172,9 +172,12 @@ class SlamSupervisorWidget(Base, Form):
             if trig_resp.success:
                 # print(trig_resp.message)
                 remote_maps = str(trig_resp.message).split(",")
-                # remote_maps = [map.strip() for map in remote_maps]#Do not strip off filetypes                
-                sorted_remote_maps=sorted(remote_maps, key=lambda x: (x[x.index(".")+1] ,x[1])) #sort by filetype first then alphabetically
-                self.map_list_handle(sorted_remote_maps)
+                # remote_maps = [map.strip() for map in remote_maps]#Do not strip off filetypes
+                try:
+                    sorted_remote_maps=sorted(remote_maps, key=lambda x: (x[x.index(".")+1] ,x[1])) #sort by filetype first then alphabetically
+                    self.map_list_handle(sorted_remote_maps)
+                except:
+                    rospy.logwarn_throttle(10, "No maps in the maps forlder.")
             else:
                 rospy.logwarn_throttle(10, "failed to fetch maps")
 

@@ -15,5 +15,5 @@ class DockingPanelWidget(Base, Form):
     def __init__(self, parent=None):
         super(self.__class__, self).__init__(parent)
         self.setupUi(self)
-        self.setDockingPoseButton.setup("/envirobot_Interface/save_dock_approach",Trigger)
-        self.goToDockButton.setup("/envirobot_Interface/go_to_base",Trigger)        
+        self.setDockingPoseButton.setup("/robot_interface/save_dock_approach",Trigger)
+        self.goToDockButton.setup("/robot_interface/go_to_base",Trigger)
