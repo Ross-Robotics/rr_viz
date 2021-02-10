@@ -11,8 +11,8 @@ from functools import partial
 from PyQt5 import QtGui, QtWidgets, uic, QtCore
 from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog, QMessageBox, QListWidgetItem
 from std_srvs.srv import Trigger, TriggerResponse, TriggerRequest
-from rr_node_tools_msgs.srv import String, StringResponse, StringRequest
-from rr_node_tools_msgs.msg import StringArray
+from rr_custom_msgs.srv import String, StringResponse, StringRequest
+from rr_custom_msgs.msg import StringArray
 from helpers import rr_qt_helper
 
 current_dir = os.path.dirname(os.path.abspath(__file__))

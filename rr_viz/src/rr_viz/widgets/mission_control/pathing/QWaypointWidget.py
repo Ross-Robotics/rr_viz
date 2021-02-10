@@ -5,7 +5,7 @@ import rospkg
 import tf
 from PyQt5 import QtGui, QtWidgets, uic, QtCore
 from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog, QMessageBox, QListWidgetItem
-from rr_viz.srv import BuildBT, BuildBTRequest
+from rr_custom_msgs.srv import BuildBT, BuildBTRequest
 from std_msgs.msg import String
 from RRTaskWaypoint import RRTaskWaypoint
 

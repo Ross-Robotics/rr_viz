@@ -10,7 +10,7 @@ from PyQt5 import QtGui, QtWidgets, uic, QtCore
 from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog
 import managers.file_management as file_management
 from pathing.QWaypointWidget import QWaypointWidget
-from rr_viz.msg import TaskWaypoint as TaskWaypointMsg
+from rr_custom_msgs.msg import TaskWaypoint as TaskWaypointMsg
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 rr_viz_dir = _dir = os.path.dirname(os.path.dirname(current_dir))

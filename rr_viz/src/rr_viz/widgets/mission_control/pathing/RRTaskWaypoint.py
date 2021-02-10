@@ -4,7 +4,7 @@ import rospy
 import rospkg
 from interactive_waypoints.waypoint import Waypoint
 from interactive_waypoints import waypoint
-from rr_viz.msg import TaskWaypoint as TaskWaypointMsg
+from rr_custom_msgs.msg import TaskWaypoint as TaskWaypointMsg
 from ros_msgdict import msgdict
 
 params = msgdict.yaml2msgdict(rospkg.RosPack().get_path(

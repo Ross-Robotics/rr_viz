@@ -3,6 +3,9 @@
     This package is an 'advanced' GUI for RR purposes. The GUI is made from various  widgets put together (check individual widget read mes for details).
     The intention is to create widgets as needed and compose the GUI in a an easy way using QT designer/editor
 
+# Install/Dependencies
+- Must have rr_custom_msgs built and available
+
 # Notes
 
 - The way .ui files are loaded prohibits individual widgets from being launchable as separate applications. However this is desirable.
