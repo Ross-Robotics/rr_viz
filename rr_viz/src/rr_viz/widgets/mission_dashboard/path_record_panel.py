@@ -3,7 +3,7 @@ import os
 import rospy
 from PyQt5 import QtGui, QtWidgets, uic, QtCore
 from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog, QMessageBox, QListWidgetItem
-from rr_custom_msgs.msg import RecordPathAction, RecordPathResult, RecordPathFeedback, RecordPathActionGoal
+from rr_custom_msgs.msg import RecordPathAction, RecordPathResult, RecordPathFeedback, RecordPathGoal
 from std_srvs.srv import Trigger
 from helpers import rr_qt_helper
 import actionlib
@@ -33,7 +33,7 @@ class PathRecordPanelWidget(Base, Form):
         return self._client.wait_for_server(timeout=rospy.Duration(2.))
 
     def startRecordingSlot(self):
-        self._client.send_goal(RecordPathActionGoal()) #Assuming declared via param
+        self._client.send_goal(RecordPathGoal(file_path="")) #Assuming declared via param
 
 # Actions:
 # path_recorder/record
