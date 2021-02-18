@@ -15,8 +15,8 @@
   <arg name="http_start_delay" default="2.0" />
   <arg name="http_stream_fps" default="30"/>
   <arg name="http_image_queue" default="1" />
-  <arg name="http_image_width" default="1024" />
-  <arg name="http_image_height" default="768" />
+  <arg name="http_image_width" default="1600" />
+  <arg name="http_image_height" default="1200" />
 
 
   <!-- front camera -->
@@ -58,10 +58,10 @@
         args="standalone image_proc/crop_decimate"
         name="$(arg front_name)_decimator">
     <!-- WARNING: If you change resolution then adjust these params -->
-    <param name="x_offset" type="int" value="150" />
-    <param name="y_offset" type="int" value="50" />
-    <param name="width" type="int" value="768" />
-    <param name="height" type="int" value="768" />
+    <param name="x_offset" type="int" value="175" />
+    <param name="y_offset" type="int" value="0" />
+    <param name="width" type="int" value="1200" />
+    <param name="height" type="int" value="1200" />
 
     <!-- remap input topics -->
     <remap from="camera/image_raw" to="$(arg front_name)/image_raw"/>
@@ -77,10 +77,10 @@
         args="standalone image_proc/crop_decimate"
         name="$(arg rear_name)_decimator">
     <!-- WARNING: If you change resolution then adjust these params -->
-    <param name="x_offset" type="int" value="150" />
+    <param name="x_offset" type="int" value="175" />
     <param name="y_offset" type="int" value="0" />
-    <param name="width" type="int" value="768" />
-    <param name="height" type="int" value="768" />
+    <param name="width" type="int" value="1200" />
+    <param name="height" type="int" value="1200" />
 
     <!-- remap input topics -->
     <remap from="camera/image_raw" to="$(arg rear_name)/image_raw"/>
