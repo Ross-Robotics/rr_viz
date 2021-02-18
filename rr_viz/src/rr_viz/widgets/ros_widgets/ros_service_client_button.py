@@ -22,7 +22,7 @@ class ROSServiceClientQButton(QtWidgets.QPushButton):
             srvName (str, optional): [service name]. Defaults to "".
             srvType (class, optional): [service type]. Defaults to None.
             createRequestCb ([type], optional): [description]. Defaults to None.
-        """        
+        """
         super(self.__class__, self).__init__(parent)
         self.isSetup = False
         if srvName:
@@ -33,20 +33,19 @@ class ROSServiceClientQButton(QtWidgets.QPushButton):
 
         Args:
             srvName (str, optional): [service name].
-            srvType (class, optional): [service type]. 
+            srvType (class, optional): [service type].
             createRequestCb ([function], optional): [description]. Defaults to empty creation based on type.
-        """        
+        """
         self.srvName = srvName
         self.srvType = srvType
         if createRequestCb:
             self.createRequestCb = createRequestCb
         else:
             self.createRequestCb = self.createEmptyRequest
-        
+
         # Enabled depends if the service is visible
         self.stateMonitor = ROSServiceMonitor(None, self.srvName, self.srvType, self.serviceStateCb)
-        self._srv_client = rospy.ServiceProxy(
-            self.srvName, self.srvType)
+        self._srv_client = rospy.ServiceProxy(self.srvName, self.srvType)
         self.clicked.connect(self.call_service)
         self.isSetup = True
 
@@ -64,5 +63,6 @@ class ROSServiceClientQButton(QtWidgets.QPushButton):
         """
         return self.srvType._request_class()
 
-    def call_service(self):        
+    def call_service(self):
         response=self._srv_client.call(self.createRequestCb())
+        print response

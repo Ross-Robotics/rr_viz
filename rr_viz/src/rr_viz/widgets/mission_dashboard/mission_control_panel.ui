@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>638</width>
-    <height>101</height>
+    <height>172</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -120,6 +120,24 @@ border-right-color: rgb(136, 138, 133);}
       <widget class="Line" name="line_2">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="ROSServiceClientQButton" name="setActiveButton">
+       <property name="text">
+        <string>Set Active</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ROSServiceClientQButton" name="nextWaypointButton">
+       <property name="text">
+        <string>Next Waypoint</string>
        </property>
       </widget>
      </item>

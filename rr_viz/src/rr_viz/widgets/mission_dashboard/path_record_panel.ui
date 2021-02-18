@@ -97,6 +97,26 @@ border-right-color: rgb(136, 138, 133);}
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="followSavedPathButton">
+       <property name="text">
+        <string>Follow Saved Path</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="stopFollowingPathButton">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>STOP FOLLOWING</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="Line" name="line">
        <property name="orientation">
         <enum>Qt::Vertical</enum>

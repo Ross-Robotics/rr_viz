@@ -4,6 +4,7 @@ import rospy
 from PyQt5 import QtGui, QtWidgets, uic, QtCore
 from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog, QMessageBox, QListWidgetItem
 from rr_custom_msgs.msg import RecordPathAction, RecordPathResult, RecordPathFeedback, RecordPathGoal
+from rr_custom_msgs.msg import TrackPathAction, TrackPathResult, TrackPathFeedback, TrackPathGoal
 from std_srvs.srv import Trigger
 from helpers import rr_qt_helper
 import actionlib
@@ -23,17 +24,27 @@ class PathRecordPanelWidget(Base, Form):
         self.stopRecordingButton.setup(
             "/path_recorder/finish_path", Trigger)
         self.startRecordingButton.clicked.connect(self.startRecordingSlot)
+        self.followSavedPathButton.clicked.connect(self.followSavedPath)
+        self.stopFollowingPathButton.clicked.connect(self.stopFollowingPath)
         self.statusLabel.setup("/path_recorder/status")
-        self._client = actionlib.SimpleActionClient('/path_recorder/record', RecordPathAction)
+        self._recorder_client = actionlib.SimpleActionClient('/path_recorder/record', RecordPathAction)
+        self._tracker_client = actionlib.SimpleActionClient('/path_tracker/start_tracking', TrackPathAction)
         self.state_checker = rr_qt_helper.StateCheckerTimer(
             self.is_record_up, self.set_enabled, Hz=1./3.)
         self.state_checker.start()
 
     def is_record_up(self):
-        return self._client.wait_for_server(timeout=rospy.Duration(2.))
+        return self._recorder_client.wait_for_server(timeout=rospy.Duration(2.))
 
     def startRecordingSlot(self):
-        self._client.send_goal(RecordPathGoal(file_path="")) #Assuming declared via param
+        self._recorder_client.send_goal(RecordPathGoal(file_path="")) #Assuming declared via param
+
+    def followSavedPath(self):
+        self._tracker_client.send_goal(TrackPathGoal(file_path=""))
+
+    def stopFollowingPath(self):
+        self._tracker_client.cancel_all_goals()
+
 
 # Actions:
 # path_recorder/record
