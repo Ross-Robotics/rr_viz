@@ -96,6 +96,7 @@ class SlamSupervisorWidget(Base, Form):
         trig_resp = self.slam_launch_mapping_srv.call(TriggerRequest())
         if trig_resp.success:
             print(trig_resp.message)
+            self.modeLabel.setText("Mapping")
         else:
             print("failedcalling slam_launch_mapping_srv")
 
@@ -114,6 +115,7 @@ class SlamSupervisorWidget(Base, Form):
         trig_resp = self.slam_launch_localization_srv.call(_str)
         if trig_resp.success:
             print(trig_resp.message)
+            self.modeLabel.setText("Localization")
         else:
             print("failedcalling slam_launch_localization_srv")
 
