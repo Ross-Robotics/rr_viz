@@ -133,15 +133,6 @@ class SlamSupervisorWidget(Base, Form):
                 rospy.Duration(1), lambda _: self.waitTillDead_and_execute(func), oneshot=True)
 
     def saveNavSlot(self):
-        # _str = StringRequest()
-        # text, okPressed = QInputDialog.getText(self, "Filename input", "name of file:", QLineEdit.Normal, "")
-        # while text == '':
-        #     if okPressed and text != '':
-        #         filename = text
-        #         print("text recieved")
-        #     else:
-        #         print("try again")
-        #         text, okPressed = QInputDialog.getText(self, "Filename input", "name of file:", QLineEdit.Normal, "")
         _str = StringRequest()
         map_name = self.mapName.text()
         if map_name !='':
