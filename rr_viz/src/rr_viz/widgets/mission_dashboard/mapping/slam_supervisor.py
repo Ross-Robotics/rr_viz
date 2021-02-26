@@ -134,20 +134,23 @@ class SlamSupervisorWidget(Base, Form):
 
     def saveNavSlot(self):
         # _str = StringRequest()
-        text, okPressed = QInputDialog.getText(self, "Filename input", "name of file:", QLineEdit.Normal, "")
-        while text == '':
-            if okPressed and text != '':
-                filename = text
-                print("text recieved")
-            else:
-                print("try again")
-                text, okPressed = QInputDialog.getText(self, "Filename input", "name of file:", QLineEdit.Normal, "")
-
-
-        if not self.default_map_name:
-            _str.str = randomTimeString()
+        # text, okPressed = QInputDialog.getText(self, "Filename input", "name of file:", QLineEdit.Normal, "")
+        # while text == '':
+        #     if okPressed and text != '':
+        #         filename = text
+        #         print("text recieved")
+        #     else:
+        #         print("try again")
+        #         text, okPressed = QInputDialog.getText(self, "Filename input", "name of file:", QLineEdit.Normal, "")
+        _str = StringRequest()
+        map_name = self.mapName.text()
+        if map_name !='':
+            _str.str = map_name
         else:
-            _str.str = self.default_map_name
+            if not self.default_map_name:
+                _str.str = randomTimeString()
+            else:
+                _str.str = self.default_map_name
         trig_resp = self.slam_save_map_srv.call(_str)
         if trig_resp.success:
             print(trig_resp.message)
