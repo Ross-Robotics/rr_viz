@@ -236,14 +236,14 @@ border-right-color: rgb(136, 138, 133);}
               <widget class="QLineEdit" name="mapName">
               </widget>
              </item>
+             <item>
+              <widget class="QPushButton" name="saveNav">
+               <property name="text">
+                <string>Save map on Nav Module</string>
+               </property>
+              </widget>
+             </item>
             </layout>
-           </item>
-           <item>
-            <widget class="QPushButton" name="saveNav">
-             <property name="text">
-              <string>Save map on Nav Module</string>
-             </property>
-            </widget>
            </item>
           </layout>
          </item>
