@@ -56,6 +56,8 @@ class SlamSupervisorWidget(Base, Form):
 
         # Setup rostopiclabel
         self.modeLabel.setup(self.slam_sup_name+"/mode")
+        self.initial_mode = rospy.get_param("/slam_toolbox/mode","")
+        self.modeLabel.setText(self.initial_mode)
 
         # Connecting buttons:
         self.switchToMappingButton.pressed.connect(self.switchToMappingSlot)
@@ -145,6 +147,7 @@ class SlamSupervisorWidget(Base, Form):
         trig_resp = self.slam_save_map_srv.call(_str)
         if trig_resp.success:
             print(trig_resp.message)
+            self.mapName.clear()
         else:
             print("failed calling slam_save_map_srv")
             print(trig_resp.message)

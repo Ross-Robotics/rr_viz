@@ -228,7 +228,7 @@ border-right-color: rgb(136, 138, 133);}
                 </font>
                </property>
                <property name="text">
-                <string>File name</string>
+                <string>File name:</string>
                </property>
               </widget>
              </item>
