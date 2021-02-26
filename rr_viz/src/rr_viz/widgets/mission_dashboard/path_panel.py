@@ -11,7 +11,7 @@ import actionlib
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 rr_viz_dir = _dir = os.path.dirname(os.path.dirname(current_dir))
-Form, Base = uic.loadUiType(os.path.join(current_dir, "path_record_panel.ui"))
+Form, Base = uic.loadUiType(os.path.join(current_dir, "path_panel.ui"))
 
 
 class PathRecordPanelWidget(Base, Form):
