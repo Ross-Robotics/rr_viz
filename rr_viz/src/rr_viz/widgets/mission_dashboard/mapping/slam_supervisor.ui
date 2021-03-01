@@ -47,6 +47,13 @@ border-right-color: rgb(136, 138, 133);}
      </item>
      <item>
       <widget class="ROSTopicLabel" name="modeLabel">
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+         <weight>65</weight>
+         <bold>false</bold>
+        </font>
+       </property>
        <property name="text">
         <string/>
        </property>

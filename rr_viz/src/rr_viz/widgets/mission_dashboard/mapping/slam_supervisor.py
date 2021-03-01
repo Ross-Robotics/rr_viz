@@ -57,7 +57,7 @@ class SlamSupervisorWidget(Base, Form):
         # Setup rostopiclabel
         self.modeLabel.setup(self.slam_sup_name+"/mode")
         self.initial_mode = rospy.get_param("/slam_toolbox/mode","")
-        self.modeLabel.setText(self.initial_mode)
+        self.modeLabel.setText(self.initial_mode.capitalize())
 
         # Connecting buttons:
         self.switchToMappingButton.pressed.connect(self.switchToMappingSlot)
