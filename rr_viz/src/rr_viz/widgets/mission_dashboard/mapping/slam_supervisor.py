@@ -52,6 +52,9 @@ class SlamSupervisorWidget(Base, Form):
             self.slam_sup_name+"/list_maps", Trigger)
         self.slam_save_map_srv = rospy.ServiceProxy(
             self.slam_sup_name+"/save_map", String)
+        self.slam_delete_map_srv = rospy.ServiceProxy(
+            self.slam_sup_name+"/delete_map", String)
+
         self.default_map_name = rospy.get_param("~default_map_name", "")
 
         # Setup rostopiclabel
@@ -63,6 +66,8 @@ class SlamSupervisorWidget(Base, Form):
         self.switchToMappingButton.pressed.connect(self.switchToMappingSlot)
         self.switchToLocalizationButton.pressed.connect(
             self.switchToLocalizationSlot)
+
+        self.deleteMapButton.pressed.connect(self.delete_map_slot)
         # self.saveLocally.pressed.connect(self.saveLocallySlot)
         # self.saveLocally.setEnabled(False)
         self.saveNav.pressed.connect(self.saveNavSlot)
@@ -186,9 +191,32 @@ class SlamSupervisorWidget(Base, Form):
                     sorted_remote_maps=sorted(remote_maps, key=lambda x: (x[x.index(".")+1] ,x[1])) #sort by filetype first then alphabetically
                     self.map_list_handle(sorted_remote_maps)
                 except:
-                    rospy.logwarn_throttle(10, "No maps in the maps forlder.")
+                    rospy.logwarn_throttle(10, "No maps in the maps folder.")
             else:
                 rospy.logwarn_throttle(10, "failed to fetch maps")
+
+    def delete_map_slot(self):
+        _str = StringRequest()
+        _str.str = self.mapListWidget.currentItem().text().split(".")[0]
+        try:
+            trig_resp = self.slam_list_maps_srv.call(TriggerRequest())
+        except Exception as e:
+            rospy.logwarn_throttle(
+                10, "failed to fetch maps: {}".format(e))
+            return
+        current_item = self.mapListWidget.currentItem()
+        self.switchToLocalizationButton.setEnabled(
+            current_item is not None)
+        if trig_resp.success:
+            # print(trig_resp.message)
+            remote_maps = str(trig_resp.message).split(",")
+            if(len(remote_maps)<= 1):
+                rospy.logwarn_throttle("Map cannot be deleted")
+            else:
+                try:
+                    resp = self.slam_delete_map_srv.call(_str)
+                except:
+                    print("x")
 
 def randomString(stringLength):
     letters = string.ascii_letters
