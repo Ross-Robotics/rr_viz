@@ -90,9 +90,27 @@ border-right-color: rgb(136, 138, 133);}
       </widget>
      </item>
      <item>
+      <widget class="ROSServiceClientQButton" name="nextWaypointButton">
+       <property name="text">
+        <string>Next Waypoint</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="ROSServiceClientQButton" name="stopMissionButton">
        <property name="text">
         <string>Stop Mission</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="ROSServiceClientQButton" name="setActiveButton">
+       <property name="text">
+        <string>Set Active</string>
        </property>
       </widget>
      </item>
@@ -113,31 +131,6 @@ border-right-color: rgb(136, 138, 133);}
       <widget class="ROSServiceClientQButton" name="eResumeButton">
        <property name="text">
         <string>eStop Resume</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="Line" name="line_2">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="ROSServiceClientQButton" name="setActiveButton">
-       <property name="text">
-        <string>Set Active</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="ROSServiceClientQButton" name="nextWaypointButton">
-       <property name="text">
-        <string>Next Waypoint</string>
        </property>
       </widget>
      </item>
