@@ -95,20 +95,7 @@ border-right-color: rgb(136, 138, 133);}
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_4">
          <item>
-          <spacer name="horizontalSpacer_4">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_3">
+          <widget class="QLabel" name="label_7">
            <property name="font">
             <font>
              <pointsize>10</pointsize>
@@ -117,7 +104,21 @@ border-right-color: rgb(136, 138, 133);}
             </font>
            </property>
            <property name="text">
-            <string>Localization</string>
+            <string>Loaded map:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="ROSTopicLabel" name="loadedMapLabel">
+           <property name="font">
+            <font>
+             <pointsize>10</pointsize>
+             <weight>65</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string/>
            </property>
           </widget>
          </item>

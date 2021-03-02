@@ -62,6 +62,13 @@ class SlamSupervisorWidget(Base, Form):
         self.initial_mode = rospy.get_param("/slam_toolbox/mode","")
         self.modeLabel.setText(self.initial_mode.capitalize())
 
+        self.loadedMapLabel.setup(self.slam_sup_name+"/default_map_path")
+        loaded_map_path = rospy.get_param(self.slam_sup_name+"/default_map_path")
+        loaded_map_path_split = loaded_map_path.split('/')
+        x = len(loaded_map_path_split)
+        self.loaded_map_name = loaded_map_path_split[x-1]
+        self.loadedMapLabel.setText(self.loaded_map_name)
+
         # Connecting buttons:
         self.switchToMappingButton.pressed.connect(self.switchToMappingSlot)
         self.switchToLocalizationButton.pressed.connect(
@@ -104,6 +111,7 @@ class SlamSupervisorWidget(Base, Form):
         if trig_resp.success:
             print(trig_resp.message)
             self.modeLabel.setText("Mapping")
+            self.loadedMapLabel.setText("")
         else:
             print("failedcalling slam_launch_mapping_srv")
 
@@ -123,6 +131,7 @@ class SlamSupervisorWidget(Base, Form):
         if trig_resp.success:
             print(trig_resp.message)
             self.modeLabel.setText("Localization")
+            self.loadedMapLabel.setText(_str.str)
         else:
             print("failed calling slam_launch_localization_srv")
 
