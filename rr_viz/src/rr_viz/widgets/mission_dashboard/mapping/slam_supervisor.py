@@ -113,6 +113,7 @@ class SlamSupervisorWidget(Base, Form):
             print(trig_resp.message)
             self.modeLabel.setText("Mapping")
             self.loadedMapLabel.setText("")
+            self.loaded_map_name=""
         else:
             print("failedcalling slam_launch_mapping_srv")
 
