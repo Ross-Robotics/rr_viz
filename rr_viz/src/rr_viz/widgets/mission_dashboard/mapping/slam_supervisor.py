@@ -209,8 +209,6 @@ class SlamSupervisorWidget(Base, Form):
     def delete_map_slot(self):
         _str = StringRequest()
         _str.str = self.mapListWidget.currentItem().text().split(".")[0].strip()
-        print(_str.str)
-        print(self.loaded_map_name)
         try:
             trig_resp = self.slam_list_maps_srv.call(TriggerRequest())
         except Exception as e:
