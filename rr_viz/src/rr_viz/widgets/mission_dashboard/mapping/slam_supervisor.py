@@ -124,7 +124,7 @@ class SlamSupervisorWidget(Base, Form):
             print(trig_resp.message)
             self.modeLabel.setText("Localization")
         else:
-            print("failedcalling slam_launch_localization_srv")
+            print("failed calling slam_launch_localization_srv")
 
     # def saveLocallySlot(self):
     #     rospy.loginfo("saveLocallySlot")
@@ -197,7 +197,7 @@ class SlamSupervisorWidget(Base, Form):
 
     def delete_map_slot(self):
         _str = StringRequest()
-        _str.str = self.mapListWidget.currentItem().text().split(".")[0]
+        _str.str = self.mapListWidget.currentItem().text().split(".")[0].strip()
         try:
             trig_resp = self.slam_list_maps_srv.call(TriggerRequest())
         except Exception as e:
@@ -210,13 +210,18 @@ class SlamSupervisorWidget(Base, Form):
         if trig_resp.success:
             # print(trig_resp.message)
             remote_maps = str(trig_resp.message).split(",")
-            if(len(remote_maps)<= 1):
-                rospy.logwarn_throttle("Map cannot be deleted")
+            if(len(remote_maps)<= 1) or (_str.str == 'default_map'):
+                rospy.logwarn_throttle(10, "Map cannot be deleted")
+                msg = QMessageBox()
+                msg.setText("default_map cannot be deleted.")
+                msg.exec_()
             else:
-                try:
-                    resp = self.slam_delete_map_srv.call(_str)
-                except:
-                    print("x")
+                trig_resp = self.slam_delete_map_srv.call(_str)
+                if trig_resp.success:
+                    print(trig_resp.message)
+                else:
+                    print("failed calling slam delete map service")
+                    print(trig_resp.message)
 
 def randomString(stringLength):
     letters = string.ascii_letters
