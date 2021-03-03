@@ -223,12 +223,12 @@ class SlamSupervisorWidget(Base, Form):
             # print(trig_resp.message)
             remote_maps = str(trig_resp.message).split(",")
             if (_str.str == 'default_map'):
-                rospy.logwarn_throttle(10, "Map cannot be deleted")
-                self.msg_to_show= "default_map cannot be deleted."
+                rospy.logwarn_throttle(10, "The default map cannot be deleted")
+                self.msg_to_show= "The default_map cannot be deleted."
                 self.message_popup()
             elif (_str.str == self.loaded_map_name):
                 rospy.logwarn_throttle(10, "Map cannot be deleted")
-                self.msg_to_show = self.loaded_map_name+" cannot be deleted while loaded."
+                self.msg_to_show = "'" + self.loaded_map_name + "' cannot be deleted while loaded."
                 self.message_popup()
             else:
                 trig_resp = self.slam_delete_map_srv.call(_str)
