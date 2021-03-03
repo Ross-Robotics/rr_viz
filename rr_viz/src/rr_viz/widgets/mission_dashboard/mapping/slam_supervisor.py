@@ -56,6 +56,7 @@ class SlamSupervisorWidget(Base, Form):
             self.slam_sup_name+"/delete_map", String)
 
         self.default_map_name = rospy.get_param("~default_map_name", "")
+        self.slam_package = rospy.get_param(self.slam_sup_name+'/slam_package',"")
 
         # Setup rostopiclabel
         self.modeLabel.setup(self.slam_sup_name+"/mode")
@@ -171,16 +172,27 @@ class SlamSupervisorWidget(Base, Form):
 
     def map_list_handle(self, remote_list):
         local_maps = []
+        eligible_maps = []
         for index in range(self.mapListWidget.count()):
             local_maps.append(self.mapListWidget.item(index).text())
         # print("local: {}".format(local_maps))
         # print("remote: {}".format(remote_list))
+
+        for _map in remote_list:
+            if(self.slam_package == "slam_toolbox") and ".posegraph" in _map:
+                eligible_maps.append(_map)
+            elif(self.slam_package == "iris_lama") and ".yaml" in _map:
+                eligible_maps.append(_map)
+            elif(self.slam_package == "rtabmap") and ".db" in _map:
+                eligible_maps.append(_map)
+
+
         for _map in local_maps:
-            if _map not in remote_list:
+            if _map not in eligible_maps:
                 self.mapListWidget.takeItem(local_maps.index(_map))
                 local_maps.remove(_map)
         # print("local: {}".format(local_maps))
-        for _map in remote_list:
+        for _map in eligible_maps:
             if _map not in local_maps:
                 self.mapListWidget.addItem(_map)
 
