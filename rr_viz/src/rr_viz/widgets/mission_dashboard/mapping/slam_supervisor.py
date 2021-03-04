@@ -54,6 +54,8 @@ class SlamSupervisorWidget(Base, Form):
             self.slam_sup_name+"/save_map", String)
         self.slam_delete_map_srv = rospy.ServiceProxy(
             self.slam_sup_name+"/delete_map", String)
+        self.slam_save_map_image_srv = rospy.ServiceProxy(
+            self.slam_sup_name+"/save_map_image", String)
 
         self.default_map_name = rospy.get_param("~default_map_name", "")
         self.slam_package = rospy.get_param(self.slam_sup_name+'/slam_package',"")
@@ -77,6 +79,7 @@ class SlamSupervisorWidget(Base, Form):
             self.switchToLocalizationSlot)
 
         self.deleteMapButton.pressed.connect(self.delete_map_slot)
+        self.saveMapImage.pressed.connect(self.save_map_image)
         # self.saveLocally.pressed.connect(self.saveLocallySlot)
         # self.saveLocally.setEnabled(False)
         self.saveNav.pressed.connect(self.saveNavSlot)
@@ -249,6 +252,26 @@ class SlamSupervisorWidget(Base, Form):
                 else:
                     print("failed calling slam delete map service")
                     print(trig_resp.message)
+
+    def save_map_image(self):
+        _str = StringRequest()
+        map_name = self.mapName.text()
+        if map_name !='':
+            _str.str = map_name
+        else:
+            if not self.default_map_name:
+                _str.str = randomTimeString()
+            else:
+                _str.str = self.default_map_name
+
+        trig_resp = self.slam_save_map_image_srv.call(_str)
+        if trig_resp.success:
+            print(trig_resp.message)
+            self.mapName.clear()
+        else:
+            print("failed calling slam_save_map_image_srv")
+            print(trig_resp.message)
+
 
     def message_popup(self):
         msg = QMessageBox()
