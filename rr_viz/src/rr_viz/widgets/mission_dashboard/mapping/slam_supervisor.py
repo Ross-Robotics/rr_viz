@@ -264,13 +264,18 @@ class SlamSupervisorWidget(Base, Form):
             else:
                 _str.str = self.default_map_name
 
-        trig_resp = self.slam_save_map_image_srv.call(_str)
-        if trig_resp.success:
-            print(trig_resp.message)
-            self.mapName.clear()
-        else:
-            print("failed calling slam_save_map_image_srv")
-            print(trig_resp.message)
+        try:
+            self.rospack.get_path('rr_ocu')
+            print("found")
+        except:
+            print("not found")
+        # trig_resp = self.slam_save_map_image_srv.call(_str)
+        # if trig_resp.success:
+        #     print(trig_resp.message)
+        #     self.mapName.clear()
+        # else:
+        #     print("failed calling slam_save_map_image_srv")
+        #     print(trig_resp.message)
 
 
     def message_popup(self):
