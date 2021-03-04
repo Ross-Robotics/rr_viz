@@ -1,6 +1,6 @@
 import os
 import rospy
-import rospkg
+import roslaunch
 import tf
 import random
 import string
@@ -87,6 +87,8 @@ class SlamSupervisorWidget(Base, Form):
         self.map_list_update_timer = QtCore.QTimer(self)
         self.map_list_update_timer.timeout.connect(self.map_list_update)
         self.map_list_update_timer.start(1000)
+
+        self.save_map_image_dir =os.path.expanduser("~") + "/Desktop/map_images"
 
     def is_slam_supervisor_up(self):
         if rospy.is_shutdown():
@@ -254,29 +256,33 @@ class SlamSupervisorWidget(Base, Form):
                     print(trig_resp.message)
 
     def save_map_image(self):
-        _str = StringRequest()
         map_name = self.mapName.text()
-        if map_name !='':
-            _str.str = map_name
-        else:
+        if map_name =='':
             if not self.default_map_name:
-                _str.str = randomTimeString()
+                map_name = randomTimeString()
             else:
-                _str.str = self.default_map_name
+                map_name = self.default_map_name
 
-        try:
-            self.rospack.get_path('rr_ocu')
-            print("found")
-        except:
-            print("not found")
-        # trig_resp = self.slam_save_map_image_srv.call(_str)
-        # if trig_resp.success:
-        #     print(trig_resp.message)
-        #     self.mapName.clear()
-        # else:
-        #     print("failed calling slam_save_map_image_srv")
-        #     print(trig_resp.message)
+        if not os.path.exists(self.save_map_image_dir):
+            rospy.loginfo(self.save_map_image_dir + " doesn't exist, creating it now.")
+            os.mkdir(self.save_map_image_dir)
 
+        map_path = self.save_map_image_dir + '/' +  map_name
+
+        package = "map_server"
+        executable = "map_saver"
+        args = "-f " + map_path
+        node = roslaunch.core.Node(
+            package, executable, args=args, output="screen")
+        launch = roslaunch.scriptapi.ROSLaunch()
+        launch.start()
+
+        process = launch.launch(node)
+        r = rospy.Rate(5)
+        while process.is_alive() and not rospy.is_shutdown():
+            rospy.loginfo_throttle(1, "Map saver running")
+            r.sleep()
+        rospy.loginfo("Map saved")
 
     def message_popup(self):
         msg = QMessageBox()
