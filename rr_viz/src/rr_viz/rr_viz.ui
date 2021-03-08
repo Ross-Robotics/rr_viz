@@ -30,11 +30,93 @@
         <string>Inspect View</string>
        </attribute>
       </widget>
-      <widget class="MissionControlView" name="MissionViewTab">
+      <widget class="MissionEditorView" name="MissionEditorTab">
        <attribute name="title">
-        <string>Mission View</string>
+        <string>Mission Editor</string>
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_2"/>
+      </widget>
+      <widget class="QWidget" name="MissionDashboardTab">
+       <attribute name="title">
+        <string>Mission Dashboard</string>
+       </attribute>
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <item>
+         <widget class="RVizMinimap" name="minimap" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <item>
+           <widget class="DockingPanelWidget" name="DockingPanel" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>50</width>
+              <height>20</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="line">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="SlamSupervisorWidget" name="SlamSup" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>50</width>
+              <height>20</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="line_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="PathRecordPanelWidget" name="PathRecordPanel" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>50</width>
+              <height>20</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="line_3">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="MissionControlPanelWidget" name="MissionControlPanel" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>50</width>
+              <height>20</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
       </widget>
       <widget class="ViewDiagnostics" name="DiagnosticsViewTab">
        <attribute name="title">
@@ -67,15 +149,21 @@
    </slots>
   </customwidget>
   <customwidget>
-   <class>MissionControlView</class>
+   <class>MissionEditorView</class>
    <extends>QWidget</extends>
-   <header>widgets/mission_control/mission_control</header>
+   <header>widgets/mission_editor/mission_editor_view</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>ViewDiagnostics</class>
    <extends>QWidget</extends>
    <header>widgets/networking/view_diagnostics</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>RVizMinimap</class>
+   <extends>QWidget</extends>
+   <header>widgets/rviz_minimap</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -94,6 +182,30 @@
    <class>RRQWebView</class>
    <extends>QWidget</extends>
    <header>widgets/rr_webview</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>SlamSupervisorWidget</class>
+   <extends>QWidget</extends>
+   <header>widgets/mission_dashboard/mapping/slam_supervisor</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>DockingPanelWidget</class>
+   <extends>QWidget</extends>
+   <header>widgets/mission_dashboard/docking_panel</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MissionControlPanelWidget</class>
+   <extends>QWidget</extends>
+   <header>widgets/mission_dashboard/mission_control_panel</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PathRecordPanelWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">widgets/mission_dashboard/path_panel</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

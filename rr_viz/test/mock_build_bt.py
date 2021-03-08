@@ -5,9 +5,9 @@ import threading
 import signal
 from functools import partial
 from std_srvs.srv import Trigger, TriggerResponse
-from rr_node_tools_msgs.srv import String, StringResponse, StringRequest
-from rr_node_tools_msgs.msg import StringArray
-from rr_viz.srv import BuildBT, BuildBTResponse
+from rr_custom_msgs.msg import StringArray
+from rr_custom_msgs.srv import String, StringResponse, StringRequest
+from rr_custom_msgs.srv import BuildBT, BuildBTResponse
 
 
 class MockBTBuilder():

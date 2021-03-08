@@ -9,7 +9,7 @@ from geometry_msgs.msg import PoseWithCovarianceStamped, PoseStamped
 from PyQt5 import QtGui, QtWidgets, uic, QtCore
 from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog
 import managers.file_management as file_management
-from pathing.QWaypointWidget import QWaypointWidget
+from rr_viz.widgets.mission_editor.pathing.QWaypointWidget import QWaypointWidget
 from rr_custom_msgs.msg import TaskWaypoint as TaskWaypointMsg
 
 current_dir = os.path.dirname(os.path.abspath(__file__))

@@ -37,7 +37,7 @@ class QWaypointWidget(QWidget, RRTaskWaypoint):
         self.taskSrvQComboBox.currentIndexChanged.connect(self.taskSrvChange)
         self.taskSubTreeQComboBox = QtWidgets.QComboBox()
         self.taskSubTreeQComboBox.addItems(
-            ["None", "InflateCostmaps", "DeflateCostmaps"])
+            ["None", "InflateCostmaps", "DeflateCostmaps","HighPoseAccuracy", "LowPoseAccuracy", "TakePicture"])
         self.taskSubTreeQComboBox.currentIndexChanged.connect(
             self.taskSubTreeChange)
 
