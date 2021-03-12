@@ -222,24 +222,26 @@ class SlamSupervisorWidget(Base, Form):
     def delete_map_slot(self):
         _str = StringRequest()
         _str.str = self.mapListWidget.currentItem().text().split(".")[0].strip()
+
         try:
             trig_resp = self.slam_list_maps_srv.call(TriggerRequest())
         except Exception as e:
             rospy.logwarn_throttle(
                 10, "failed to fetch maps: {}".format(e))
             return
+            
         current_item = self.mapListWidget.currentItem()
         self.switchToLocalizationButton.setEnabled(
             current_item is not None)
+
         if trig_resp.success:
-            # print(trig_resp.message)
             remote_maps = str(trig_resp.message).split(",")
             if (_str.str == 'default_map'):
-                rospy.logwarn_throttle(10, "The default map cannot be deleted")
-                self.msg_to_show= "The default_map cannot be deleted."
+                self.msg_to_show = "The default_map cannot be deleted."
+                rospy.logwarn(self.msg_to_show)
                 self.message_popup()
             elif (_str.str == self.loaded_map_name):
-                rospy.logwarn_throttle(10, "Map cannot be deleted")
+                rospy.logwarn("Map cannot be deleted")
                 self.msg_to_show = "'" + self.loaded_map_name + "' cannot be deleted while loaded."
                 self.message_popup()
             else:
@@ -251,9 +253,12 @@ class SlamSupervisorWidget(Base, Form):
                     print(trig_resp.message)
 
     def message_popup(self):
-        msg = QMessageBox()
-        msg.setText(self.msg_to_show)
-        msg.exec_()
+        msgBox = QMessageBox()
+        msgBox.setIcon(QMessageBox.Information)
+        msgBox.setText(self.msg_to_show)
+        msgBox.exec_()
+
+
 def randomString(stringLength):
     letters = string.ascii_letters
     return ''.join(random.choice(letters) for i in range(stringLength))
