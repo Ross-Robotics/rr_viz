@@ -4,7 +4,7 @@
   <arg name="connect_movebase" default="true"/>
   <arg name="enable_saving" default="true"/>
   <arg name="waypoint_server_name" default="mission_path_srv"/>
-  <!-- <arg name="web_ui_url" default="http://192.168.10.100:8000/rr_gui.html/"/> -->
+  <arg name="web_ui_url" default="http://www.ross-robotics.co.uk"/>
   <arg name="move_base_namespace" default="/move_base"/>
   <arg name="build_bt_srv" default="/build_bt"/>
 
