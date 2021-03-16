@@ -1,3 +1,9 @@
 [submodule "submodules/rviz_textured_sphere"]
 	path = submodules/rviz_textured_sphere
 	url = https://github.com/UTNuclearRoboticsPublic/rviz_textured_sphere.git
+[submodule "rr_gui/submodules/interactive_waypoints"]
+	path = submodules/interactive_waypoints
+	url = https://github.com/JuliusSustarevas/interactive_waypoints.git
+[submodule "rr_gui/submodules/ros_msgdict"]
+	path = submodules/ros_msgdict
+	url = https://github.com/JuliusSustarevas/ros_msgdict.git
