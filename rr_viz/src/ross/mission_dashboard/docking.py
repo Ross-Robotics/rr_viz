@@ -36,11 +36,15 @@ class Docking(QWidget):
         self.setLayout(self.v_layout)
 
     def set_pose(self):
-        trig_resp = self.set_pose_srv.call(TriggerRequest())
-        if trig_resp.success:
-            print(trig_resp.message)
-        else:
-            print("failed to call save_dock_approach service")
+        try:
+            trig_resp = self.set_pose_srv.call(TriggerRequest())
+            if trig_resp.success:
+                print(trig_resp.message)
+            else:
+                print("failed to call save_dock_approach service")
+        except:
+            rospy.logwarn("Service unavailable")
+
 
     def go_to_dock(self):
         trig_resp = self.go_to_dock_srv.call(TriggerRequest())
