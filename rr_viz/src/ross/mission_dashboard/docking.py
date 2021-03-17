@@ -17,13 +17,13 @@ class Docking(QWidget):
 
         self.v_layout= QVBoxLayout()
 
-        #Title
+        # Title
         self.title_label = QLabel('Docking')
         self.title_label.setFont(QFont('Ubuntu', 11, QFont.Bold))
         self.title_label.setAlignment(Qt.AlignRight)
         self.v_layout.addWidget(self.title_label)
 
-        #Buttons
+        # Buttons
         self.h_layout = QHBoxLayout()
         self.set_pose_button = QPushButton('Set Docking Pose')
         self.set_pose_button.pressed.connect(self.set_pose)
