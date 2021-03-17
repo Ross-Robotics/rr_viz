@@ -12,8 +12,10 @@ class Docking(QWidget):
         super(QWidget, self).__init__(parent)
 
         # Setup services
-        self.set_pose_srv = rospy.ServiceProxy("/robot_interface/save_dock_approach", Trigger)
-        self.go_to_dock_srv = rospy.ServiceProxy("/robot_interface/go_to_base", Trigger)
+        self.set_pose_srv_name = "/robot_interface/save_dock_approach"
+        self.go_to_dock_srv_name = "/robot_interface/go_to_base"
+        self.set_pose_srv = rospy.ServiceProxy(self.set_pose_srv_name, Trigger)
+        self.go_to_dock_srv = rospy.ServiceProxy(self.go_to_dock_srv_name, Trigger)
 
         self.v_layout= QVBoxLayout()
 
@@ -41,14 +43,21 @@ class Docking(QWidget):
             if trig_resp.success:
                 print(trig_resp.message)
             else:
+                print(trig_resp.message)
                 print("failed to call save_dock_approach service")
         except:
-            rospy.logwarn("Service unavailable")
+            msg = "Service '" + self.set_pose_srv_name + "' unavailable"
+            rospy.logwarn(msg)
 
 
     def go_to_dock(self):
-        trig_resp = self.go_to_dock_srv.call(TriggerRequest())
-        if trig_resp.success:
-            print(trig_resp.message)
-        else:
-            print("failed to call go_to_base service")
+        try:
+            trig_resp = self.go_to_dock_srv.call(TriggerRequest())
+            if trig_resp.success:
+                print(trig_resp.message)
+            else:
+                print(trig_resp.message)
+                print("failed to call go_to_base service")
+        except:
+            msg = "Service '" + self.go_to_dock_srv_name + "' unavailable"
+            rospy.logwarn(msg)
