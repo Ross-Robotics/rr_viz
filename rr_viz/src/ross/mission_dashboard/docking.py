@@ -27,10 +27,13 @@ class Docking(QWidget):
 
         # Buttons
         self.h_layout = QHBoxLayout()
+
         self.set_pose_button = QPushButton('Set Docking Pose')
         self.set_pose_button.pressed.connect(self.set_pose)
+
         self.go_to_dock_button = QPushButton('Go to Dock')
         self.go_to_dock_button.pressed.connect(self.go_to_dock)
+
         self.h_layout.addWidget(self.set_pose_button)
         self.h_layout.addWidget(self.go_to_dock_button)
         self.v_layout.addLayout(self.h_layout)
@@ -44,7 +47,8 @@ class Docking(QWidget):
                 print(trig_resp.message)
             else:
                 print(trig_resp.message)
-                print("failed to call save_dock_approach service")
+                msg = "Failed to call '" + self.set_pose_srv_name + "' service"
+                print(msg)
         except:
             msg = "Service '" + self.set_pose_srv_name + "' unavailable"
             rospy.logwarn(msg)
@@ -56,8 +60,8 @@ class Docking(QWidget):
             if trig_resp.success:
                 print(trig_resp.message)
             else:
-                print(trig_resp.message)
-                print("failed to call go_to_base service")
+                msg = "Failed to call '" + self.go_to_dock_srv_name + "' service"
+                print(msg)
         except:
             msg = "Service '" + self.go_to_dock_srv_name + "' unavailable"
             rospy.logwarn(msg)
