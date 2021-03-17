@@ -4,9 +4,16 @@ from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QLabel, QPushButt
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 
+import rospy
+from std_srvs.srv import Trigger, TriggerRequest
+
 class Docking(QWidget):
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
+
+        # Setup services
+        self.set_pose_srv = rospy.ServiceProxy("/robot_interface/save_dock_approach", Trigger)
+        self.go_to_dock_srv = rospy.ServiceProxy("/robot_interface/go_to_base", Trigger)
 
         self.v_layout= QVBoxLayout()
 
@@ -19,10 +26,25 @@ class Docking(QWidget):
         #Buttons
         self.h_layout = QHBoxLayout()
         self.set_pose_button = QPushButton('Set Docking Pose')
+        self.set_pose_button.pressed.connect(self.set_pose)
         self.go_to_dock_button = QPushButton('Go to Dock')
+        self.go_to_dock_button.pressed.connect(self.go_to_dock)
         self.h_layout.addWidget(self.set_pose_button)
         self.h_layout.addWidget(self.go_to_dock_button)
-
         self.v_layout.addLayout(self.h_layout)
 
         self.setLayout(self.v_layout)
+
+    def set_pose(self):
+        trig_resp = self.set_pose_srv.call(TriggerRequest())
+        if trig_resp.success:
+            print(trig_resp.message)
+        else:
+            print("failed to call save_dock_approach service")
+
+    def go_to_dock(self):
+        trig_resp = self.go_to_dock_srv.call(TriggerRequest())
+        if trig_resp.success:
+            print(trig_resp.message)
+        else:
+            print("failed to call go_to_base service")
