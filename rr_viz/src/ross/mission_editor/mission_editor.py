@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QLabel, QGridLayo
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 
-from ross.mission_editor.pathing.QWaypointListWidget import QWaypointListWidget
+#from ross.mission_editor.pathing.QWaypointListWidget import QWaypointListWidget
 
 class MissionEditor(QWidget):
     def __init__(self, parent):
@@ -26,7 +26,7 @@ class MissionEditor(QWidget):
 
         # Waypoint list
         # self.waypoint_list = QWidget()
-        self.waypoint_list = QWaypointListWidget()
+        self.waypoint_list = QListWidget()
         self.v_layout.addWidget(self.waypoint_list, 5)
 
         # Buttons
