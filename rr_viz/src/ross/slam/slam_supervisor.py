@@ -7,6 +7,8 @@ from PyQt5 import QtCore
 
 import rospy
 import string
+import os
+import roslaunch
 from std_srvs.srv import Trigger, TriggerResponse, TriggerRequest
 from rr_custom_msgs.srv import String, StringResponse, StringRequest
 from rr_custom_msgs.msg import StringArray
@@ -33,6 +35,7 @@ class SlamSupervisor(QWidget):
             self.active_nodes_sub = rospy.Subscriber(self.slam_sup_name+"/active_nodes", StringArray, self.active_nodes_sub_cb)
             
             self.active_nodes = []
+            self.save_map_image_dir =os.path.expanduser("~") + "/Desktop/map_images"
 
             self.v_layout = QVBoxLayout()
 
@@ -144,10 +147,10 @@ class SlamSupervisor(QWidget):
             self.h_layout_save_map = QHBoxLayout()
 
             self.save_map_button = QPushButton('Save Map')
-            # self.save_map_button.pressed.connect(self.save_map)
+            self.save_map_button.pressed.connect(self.save_map)
 
             self.save_map_image_button = QPushButton('Save Map Image')
-            # self.save_map_image_button.pressed.connect(self.save_map_image)
+            self.save_map_image_button.pressed.connect(self.save_map_image)
 
             self.h_layout_save_map.addWidget(self.save_map_button)
             self.h_layout_save_map.addWidget(self.save_map_image_button)
