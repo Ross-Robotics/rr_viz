@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 import sys
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QLabel, QPushButton, QListWidget, QLineEdit
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QLabel, QPushButton, QListWidget, QLineEdit, QMessageBox
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
+from PyQt5 import QtCore
 
 import rospy
 import string
 from std_srvs.srv import Trigger, TriggerResponse, TriggerRequest
 from rr_custom_msgs.srv import String, StringResponse, StringRequest
+from rr_custom_msgs.msg import StringArray
 
 class SlamSupervisor(QWidget):
     def __init__(self, parent):
@@ -28,6 +30,9 @@ class SlamSupervisor(QWidget):
             self.save_map_srv = rospy.ServiceProxy(self.slam_sup_name+"/save_map", String)
             self.delete_map_srv = rospy.ServiceProxy(self.slam_sup_name+"/delete_map", String)
             self.save_map_image_srv = rospy.ServiceProxy(self.slam_sup_name+"/save_map_image", String)
+            self.active_nodes_sub = rospy.Subscriber(self.slam_sup_name+"/active_nodes", StringArray, self.active_nodes_sub_cb)
+            
+            self.active_nodes = []
 
             self.v_layout = QVBoxLayout()
 
@@ -139,10 +144,10 @@ class SlamSupervisor(QWidget):
             self.h_layout_save_map = QHBoxLayout()
 
             self.save_map_button = QPushButton('Save Map')
-            self.save_map_button.pressed.connect(self.save_map)
+            # self.save_map_button.pressed.connect(self.save_map)
 
             self.save_map_image_button = QPushButton('Save Map Image')
-            self.save_map_image_button.pressed.connect(self.save_map_image)
+            # self.save_map_image_button.pressed.connect(self.save_map_image)
 
             self.h_layout_save_map.addWidget(self.save_map_button)
             self.h_layout_save_map.addWidget(self.save_map_image_button)
@@ -155,6 +160,9 @@ class SlamSupervisor(QWidget):
             self.map_list_update_timer = QtCore.QTimer(self)
             self.map_list_update_timer.timeout.connect(self.map_list_update)
             self.map_list_update_timer.start(1000)
+
+    def active_nodes_sub_cb(self, msg):
+        self.active_nodes = msg.data
 
     def switch_to_mapping(self):
         trig_resp = self.kill_nodes_srv.call(TriggerRequest())
