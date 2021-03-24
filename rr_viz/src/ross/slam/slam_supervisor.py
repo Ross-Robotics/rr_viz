@@ -169,6 +169,7 @@ class SlamSupervisor(QWidget):
 
     def switch_to_mapping(self):
         trig_resp = self.kill_nodes_srv.call(TriggerRequest())
+        
         if trig_resp.success:
             print(trig_resp.message)
             temp_timer = rospy.Timer(
@@ -178,6 +179,7 @@ class SlamSupervisor(QWidget):
     
     def runMapping(self):
         trig_resp = self.launch_mapping_srv.call(TriggerRequest())
+
         if trig_resp.success:
             print(trig_resp.message)
             self.mode_label.setText("Mapping")
@@ -188,6 +190,7 @@ class SlamSupervisor(QWidget):
 
     def switch_to_localization(self):
         trig_resp = self.kill_nodes_srv.call(TriggerRequest())
+
         if trig_resp.success:
             print(trig_resp.message)
             temp_timer = rospy.Timer(
@@ -199,6 +202,7 @@ class SlamSupervisor(QWidget):
         _str = StringRequest()
         _str.str = self.map_list_widget.currentItem().text().split(".")[0].strip()
         trig_resp = self.launch_localization_srv.call(_str)
+
         if trig_resp.success:
             print(trig_resp.message)
             self.mode_label.setText("Localization")
@@ -209,27 +213,27 @@ class SlamSupervisor(QWidget):
         
     def waitTillDead_and_execute(self, func):
         if len(self.active_nodes) == 0:
-            # print("!!! Timer found nodes 0")
             func()
         else:
-            # print("!!! Timer found nodes >0 , new timer created")
             rospy.Timer(
                 rospy.Duration(1), lambda _: self.waitTillDead_and_execute(func), oneshot=True)
 
     def delete_map(self):
         _str = StringRequest()
         _str.str = self.map_list_widget.currentItem().text().split(".")[0].strip()
+
         try:
             trig_resp = self.list_maps_srv.call(TriggerRequest())
         except Exception as e:
             rospy.logwarn_throttle(
                 10, "failed to fetch maps: {}".format(e))
             return
+
         current_item = self.map_list_widget.currentItem()
         self.localization_button.setEnabled(
             current_item is not None)
+
         if trig_resp.success:
-            # print(trig_resp.message)
             remote_maps = str(trig_resp.message).split(",")
             if (_str.str == 'default_map'):
                 rospy.logwarn_throttle(10, "The default map cannot be deleted")
@@ -250,6 +254,7 @@ class SlamSupervisor(QWidget):
     def save_map(self):
         _str = StringRequest()
         map_name = self.file_name_text_edit.text()
+
         if map_name !='':
             _str.str = map_name
         else:
@@ -257,7 +262,9 @@ class SlamSupervisor(QWidget):
                 _str.str = randomTimeString()
             else:
                 _str.str = self.default_map_name
+
         trig_resp = self.save_map_srv.call(_str)
+
         if trig_resp.success:
             print(trig_resp.message)
             self.file_name_text_edit.clear()
@@ -267,6 +274,7 @@ class SlamSupervisor(QWidget):
 
     def save_map_image(self):
         map_name = self.file_name_text_edit.text()
+
         if map_name =='':
             if not self.default_map_name:
                 map_name = randomTimeString()
@@ -282,13 +290,14 @@ class SlamSupervisor(QWidget):
         package = "map_server"
         executable = "map_saver"
         args = "-f " + map_path
-        node = roslaunch.core.Node(
-            package, executable, args=args, output="screen")
+        node = roslaunch.core.Node(package, executable, args=args, output="screen")
+
         launch = roslaunch.scriptapi.ROSLaunch()
         launch.start()
 
         process = launch.launch(node)
         r = rospy.Rate(5)
+
         while process.is_alive() and not rospy.is_shutdown():
             rospy.loginfo_throttle(1, "Map saver running")
             r.sleep()
@@ -303,12 +312,12 @@ class SlamSupervisor(QWidget):
                     10, "failed to fetch maps: {}".format(e))
                 return
             current_item = self.map_list_widget.currentItem()
+
             self.localization_button.setEnabled(
                 current_item is not None)
+
             if trig_resp.success:
-                # print(trig_resp.message)
                 remote_maps = str(trig_resp.message).split(",")
-                # remote_maps = [map.strip() for map in remote_maps]#Do not strip off filetypes
                 try:
                     sorted_remote_maps=sorted(remote_maps, key=lambda x: (x[x.index(".")+1] ,x[1])) #sort by filetype first then alphabetically
                     self.map_list_handle(sorted_remote_maps)
@@ -320,11 +329,10 @@ class SlamSupervisor(QWidget):
     def map_list_handle(self, remote_list):
         local_maps = []
         eligible_maps = []
+
         for index in range(self.map_list_widget.count()):
             local_maps.append(self.map_list_widget.item(index).text())
-        # print("local: {}".format(local_maps))
-        # print("remote: {}".format(remote_list))
-
+        
         for _map in remote_list:
             if(self.slam_package == "slam_toolbox") and ".posegraph" in _map:
                 eligible_maps.append(_map)
@@ -337,7 +345,7 @@ class SlamSupervisor(QWidget):
             if _map not in eligible_maps:
                 self.map_list_widget.takeItem(local_maps.index(_map))
                 local_maps.remove(_map)
-        # print("local: {}".format(local_maps))
+        
         for _map in eligible_maps:
             if _map not in local_maps:
                 self.map_list_widget.addItem(_map)
