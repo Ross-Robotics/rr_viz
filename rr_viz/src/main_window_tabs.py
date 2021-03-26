@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import QTabWidget, QVBoxLayout, QWidget, QHBoxLayout, QPush
 from rviz_tabs import *
 from ross.ross_robotics import *
 from webview.rr_webview import *
+from webview.rr_webview_tab import *
 
 class MainWindowTabs(QWidget):
     def __init__(self, parent):
@@ -37,7 +38,7 @@ class MainWindowTabs(QWidget):
 
 
         self.verifinder_tab.layout = QVBoxLayout(self)
-        self.verifinder_tab.layout.addWidget(RRQWebView(self))
+        self.verifinder_tab.layout.addWidget(RRQWebViewTab(self))
         self.verifinder_tab.setLayout(self.verifinder_tab.layout)
 
         self.main_window_layout.addWidget(self.main_window_tabs)
