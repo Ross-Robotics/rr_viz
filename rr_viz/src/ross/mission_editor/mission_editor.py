@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import sys
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QLabel, QGridLayout, QPushButton, QListWidget, QFrame
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QLabel, QGridLayout, QPushButton, QListWidget, QFrame, QFileDialog, QLineEdit, QMessageBox
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 from PyQt5 import QtCore
@@ -9,6 +9,7 @@ from ross.mission_editor.pathing.QWaypointListWidget import QWaypointListWidget
 import rospy
 from geometry_msgs.msg import PoseWithCovarianceStamped, PoseStamped
 from rr_custom_msgs.msg import TaskWaypoint as TaskWaypointMsg
+import managers.file_management as file_management
 
 class MissionEditor(QWidget):
     # Set up signal
@@ -39,20 +40,24 @@ class MissionEditor(QWidget):
         self.editor_title_label.setFont(QFont('Ubuntu', 10, QFont.Bold))
         self.v_layout.addWidget(self.editor_title_label)
 
-
         # Waypoint list
-        # self.waypoint_list = QWidget()
         self.waypoint_list = QWaypointListWidget()
         self.v_layout.addWidget(self.waypoint_list, 5)
 
         # Buttons
         self.add_here_button = QPushButton('Add Here')
-        self.add_here_button.pressed.connect(self.add_here)
         self.duplicate_button = QPushButton('Duplicate')
         self.delete_button = QPushButton('Delete')
         self.delete_all_button = QPushButton('Delete All')
         self.save_mission_button = QPushButton('Save Mission')
         self.load_mission_button = QPushButton('Load Mission')
+
+        self.add_here_button.pressed.connect(self.add_here)
+        self.duplicate_button.pressed.connect(self.duplicate)
+        self.delete_button.pressed.connect(self.delete)
+        self.delete_all_button.pressed.connect(self.delete_all)
+        self.save_mission_button.pressed.connect(self.save)
+        self.load_mission_button.pressed.connect(self.load)
 
         self.button_layout = QGridLayout()
         self.button_layout.addWidget(self.add_here_button, 0, 0)
@@ -62,6 +67,18 @@ class MissionEditor(QWidget):
         self.button_layout.addWidget(self.save_mission_button, 2, 0)
         self.button_layout.addWidget(self.load_mission_button, 2, 1)
         self.v_layout.addLayout(self.button_layout)
+
+        # Filename
+        self.h_layout_file_name = QHBoxLayout()
+        self.filename_label = QLabel('Filename:')
+        self.filename_label.setFont(QFont('Ubuntu', 10, QFont.Bold))
+        self.h_layout_file_name.addWidget(self.filename_label, 2)
+
+        self.file_name_text_edit = QLineEdit()
+        self.file_name_text_edit.setFont(QFont('Ubuntu', 10))
+        self.h_layout_file_name.addWidget(self.file_name_text_edit, 8)
+
+        self.v_layout.addLayout(self.h_layout_file_name)
 
         # Line
         self.line = QFrame()
@@ -75,14 +92,14 @@ class MissionEditor(QWidget):
         self.v_layout.addWidget(self.command_title)
 
         # Command buttons
-        self.h_layout = QHBoxLayout()
+        self.h_layout_command = QHBoxLayout()
         self.go_to_selected_button = QPushButton('Go to Selected')
         self.go_to_all_button = QPushButton('Go to All')
         self.send_mission_button = QPushButton('Send Mission')
-        self.h_layout.addWidget(self.go_to_selected_button)
-        self.h_layout.addWidget(self.go_to_all_button)
-        self.h_layout.addWidget(self.send_mission_button)
-        self.v_layout.addLayout(self.h_layout)
+        self.h_layout_command.addWidget(self.go_to_selected_button)
+        self.h_layout_command.addWidget(self.go_to_all_button)
+        self.h_layout_command.addWidget(self.send_mission_button)
+        self.v_layout.addLayout(self.h_layout_command)
 
         self.setLayout(self.v_layout)
 
@@ -102,8 +119,50 @@ class MissionEditor(QWidget):
             msg = PoseWithCovarianceStamped()
             msg.header = self.robot_pose.header
             msg.pose.pose = self.robot_pose.pose
+            print(msg)
             self.spawn_waypoint_signal.emit(msg)
         else:
             rospy.logwarn("Robot pose not connected")
 
+    def duplicate(self):
+        if self.waypoint_list.get_selected_wp():
+            self.waypoint_list.duplicate(self.waypoint_list.get_selected_wp())
 
+    def delete(self):
+        if self.waypoint_list.get_selected_wp():
+            self.waypoint_list.remove(self.waypoint_list.get_selected_wp())        
+
+    def delete_all(self):
+        for _ in range(self.waypoint_list.len()):
+            self.waypoint_list.remove(
+                self.waypoint_list.get_wp(self.waypoint_list.len()-1))
+
+    def save(self):
+        file_name = self.file_name_text_edit.text()
+        if file_name == '':
+            self.msg_to_show= "No file name specified."
+            self.message_popup()
+        else:
+            save_path = file_management.get_user_dir() + "/paths/" + file_name
+        
+            if save_path[-5:] != ".yaml":
+                save_path = save_path + ".yaml"
+
+            self.waypoint_list.saveToPath(save_path, "Mission" + str(rospy.Time.now()))
+
+    def load(self):
+        file_name = self.file_name_text_edit.text()
+        if file_name == '':
+            self.msg_to_show= "No file name specified."
+            self.message_popup()
+        else:
+            load_path = file_management.get_user_dir() + "/paths/" + file_name
+            if load_path[-5:] != ".yaml":
+                load_path = load_path + ".yaml"
+            
+            self.waypoint_list.loadFromPath(load_path)         
+
+    def message_popup(self):
+        msg = QMessageBox()
+        msg.setText(self.msg_to_show)
+        msg.exec_()                                
