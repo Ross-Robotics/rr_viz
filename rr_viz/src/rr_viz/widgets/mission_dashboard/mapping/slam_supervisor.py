@@ -64,6 +64,7 @@ class SlamSupervisorWidget(Base, Form):
         self.modeLabel.setText(self.initial_mode.capitalize())
 
         self.loadedMapLabel.setup(self.slam_sup_name+"/default_map_path")
+        self.loaded_map_name = ""
         if(self.initial_mode == 'localization'):
             loaded_map_path = rospy.get_param(self.slam_sup_name+"/default_map_path","")
             loaded_map_path_split = loaded_map_path.split('/')
@@ -129,7 +130,7 @@ class SlamSupervisorWidget(Base, Form):
 
     def runLocalization(self):
         _str = StringRequest()
-        _str.str = self.mapListWidget.currentItem().text().split(".")[0].strip()
+        _str.str = self.mapListWidget.currentItem().text().split(".")[0]
         trig_resp = self.slam_launch_localization_srv.call(_str)
         if trig_resp.success:
             print(trig_resp.message)
@@ -156,7 +157,10 @@ class SlamSupervisorWidget(Base, Form):
         _str = StringRequest()
         map_name = self.mapName.text()
         if map_name !='':
-            _str.str = map_name
+            if map_name.find('.'):
+                _str.str = string.replace(map_name, '.', '_')
+            else:
+                _str.str = map_name
         else:
             if not self.default_map_name:
                 _str.str = randomTimeString()
@@ -221,8 +225,8 @@ class SlamSupervisorWidget(Base, Form):
 
     def delete_map_slot(self):
         _str = StringRequest()
-        _str.str = self.mapListWidget.currentItem().text().split(".")[0].strip()
-
+        _str.str = self.mapListWidget.currentItem().text().split(".")[0]
+        
         try:
             trig_resp = self.slam_list_maps_srv.call(TriggerRequest())
         except Exception as e:
