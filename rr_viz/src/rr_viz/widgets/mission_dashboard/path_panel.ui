@@ -83,45 +83,50 @@ border-right-color: rgb(136, 138, 133);}
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QPushButton" name="startRecordingButton">
-       <property name="text">
-        <string>Start Recording</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="ROSServiceClientQButton" name="stopRecordingButton">
-       <property name="text">
-        <string>Stop Recording</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="followSavedPathButton">
-       <property name="text">
-        <string>Follow Saved Path</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="stopFollowingPathButton">
-       <property name="font">
-        <font>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>STOP FOLLOWING</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="Line" name="line">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-      </widget>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <item>
+          <widget class="QPushButton" name="startRecordingButton">
+           <property name="text">
+            <string>Start Recording</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="ROSServiceClientQButton" name="stopRecordingButton">
+           <property name="text">
+            <string>Stop Recording</string>
+           </property>
+          </widget>
+         </item>
+         </layout>
+        </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <item>
+          <widget class="QPushButton" name="followSavedPathButton">
+           <property name="text">
+            <string>Follow Saved Path</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="stopFollowingPathButton">
+           <property name="font">
+            <font>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>STOP FOLLOWING</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>

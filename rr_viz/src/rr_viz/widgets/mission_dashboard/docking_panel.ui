@@ -75,13 +75,6 @@ border-right-color: rgb(136, 138, 133);}
        </property>
       </widget>
      </item>
-     <item>
-      <widget class="Line" name="line">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-      </widget>
-     </item>
     </layout>
    </item>
   </layout>
