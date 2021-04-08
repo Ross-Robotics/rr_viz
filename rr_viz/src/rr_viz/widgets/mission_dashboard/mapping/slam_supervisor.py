@@ -263,6 +263,16 @@ class SlamSupervisorWidget(Base, Form):
 
     def save_map_image(self):
         map_name = self.mapName.text()
+
+        if map_name !='':
+            if map_name.find('.'):
+                map_name = string.replace(map_name, '.', '_')
+        else:
+            if not self.default_map_name:
+                map_name = randomTimeString()
+            else:
+                map_name = self.default_map_name
+                
         if map_name =='':
             if not self.default_map_name:
                 map_name = randomTimeString()
