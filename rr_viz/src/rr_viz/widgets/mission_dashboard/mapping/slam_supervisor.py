@@ -66,6 +66,7 @@ class SlamSupervisorWidget(Base, Form):
         self.modeLabel.setText(self.initial_mode.capitalize())
 
         self.loadedMapLabel.setup(self.slam_sup_name+"/default_map_path")
+        self.loaded_map_name = ""
         if(self.initial_mode == 'localization'):
             loaded_map_path = rospy.get_param(self.slam_sup_name+"/default_map_path","")
             loaded_map_path_split = loaded_map_path.split('/')
@@ -134,7 +135,7 @@ class SlamSupervisorWidget(Base, Form):
 
     def runLocalization(self):
         _str = StringRequest()
-        _str.str = self.mapListWidget.currentItem().text().split(".")[0].strip()
+        _str.str = self.mapListWidget.currentItem().text().split(".")[0]
         trig_resp = self.slam_launch_localization_srv.call(_str)
         if trig_resp.success:
             print(trig_resp.message)
@@ -161,7 +162,10 @@ class SlamSupervisorWidget(Base, Form):
         _str = StringRequest()
         map_name = self.mapName.text()
         if map_name !='':
-            _str.str = map_name
+            if map_name.find('.'):
+                _str.str = string.replace(map_name, '.', '_')
+            else:
+                _str.str = map_name
         else:
             if not self.default_map_name:
                 _str.str = randomTimeString()
@@ -226,25 +230,27 @@ class SlamSupervisorWidget(Base, Form):
 
     def delete_map_slot(self):
         _str = StringRequest()
-        _str.str = self.mapListWidget.currentItem().text().split(".")[0].strip()
+        _str.str = self.mapListWidget.currentItem().text().split(".")[0]
+        
         try:
             trig_resp = self.slam_list_maps_srv.call(TriggerRequest())
         except Exception as e:
             rospy.logwarn_throttle(
                 10, "failed to fetch maps: {}".format(e))
             return
+            
         current_item = self.mapListWidget.currentItem()
         self.switchToLocalizationButton.setEnabled(
             current_item is not None)
+
         if trig_resp.success:
-            # print(trig_resp.message)
             remote_maps = str(trig_resp.message).split(",")
             if (_str.str == 'default_map'):
-                rospy.logwarn_throttle(10, "The default map cannot be deleted")
-                self.msg_to_show= "The default_map cannot be deleted."
+                self.msg_to_show = "The default_map cannot be deleted."
+                rospy.logwarn(self.msg_to_show)
                 self.message_popup()
             elif (_str.str == self.loaded_map_name):
-                rospy.logwarn_throttle(10, "Map cannot be deleted")
+                rospy.logwarn("Map cannot be deleted")
                 self.msg_to_show = "'" + self.loaded_map_name + "' cannot be deleted while loaded."
                 self.message_popup()
             else:
@@ -285,9 +291,12 @@ class SlamSupervisorWidget(Base, Form):
         rospy.loginfo("Map saved")
 
     def message_popup(self):
-        msg = QMessageBox()
-        msg.setText(self.msg_to_show)
-        msg.exec_()
+        msgBox = QMessageBox()
+        msgBox.setIcon(QMessageBox.Information)
+        msgBox.setText(self.msg_to_show)
+        msgBox.exec_()
+
+
 def randomString(stringLength):
     letters = string.ascii_letters
     return ''.join(random.choice(letters) for i in range(stringLength))
