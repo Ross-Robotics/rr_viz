@@ -15,6 +15,7 @@ from std_srvs.srv import Trigger, TriggerResponse, TriggerRequest
 from rr_custom_msgs.srv import String, StringResponse, StringRequest
 from rr_custom_msgs.msg import StringArray
 from helpers import rr_qt_helper
+import managers.file_management as file_management
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 Form, Base = uic.loadUiType(os.path.join(current_dir, "slam_supervisor.ui"))
@@ -89,8 +90,6 @@ class SlamSupervisorWidget(Base, Form):
         self.map_list_update_timer.timeout.connect(self.map_list_update)
         self.map_list_update_timer.start(1000)
 
-        self.save_map_image_dir =os.path.expanduser("~") + "/Desktop/map_images"
-
     def is_slam_supervisor_up(self):
         if rospy.is_shutdown():
             return False
@@ -162,10 +161,7 @@ class SlamSupervisorWidget(Base, Form):
         _str = StringRequest()
         map_name = self.mapName.text()
         if map_name !='':
-            if map_name.find('.'):
-                _str.str = string.replace(map_name, '.', '_')
-            else:
-                _str.str = map_name
+            map_name = string.replace(map_name, '.', '_')
         else:
             if not self.default_map_name:
                 _str.str = randomTimeString()
@@ -264,27 +260,17 @@ class SlamSupervisorWidget(Base, Form):
     def save_map_image(self):
         map_name = self.mapName.text()
 
-        if map_name !='':
-            if map_name.find('.'):
-                map_name = string.replace(map_name, '.', '_')
+        if map_name != '':
+            map_name = string.replace(map_name, '.', '_')
         else:
             if not self.default_map_name:
                 map_name = randomTimeString()
             else:
                 map_name = self.default_map_name
                 
-        if map_name =='':
-            if not self.default_map_name:
-                map_name = randomTimeString()
-            else:
-                map_name = self.default_map_name
-
-        if not os.path.exists(self.save_map_image_dir):
-            rospy.loginfo(self.save_map_image_dir + " doesn't exist, creating it now.")
-            os.mkdir(self.save_map_image_dir)
-
-        map_path = self.save_map_image_dir + '/' +  map_name
-
+        save_map_image_dir = file_management.get_map_images_dir()
+        map_path = save_map_image_dir + '/' +  map_name
+        
         package = "map_server"
         executable = "map_saver"
         args = "-f " + map_path
