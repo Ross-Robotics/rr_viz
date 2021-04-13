@@ -35,7 +35,6 @@ class SlamSupervisor(QWidget):
             self.active_nodes_sub = rospy.Subscriber(self.slam_sup_name+"/active_nodes", StringArray, self.active_nodes_sub_cb)
             
             self.active_nodes = []
-            self.save_map_image_dir =os.path.expanduser("~") + "/Desktop/map_images"
 
             self.v_layout = QVBoxLayout()
 
@@ -173,11 +172,11 @@ class SlamSupervisor(QWidget):
         if trig_resp.success:
             print(trig_resp.message)
             temp_timer = rospy.Timer(
-                rospy.Duration(.1), lambda _: self.waitTillDead_and_execute(self.runMapping), oneshot=True)
+                rospy.Duration(.1), lambda _: self.waitTillDead_and_execute(self.run_mapping), oneshot=True)
         else:
             print("failed calling slam_killnodes_srv")
     
-    def runMapping(self):
+    def run_mapping(self):
         trig_resp = self.launch_mapping_srv.call(TriggerRequest())
 
         if trig_resp.success:
@@ -194,11 +193,11 @@ class SlamSupervisor(QWidget):
         if trig_resp.success:
             print(trig_resp.message)
             temp_timer = rospy.Timer(
-                rospy.Duration(.1), lambda _: self.waitTillDead_and_execute(self.runLocalization), oneshot=True)
+                rospy.Duration(.1), lambda _: self.waitTillDead_and_execute(self.run_localization), oneshot=True)
         else:
             print("failed calling slam_killnodes_srv")
 
-    def runLocalization(self):
+    def run_localization(self):
         _str = StringRequest()
         _str.str = self.map_list_widget.currentItem().text().split(".")[0].strip()
         trig_resp = self.launch_localization_srv.call(_str)
@@ -255,8 +254,8 @@ class SlamSupervisor(QWidget):
         _str = StringRequest()
         map_name = self.file_name_text_edit.text()
 
-        if map_name !='':
-            _str.str = map_name
+        if map_name != '':
+            _str.str = string.replace(map_name, '.', '_')
         else:
             if not self.default_map_name:
                 _str.str = randomTimeString()
@@ -275,17 +274,16 @@ class SlamSupervisor(QWidget):
     def save_map_image(self):
         map_name = self.file_name_text_edit.text()
 
-        if map_name =='':
+        if map_name != '':
+            map_name = string.replace(map_name, '.', '_')
+        else:
             if not self.default_map_name:
                 map_name = randomTimeString()
             else:
                 map_name = self.default_map_name
 
-        if not os.path.exists(self.save_map_image_dir):
-            rospy.loginfo(self.save_map_image_dir + " doesn't exist, creating it now.")
-            os.mkdir(self.save_map_image_dir)
-
-        map_path = self.save_map_image_dir + '/' +  map_name
+        save_map_image_dir = file_management.get_map_images_dir()
+        map_path = save_map_image_dir + '/' +  map_name
 
         package = "map_server"
         executable = "map_saver"
@@ -358,3 +356,8 @@ class SlamSupervisor(QWidget):
 def randomString(stringLength):
     letters = string.ascii_letters
     return ''.join(random.choice(letters) for i in range(stringLength))
+
+def randomTimeString():
+    # time.ctime() # 'Mon Oct 18 13:35:29 2010'
+    # ' 1:36PM EDT on Oct 18, 2010'
+    return "{:%m_%d_%H_%M_}".format(datetime.now())+randomString(4)

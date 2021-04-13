@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import sys
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QLabel, QGridLayout, QPushButton, QListWidget, QFrame, QFileDialog, QLineEdit, QMessageBox
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QLabel, QGridLayout, QPushButton, QListWidget, QFrame, QFileDialog, QLineEdit, QMessageBox, QInputDialog
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 from PyQt5 import QtCore
@@ -10,6 +10,7 @@ import rospy
 from geometry_msgs.msg import PoseWithCovarianceStamped, PoseStamped
 from rr_custom_msgs.msg import TaskWaypoint as TaskWaypointMsg
 import managers.file_management as file_management
+import string
 
 class MissionEditor(QWidget):
     # Set up signal
@@ -138,12 +139,13 @@ class MissionEditor(QWidget):
                 self.waypoint_list.get_wp(self.waypoint_list.len()-1))
 
     def save(self):
-        file_name = self.file_name_text_edit.text()
-        if file_name == '':
+        mission_name = self.file_name_text_edit.text()
+        if mission_name == '':
             self.msg_to_show= "No file name specified."
             self.message_popup()
         else:
-            save_path = file_management.get_user_dir() + "/paths/" + file_name
+            mission_name = string.replace(mission_name, '.', '_')
+            save_path = file_management.get_mission_files_dir() + "/" + mission_name
         
             if save_path[-5:] != ".yaml":
                 save_path = save_path + ".yaml"
@@ -151,18 +153,17 @@ class MissionEditor(QWidget):
             self.waypoint_list.saveToPath(save_path, "Mission" + str(rospy.Time.now()))
 
     def load(self):
-        file_name = self.file_name_text_edit.text()
-        if file_name == '':
-            self.msg_to_show= "No file name specified."
-            self.message_popup()
-        else:
-            load_path = file_management.get_user_dir() + "/paths/" + file_name
-            if load_path[-5:] != ".yaml":
-                load_path = load_path + ".yaml"
-            
-            self.waypoint_list.loadFromPath(load_path)         
+        mission_files = file_management.get_files(file_management.get_mission_files_dir(),".yaml")
+        
+        mission_file, ok = QInputDialog.getItem(self, "Select mission to load", "Available missions:", mission_files, 0, False)
+        
+        load_path = file_management.get_mission_files_dir() + "/" + mission_file
+        if load_path[-5:] != ".yaml":
+            load_path = load_path + ".yaml"
+        
+        self.waypoint_list.loadFromPath(load_path)         
 
     def message_popup(self):
         msg = QMessageBox()
         msg.setText(self.msg_to_show)
-        msg.exec_()                                
+        msg.exec_()
