@@ -10,11 +10,17 @@ import rospy
 from geometry_msgs.msg import PoseWithCovarianceStamped, PoseStamped
 from rr_custom_msgs.msg import TaskWaypoint as TaskWaypointMsg
 import managers.file_management as file_management
+from helpers import rr_qt_helper
 import string
 
+from rr_custom_msgs.srv import BuildBT, BuildBTRequest
+from mission_actions import BuildBTAction, WaypointMoveBaseAction
+
 class MissionEditor(QWidget):
-    # Set up signal
+    # Set up signals
     spawn_waypoint_signal = QtCore.pyqtSignal(PoseWithCovarianceStamped)
+    set_enable_go_to_buttons = QtCore.pyqtSignal(bool)
+    set_enable_send_mission = QtCore.pyqtSignal(bool)
    
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
@@ -94,15 +100,39 @@ class MissionEditor(QWidget):
 
         # Command buttons
         self.h_layout_command = QHBoxLayout()
+
         self.go_to_selected_button = QPushButton('Go to Selected')
+        self.go_to_selected_button.pressed.connect(self.go_to_selected)
+        
         self.go_to_all_button = QPushButton('Go to All')
+        self.go_to_all_button.pressed.connect(self.go_to_all)
+
+        self.enable_go_to_buttons(False)
+        self.set_enable_go_to_buttons.connect(self.enable_go_to_buttons)
+
         self.send_mission_button = QPushButton('Send Mission')
+        self.send_mission_button.pressed.connect(self.send_mission)
+        self.enable_send_mission_button(False)
+        self.set_enable_send_mission.connect(self.enable_send_mission_button)
+
         self.h_layout_command.addWidget(self.go_to_selected_button)
         self.h_layout_command.addWidget(self.go_to_all_button)
         self.h_layout_command.addWidget(self.send_mission_button)
+
         self.v_layout.addLayout(self.h_layout_command)
 
         self.setLayout(self.v_layout)
+
+        self.btAction = BuildBTAction()
+        self.mbAction = WaypointMoveBaseAction()
+        
+        # Setup state checker:
+        self.bt_state_checker = rr_qt_helper.StateCheckerTimer(
+            self.btAction.is_connected,  self.set_enable_send_mission, Hz=1./3.)
+        self.bt_state_checker.start()
+        self.mb_state_checker = rr_qt_helper.StateCheckerTimer(
+            self.mbAction.is_connected,  self.set_enable_go_to_buttons, Hz=1./3.)
+        self.mb_state_checker.start()
 
     def robot_pose_cb(self, msg):
         self.robot_pose = msg
@@ -167,3 +197,19 @@ class MissionEditor(QWidget):
         msg = QMessageBox()
         msg.setText(self.msg_to_show)
         msg.exec_()
+
+    def enable_go_to_buttons(self, enabled):
+        self.go_to_selected_button.setEnabled(enabled)
+        self.go_to_all_button.setEnabled(enabled)
+
+    def enable_send_mission_button(self, enabled):
+        self.send_mission_button.setEnabled(enabled)
+
+    def go_to_selected(self):
+        print("go to selected")
+
+    def go_to_all(self):
+        print("go to all")
+
+    def send_mission(self):
+        print("send mission")
