@@ -12,8 +12,11 @@ import roslaunch
 from std_srvs.srv import Trigger, TriggerResponse, TriggerRequest
 from rr_custom_msgs.srv import String, StringResponse, StringRequest
 from rr_custom_msgs.msg import StringArray
+from helpers import rr_qt_helper
 
 class SlamSupervisor(QWidget):
+    set_enable_panel = QtCore.pyqtSignal(bool)
+
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
 
@@ -158,11 +161,30 @@ class SlamSupervisor(QWidget):
 
         self.setLayout(self.v_layout)
 
+        self.setEnabled(False)
+        self.set_enable_panel.connect(self.setEnabled)
+
+        # Setup state checker:
+        self.state_checker = rr_qt_helper.StateCheckerTimer(
+            self.is_slam_supervisor_up, self.set_enable_panel, Hz=1./3.)
+        self.state_checker.start()
+
         # Map update
         self.map_list_update_timer = QtCore.QTimer(self)
         self.map_list_update_timer.timeout.connect(self.map_list_update)
         self.map_list_update_timer.start(1000)
 
+    def is_slam_supervisor_up(self):
+        if rospy.is_shutdown():
+            return False
+        try:
+            rospy.wait_for_service(
+                self.slam_sup_name+"/kill_nodes", rospy.Duration(3))
+            return True
+        except:
+            # Exit if theres no service
+            return False
+            
     def active_nodes_sub_cb(self, msg):
         self.active_nodes = msg.data
 
