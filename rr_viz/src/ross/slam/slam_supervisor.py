@@ -15,153 +15,153 @@ from rr_custom_msgs.msg import StringArray
 
 class SlamSupervisor(QWidget):
     def __init__(self, parent):
-            super(QWidget, self).__init__(parent)
+        super(QWidget, self).__init__(parent)
 
-            # Get parameters from server
-            self.slam_sup_name = rospy.get_param("slam_supervisor_name", "slam_supervisor")
-            self.default_map_name = rospy.get_param("~default_map_name", "")
-            self.slam_package = rospy.get_param(self.slam_sup_name+'/slam_package',"")
-            self.initial_mode = rospy.get_param(self.slam_sup_name+"/slam_mode","")
-            self.loaded_map_path = rospy.get_param(self.slam_sup_name+"/default_map_path","")
+        # Get parameters from server
+        self.slam_sup_name = rospy.get_param("slam_supervisor_name", "slam_supervisor")
+        self.default_map_name = rospy.get_param("~default_map_name", "")
+        self.slam_package = rospy.get_param(self.slam_sup_name+'/slam_package',"")
+        self.initial_mode = rospy.get_param(self.slam_sup_name+"/slam_mode","")
+        self.loaded_map_path = rospy.get_param(self.slam_sup_name+"/default_map_path","")
 
-            # Setup services
-            self.kill_nodes_srv = rospy.ServiceProxy(self.slam_sup_name+"/kill_nodes", Trigger)
-            self.launch_mapping_srv = rospy.ServiceProxy(self.slam_sup_name+"/launch_mapping", Trigger)
-            self.launch_localization_srv = rospy.ServiceProxy(self.slam_sup_name+"/launch_localization", String)
-            self.list_maps_srv = rospy.ServiceProxy(self.slam_sup_name+"/list_maps", Trigger)
-            self.save_map_srv = rospy.ServiceProxy(self.slam_sup_name+"/save_map", String)
-            self.delete_map_srv = rospy.ServiceProxy(self.slam_sup_name+"/delete_map", String)
-            self.save_map_image_srv = rospy.ServiceProxy(self.slam_sup_name+"/save_map_image", String)
-            self.active_nodes_sub = rospy.Subscriber(self.slam_sup_name+"/active_nodes", StringArray, self.active_nodes_sub_cb)
-            
-            self.active_nodes = []
+        # Setup services
+        self.kill_nodes_srv = rospy.ServiceProxy(self.slam_sup_name+"/kill_nodes", Trigger)
+        self.launch_mapping_srv = rospy.ServiceProxy(self.slam_sup_name+"/launch_mapping", Trigger)
+        self.launch_localization_srv = rospy.ServiceProxy(self.slam_sup_name+"/launch_localization", String)
+        self.list_maps_srv = rospy.ServiceProxy(self.slam_sup_name+"/list_maps", Trigger)
+        self.save_map_srv = rospy.ServiceProxy(self.slam_sup_name+"/save_map", String)
+        self.delete_map_srv = rospy.ServiceProxy(self.slam_sup_name+"/delete_map", String)
+        self.save_map_image_srv = rospy.ServiceProxy(self.slam_sup_name+"/save_map_image", String)
+        self.active_nodes_sub = rospy.Subscriber(self.slam_sup_name+"/active_nodes", StringArray, self.active_nodes_sub_cb)
+        
+        self.active_nodes = []
 
-            self.v_layout = QVBoxLayout()
+        self.v_layout = QVBoxLayout()
 
-            # Title
-            self.title_label = QLabel('SLAM')
-            self.title_label.setFont(QFont('Ubuntu', 11, QFont.Bold))
-            self.title_label.setAlignment(Qt.AlignRight)
-            self.v_layout.addWidget(self.title_label)
+        # Title
+        self.title_label = QLabel('SLAM')
+        self.title_label.setFont(QFont('Ubuntu', 11, QFont.Bold))
+        self.title_label.setAlignment(Qt.AlignRight)
+        self.v_layout.addWidget(self.title_label)
 
-            # Slam mode
-            self.h_layout_mode = QHBoxLayout()
-            self.mode_text_label = QLabel('Mode:')
-            self.mode_text_label.setFont(QFont('Ubuntu', 10, QFont.Bold))
-            self.h_layout_mode.addWidget(self.mode_text_label, 1)
+        # Slam mode
+        self.h_layout_mode = QHBoxLayout()
+        self.mode_text_label = QLabel('Mode:')
+        self.mode_text_label.setFont(QFont('Ubuntu', 10, QFont.Bold))
+        self.h_layout_mode.addWidget(self.mode_text_label, 1)
 
-            self.mode_label = QLabel('')
-            self.mode_label.setFont(QFont('Ubuntu', 10))
-            self.mode_label.setText(self.initial_mode.capitalize())
-            self.h_layout_mode.addWidget(self.mode_label, 9)
+        self.mode_label = QLabel('')
+        self.mode_label.setFont(QFont('Ubuntu', 10))
+        self.mode_label.setText(self.initial_mode.capitalize())
+        self.h_layout_mode.addWidget(self.mode_label, 9)
 
-            self.v_layout.addLayout(self.h_layout_mode)
+        self.v_layout.addLayout(self.h_layout_mode)
 
-            # Loaded map
-            self.h_layout_map = QHBoxLayout()
-            self.loaded_map_text_label = QLabel('Loaded map:')
-            self.loaded_map_text_label.setFont(QFont('Ubuntu', 10, QFont.Bold))
-            self.h_layout_map.addWidget(self.loaded_map_text_label, 2)
+        # Loaded map
+        self.h_layout_map = QHBoxLayout()
+        self.loaded_map_text_label = QLabel('Loaded map:')
+        self.loaded_map_text_label.setFont(QFont('Ubuntu', 10, QFont.Bold))
+        self.h_layout_map.addWidget(self.loaded_map_text_label, 2)
 
-            self.loaded_map_label = QLabel('')
-            self.loaded_map_label.setFont(QFont('Ubuntu', 10))
-            if(self.initial_mode == "localization"):
-                loaded_map_path_split = self.loaded_map_path.split('/')
-                x = len(loaded_map_path_split)
-                self.loaded_map_name = loaded_map_path_split[x-1]
-                self.loaded_map_label.setText(self.loaded_map_name)
-            self.h_layout_map.addWidget(self.loaded_map_label, 8)
+        self.loaded_map_label = QLabel('')
+        self.loaded_map_label.setFont(QFont('Ubuntu', 10))
+        if(self.initial_mode == "localization"):
+            loaded_map_path_split = self.loaded_map_path.split('/')
+            x = len(loaded_map_path_split)
+            self.loaded_map_name = loaded_map_path_split[x-1]
+            self.loaded_map_label.setText(self.loaded_map_name)
+        self.h_layout_map.addWidget(self.loaded_map_label, 8)
 
-            self.v_layout.addLayout(self.h_layout_map)
+        self.v_layout.addLayout(self.h_layout_map)
 
-            # Selecting a map
-            self.select_a_map_label = QLabel('Select a map:')
-            self.select_a_map_label.setFont(QFont('Ubuntu', 11))
-            self.v_layout.addWidget(self.select_a_map_label)
+        # Selecting a map
+        self.select_a_map_label = QLabel('Select a map:')
+        self.select_a_map_label.setFont(QFont('Ubuntu', 11))
+        self.v_layout.addWidget(self.select_a_map_label)
 
-            self.map_list_widget = QListWidget()
-            self.v_layout.addWidget(self.map_list_widget)
+        self.map_list_widget = QListWidget()
+        self.v_layout.addWidget(self.map_list_widget)
 
-            # Delete map
-            self.h_layout_delete_map = QHBoxLayout()
+        # Delete map
+        self.h_layout_delete_map = QHBoxLayout()
 
-            self.delete_spacer = QLabel('')
-            self.h_layout_delete_map.addWidget(self.delete_spacer, 7)
-            
-            self.delete_map_button = QPushButton('Delete Map')
-            self.delete_map_button.pressed.connect(self.delete_map)
+        self.delete_spacer = QLabel('')
+        self.h_layout_delete_map.addWidget(self.delete_spacer, 7)
+        
+        self.delete_map_button = QPushButton('Delete Map')
+        self.delete_map_button.pressed.connect(self.delete_map)
 
-            self.h_layout_delete_map.addWidget(self.delete_map_button, 3)
+        self.h_layout_delete_map.addWidget(self.delete_map_button, 3)
 
-            self.v_layout.addLayout(self.h_layout_delete_map)
+        self.v_layout.addLayout(self.h_layout_delete_map)
 
-            # Localization title
-            self.h_layout_localization = QHBoxLayout()
-            self.localization_spacer = QLabel('')
-            self.h_layout_localization.addWidget(self.localization_spacer, 7)
+        # Localization title
+        self.h_layout_localization = QHBoxLayout()
+        self.localization_spacer = QLabel('')
+        self.h_layout_localization.addWidget(self.localization_spacer, 7)
 
-            self.localization_label = QLabel('Localization')
-            self.localization_label.setFont(QFont('Ubuntu', 10, QFont.Bold))
-            self.localization_label.setAlignment(Qt.AlignRight)
-            self.h_layout_localization.addWidget(self.localization_label, 3)
+        self.localization_label = QLabel('Localization')
+        self.localization_label.setFont(QFont('Ubuntu', 10, QFont.Bold))
+        self.localization_label.setAlignment(Qt.AlignRight)
+        self.h_layout_localization.addWidget(self.localization_label, 3)
 
-            self.v_layout.addLayout(self.h_layout_localization)
+        self.v_layout.addLayout(self.h_layout_localization)
 
-            # Localization button
-            self.localization_button = QPushButton('Switch to Localization')
-            self.localization_button.pressed.connect(self.switch_to_localization)
+        # Localization button
+        self.localization_button = QPushButton('Switch to Localization')
+        self.localization_button.pressed.connect(self.switch_to_localization)
 
-            self.v_layout.addWidget(self.localization_button)
+        self.v_layout.addWidget(self.localization_button)
 
-            # Mapping title
-            self.h_layout_mapping = QHBoxLayout()
-            self.mapping_spacer = QLabel('')
-            self.h_layout_mapping.addWidget(self.mapping_spacer, 7)
+        # Mapping title
+        self.h_layout_mapping = QHBoxLayout()
+        self.mapping_spacer = QLabel('')
+        self.h_layout_mapping.addWidget(self.mapping_spacer, 7)
 
-            self.mapping_label = QLabel('Mapping')
-            self.mapping_label.setFont(QFont('Ubuntu', 10, QFont.Bold))
-            self.mapping_label.setAlignment(Qt.AlignRight)
-            self.h_layout_mapping.addWidget(self.mapping_label)
+        self.mapping_label = QLabel('Mapping')
+        self.mapping_label.setFont(QFont('Ubuntu', 10, QFont.Bold))
+        self.mapping_label.setAlignment(Qt.AlignRight)
+        self.h_layout_mapping.addWidget(self.mapping_label)
 
-            self.v_layout.addLayout(self.h_layout_mapping)
-            
-            # Mapping button
-            self.mapping_button = QPushButton('Switch to Mapping')
-            self.mapping_button.pressed.connect(self.switch_to_mapping)
-            self.v_layout.addWidget(self.mapping_button)
+        self.v_layout.addLayout(self.h_layout_mapping)
+        
+        # Mapping button
+        self.mapping_button = QPushButton('Switch to Mapping')
+        self.mapping_button.pressed.connect(self.switch_to_mapping)
+        self.v_layout.addWidget(self.mapping_button)
 
-            # File name
-            self.h_layout_file_name = QHBoxLayout()
-            self.filename_label = QLabel('Filename:')
-            self.filename_label.setFont(QFont('Ubuntu', 10, QFont.Bold))
-            self.h_layout_file_name.addWidget(self.filename_label, 2)
+        # File name
+        self.h_layout_file_name = QHBoxLayout()
+        self.filename_label = QLabel('Filename:')
+        self.filename_label.setFont(QFont('Ubuntu', 10, QFont.Bold))
+        self.h_layout_file_name.addWidget(self.filename_label, 2)
 
-            self.file_name_text_edit = QLineEdit()
-            self.file_name_text_edit.setFont(QFont('Ubuntu', 10))
-            self.h_layout_file_name.addWidget(self.file_name_text_edit, 8)
+        self.file_name_text_edit = QLineEdit()
+        self.file_name_text_edit.setFont(QFont('Ubuntu', 10))
+        self.h_layout_file_name.addWidget(self.file_name_text_edit, 8)
 
-            self.v_layout.addLayout(self.h_layout_file_name)
+        self.v_layout.addLayout(self.h_layout_file_name)
 
-            # Save map
-            self.h_layout_save_map = QHBoxLayout()
+        # Save map
+        self.h_layout_save_map = QHBoxLayout()
 
-            self.save_map_button = QPushButton('Save Map')
-            self.save_map_button.pressed.connect(self.save_map)
+        self.save_map_button = QPushButton('Save Map')
+        self.save_map_button.pressed.connect(self.save_map)
 
-            self.save_map_image_button = QPushButton('Save Map Image')
-            self.save_map_image_button.pressed.connect(self.save_map_image)
+        self.save_map_image_button = QPushButton('Save Map Image')
+        self.save_map_image_button.pressed.connect(self.save_map_image)
 
-            self.h_layout_save_map.addWidget(self.save_map_button)
-            self.h_layout_save_map.addWidget(self.save_map_image_button)
+        self.h_layout_save_map.addWidget(self.save_map_button)
+        self.h_layout_save_map.addWidget(self.save_map_image_button)
 
-            self.v_layout.addLayout(self.h_layout_save_map)
+        self.v_layout.addLayout(self.h_layout_save_map)
 
-            self.setLayout(self.v_layout)
+        self.setLayout(self.v_layout)
 
-            # Map update
-            self.map_list_update_timer = QtCore.QTimer(self)
-            self.map_list_update_timer.timeout.connect(self.map_list_update)
-            self.map_list_update_timer.start(1000)
+        # Map update
+        self.map_list_update_timer = QtCore.QTimer(self)
+        self.map_list_update_timer.timeout.connect(self.map_list_update)
+        self.map_list_update_timer.start(1000)
 
     def active_nodes_sub_cb(self, msg):
         self.active_nodes = msg.data

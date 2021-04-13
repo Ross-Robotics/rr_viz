@@ -7,6 +7,7 @@ from rviz_tabs import *
 from mission_editor.mission_editor import *
 from mission_dashboard.mission_dashboard import *
 from slam.slam_supervisor import *
+from explosive_ace_id.explosive_ace_id import *
 
 class RossRobotics(QWidget):
     def __init__(self, parent):
@@ -18,10 +19,12 @@ class RossRobotics(QWidget):
         self.mission_editor_tab = QWidget()
         #self.diagnostics_tab = QWidget()
         self.slam_supervisor_tab = QWidget()
+        self.explosive_sensor_tab = QWidget()
 
         self.tabs.addTab(self.mission_editor_tab, "Mission Editor")
         self.tabs.addTab(self.slam_supervisor_tab, "Slam Supervisor")
         self.tabs.addTab(self.mission_dashboard_tab, "Mission Dashboard")
+        self.tabs.addTab(self.explosive_sensor_tab, "ACE-ID")
         #self.tabs.addTab(self.diagnostics_tab, "Diagnostics")
         
         self.mission_editor_tab.layout = QVBoxLayout()
@@ -36,9 +39,9 @@ class RossRobotics(QWidget):
         self.mission_dashboard_tab.layout.addWidget(MissionDashboard(self))
         self.mission_dashboard_tab.setLayout(self.mission_dashboard_tab.layout)
 
-
+        self.explosive_sensor_tab.layout = QVBoxLayout()
+        self.explosive_sensor_tab.layout.addWidget(ExplosiveAceID(self))
+        self.explosive_sensor_tab.setLayout(self.explosive_sensor_tab.layout)
 
         self.layout.addWidget(self.tabs)
         self.setLayout(self.layout)
-
-        
