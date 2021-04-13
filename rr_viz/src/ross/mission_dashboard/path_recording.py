@@ -3,14 +3,19 @@ import sys
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QLabel, QPushButton, QGridLayout
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
+from PyQt5 import QtCore
 
 import actionlib
 import rospy
 from std_srvs.srv import Trigger, TriggerRequest
 from rr_custom_msgs.msg import RecordPathAction, RecordPathResult, RecordPathFeedback, RecordPathGoal
 from rr_custom_msgs.msg import TrackPathAction, TrackPathResult, TrackPathFeedback, TrackPathGoal
+from helpers import rr_qt_helper
 
 class PathRecording(QWidget):
+    set_enable_record = QtCore.pyqtSignal(bool)
+    set_enable_follow = QtCore.pyqtSignal(bool)
+
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
 
@@ -51,6 +56,9 @@ class PathRecording(QWidget):
         self.stop_recording_button = QPushButton('Stop Recording')
         self.stop_recording_button.pressed.connect(self.stop_recording)
 
+        self.enable_recording_buttons(False)
+        self.set_enable_record.connect(self.enable_recording_buttons)
+
         self.follow_saved_path_button = QPushButton('Follow Saved Path')
         self.follow_saved_path_button.pressed.connect(self.start_following)
 
@@ -64,6 +72,12 @@ class PathRecording(QWidget):
         self.v_layout.addLayout(self.grid_layout)
 
         self.setLayout(self.v_layout)
+
+        self._recorder_client = actionlib.SimpleActionClient('/path_recorder/record', RecordPathAction)
+        self._tracker_client = actionlib.SimpleActionClient('/path_tracker/start_tracking', TrackPathAction)
+        
+        self.state_checker = rr_qt_helper.StateCheckerTimer(
+            self.is_record_up, self.set_enable_record, Hz=1./3.)
 
     def start_recording(self):
         self.start_recording_action.send_goal(RecordPathGoal(file_path=""))
@@ -86,3 +100,15 @@ class PathRecording(QWidget):
 
     def stop_following(self):
         self.tracking_action.cancel_all_goals()
+
+    def enable_recording_buttons(self, enabled):
+        self.start_recording_button.setEnabled(enabled)
+        self.stop_recording_button.setEnabled(enabled)
+
+    def enable_following_buttons(self, enabled):
+        self.follow_saved_path_button.setEnabled(enabled)
+        self.stop_following_button.setEnabled(enabled)
+
+    
+    def is_record_up(self):
+        return self._recorder_client.wait_for_server(timeout=rospy.Duration(2.))
