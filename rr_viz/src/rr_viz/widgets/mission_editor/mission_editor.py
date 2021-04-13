@@ -86,13 +86,13 @@ class MissionEditorWidget(Base, Form):
 
     def load_slot(self):
         filename = QFileDialog.getOpenFileName(
-            self, 'Load Path', file_management.get_mission_files_dir(), "Config files (*.yaml)")[0]
+            self, 'Load Path', file_management.get_mission_files_dir()+"/", "Config files (*.yaml)")[0]
         if filename:
             self.waypointList.loadFromPath(filename)
 
     def save_slot(self):
         filename = QFileDialog.getSaveFileName(
-            self, 'Save Path', file_management.get_mission_files_dir(), "Config files (*.yaml)")[0]
+            self, 'Save Path', file_management.get_mission_files_dir()+"/", "Config files (*.yaml)")[0]
         if filename:
             rospy.loginfo(filename[-5:])
             if filename[-5:] != ".yaml":

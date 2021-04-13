@@ -17,7 +17,7 @@ def get_rrviz_cfgdir():
     return get_rrviz_resdir() + "/cfg"
 
 def get_mission_files_dir():
-    return get_user_dir() + "/mission_files"
+    return get_user_dir() + "/mission"
 
 def get_map_images_dir():
     return get_user_dir() + "/map_images"
@@ -29,7 +29,7 @@ def is_userdir():
         if "Yes" in i.text():
             try:
                 os.mkdir(RR_VIZ_USER_DIR)
-                os.mkdir(RR_VIZ_USER_DIR +"/misison_files")
+                os.mkdir(RR_VIZ_USER_DIR +"/misison")
                 os.mkdir(RR_VIZ_USER_DIR + "/map_images")                
             except OSError:
                 print ("Creation of the directory %s failed" %
