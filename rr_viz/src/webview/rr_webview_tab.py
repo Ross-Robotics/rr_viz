@@ -21,6 +21,13 @@ import rospy
 # document.getElementById('mat-input-0').value = 'advanced'
 #http://10.42.0.59/ui/en/hosts/sn23n-180004/remote-control
 
+#work plan:
+# load the intended URL
+# check if we got to the correct URL or if we are in the login screen
+# if we are in the login screen input username and password
+#if we are in the indeded screen lets remove unwanted elements
+# profit
+
 class RRQWebViewTab(QWebView):
     def __init__(self, parent=None):
         super(self.__class__, self).__init__(parent)
