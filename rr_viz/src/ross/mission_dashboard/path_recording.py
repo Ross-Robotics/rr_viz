@@ -64,6 +64,10 @@ class PathRecording(QWidget):
 
         self.stop_following_button = QPushButton('STOP FOLLOWING')
         self.stop_following_button.pressed.connect(self.stop_following)
+
+        self.enable_following_buttons(False)
+        self.set_enable_follow.connect(self.enable_following_buttons)
+
         self.grid_layout.addWidget(self.start_recording_button, 0, 0)
         self.grid_layout.addWidget(self.stop_recording_button, 0, 1)
         self.grid_layout.addWidget(self.follow_saved_path_button, 1, 0)
@@ -72,12 +76,14 @@ class PathRecording(QWidget):
         self.v_layout.addLayout(self.grid_layout)
 
         self.setLayout(self.v_layout)
-
-        self._recorder_client = actionlib.SimpleActionClient('/path_recorder/record', RecordPathAction)
-        self._tracker_client = actionlib.SimpleActionClient('/path_tracker/start_tracking', TrackPathAction)
         
-        self.state_checker = rr_qt_helper.StateCheckerTimer(
+        self.record_state_checker = rr_qt_helper.StateCheckerTimer(
             self.is_record_up, self.set_enable_record, Hz=1./3.)
+        self.record_state_checker.start()
+
+        self.follow_state_checker = rr_qt_helper.StateCheckerTimer(
+            self.is_record_up, self.set_enable_follow, Hz=1./3.)
+        self.follow_state_checker.start()
 
     def start_recording(self):
         self.start_recording_action.send_goal(RecordPathGoal(file_path=""))
@@ -109,6 +115,8 @@ class PathRecording(QWidget):
         self.follow_saved_path_button.setEnabled(enabled)
         self.stop_following_button.setEnabled(enabled)
 
-    
     def is_record_up(self):
-        return self._recorder_client.wait_for_server(timeout=rospy.Duration(2.))
+        return self.start_recording_action.wait_for_server(timeout=rospy.Duration(2.))
+
+    def is_follow_up(self):
+        return self.start_recording_action.wait_for_server(timeout=rospy.Duration(2.))
