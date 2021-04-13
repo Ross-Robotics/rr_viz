@@ -15,6 +15,7 @@ from std_srvs.srv import Trigger, TriggerResponse, TriggerRequest
 from rr_custom_msgs.srv import String, StringResponse, StringRequest
 from rr_custom_msgs.msg import StringArray
 from helpers import rr_qt_helper
+import managers.file_management as file_management
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 Form, Base = uic.loadUiType(os.path.join(current_dir, "slam_supervisor.ui"))
@@ -66,6 +67,7 @@ class SlamSupervisorWidget(Base, Form):
         self.modeLabel.setText(self.initial_mode.capitalize())
 
         self.loadedMapLabel.setup(self.slam_sup_name+"/default_map_path")
+        self.loaded_map_name = ""
         if(self.initial_mode == 'localization'):
             loaded_map_path = rospy.get_param(self.slam_sup_name+"/default_map_path","")
             loaded_map_path_split = loaded_map_path.split('/')
@@ -87,8 +89,6 @@ class SlamSupervisorWidget(Base, Form):
         self.map_list_update_timer = QtCore.QTimer(self)
         self.map_list_update_timer.timeout.connect(self.map_list_update)
         self.map_list_update_timer.start(1000)
-
-        self.save_map_image_dir =os.path.expanduser("~") + "/Desktop/map_images"
 
     def is_slam_supervisor_up(self):
         if rospy.is_shutdown():
@@ -134,7 +134,7 @@ class SlamSupervisorWidget(Base, Form):
 
     def runLocalization(self):
         _str = StringRequest()
-        _str.str = self.mapListWidget.currentItem().text().split(".")[0].strip()
+        _str.str = self.mapListWidget.currentItem().text().split(".")[0]
         trig_resp = self.slam_launch_localization_srv.call(_str)
         if trig_resp.success:
             print(trig_resp.message)
@@ -161,7 +161,7 @@ class SlamSupervisorWidget(Base, Form):
         _str = StringRequest()
         map_name = self.mapName.text()
         if map_name !='':
-            _str.str = map_name
+            map_name = string.replace(map_name, '.', '_')
         else:
             if not self.default_map_name:
                 _str.str = randomTimeString()
@@ -226,25 +226,27 @@ class SlamSupervisorWidget(Base, Form):
 
     def delete_map_slot(self):
         _str = StringRequest()
-        _str.str = self.mapListWidget.currentItem().text().split(".")[0].strip()
+        _str.str = self.mapListWidget.currentItem().text().split(".")[0]
+        
         try:
             trig_resp = self.slam_list_maps_srv.call(TriggerRequest())
         except Exception as e:
             rospy.logwarn_throttle(
                 10, "failed to fetch maps: {}".format(e))
             return
+            
         current_item = self.mapListWidget.currentItem()
         self.switchToLocalizationButton.setEnabled(
             current_item is not None)
+
         if trig_resp.success:
-            # print(trig_resp.message)
             remote_maps = str(trig_resp.message).split(",")
             if (_str.str == 'default_map'):
-                rospy.logwarn_throttle(10, "The default map cannot be deleted")
-                self.msg_to_show= "The default_map cannot be deleted."
+                self.msg_to_show = "The default_map cannot be deleted."
+                rospy.logwarn(self.msg_to_show)
                 self.message_popup()
             elif (_str.str == self.loaded_map_name):
-                rospy.logwarn_throttle(10, "Map cannot be deleted")
+                rospy.logwarn("Map cannot be deleted")
                 self.msg_to_show = "'" + self.loaded_map_name + "' cannot be deleted while loaded."
                 self.message_popup()
             else:
@@ -257,18 +259,18 @@ class SlamSupervisorWidget(Base, Form):
 
     def save_map_image(self):
         map_name = self.mapName.text()
-        if map_name =='':
+
+        if map_name != '':
+            map_name = string.replace(map_name, '.', '_')
+        else:
             if not self.default_map_name:
                 map_name = randomTimeString()
             else:
                 map_name = self.default_map_name
-
-        if not os.path.exists(self.save_map_image_dir):
-            rospy.loginfo(self.save_map_image_dir + " doesn't exist, creating it now.")
-            os.mkdir(self.save_map_image_dir)
-
-        map_path = self.save_map_image_dir + '/' +  map_name
-
+                
+        save_map_image_dir = file_management.get_map_images_dir()
+        map_path = save_map_image_dir + '/' +  map_name
+        
         package = "map_server"
         executable = "map_saver"
         args = "-f " + map_path
@@ -285,9 +287,12 @@ class SlamSupervisorWidget(Base, Form):
         rospy.loginfo("Map saved")
 
     def message_popup(self):
-        msg = QMessageBox()
-        msg.setText(self.msg_to_show)
-        msg.exec_()
+        msgBox = QMessageBox()
+        msgBox.setIcon(QMessageBox.Information)
+        msgBox.setText(self.msg_to_show)
+        msgBox.exec_()
+
+
 def randomString(stringLength):
     letters = string.ascii_letters
     return ''.join(random.choice(letters) for i in range(stringLength))
