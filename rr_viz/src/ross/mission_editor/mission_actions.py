@@ -52,6 +52,7 @@ class ActionServerAction(object):
         if not self._act_client.wait_for_server(timeout=rospy.Duration(3.0)):
             rospy.loginfo_throttle(30,
                                    "Waypoint lost connection to {}".format(self.act_name) if self._act_connected else "Failed to connect to {}".format(self.act_name))
+            self._act_connected = False
         else:
             if not self._act_connected:
                 rospy.loginfo(
