@@ -6,21 +6,21 @@ import rosgraph
 
 from PyQt5.QtWidgets import QApplication, QMainWindow
 
-from main_window_tabs import *
+from rr_viz_tabs import *
 from helpers import rr_qt_helper
 
-class MainWindow(QMainWindow):
+class RossRoboticsRViz(QMainWindow):
     ross_loss_signal = QtCore.pyqtSignal(bool)
 
     def __init__(self, parent=None):
         super(QMainWindow, self).__init__(parent)
-        self.setWindowTitle("RossRobotics RViz")
+        self.setWindowTitle("Ross Robotics RViz")
         self.x = 10
         self.y = 10
         self.width = 1482
         self.height = 868
         self.setGeometry(self.x, self.y, self.width, self.height)
-        self.tabWidget = MainWindowTabs(self)
+        self.tabWidget = RRVizTabs(self)
         self.setCentralWidget(self.tabWidget)
 
         self.ross_loss_signal.connect(self.ros_loss_slot)
@@ -51,7 +51,7 @@ class MainWindow(QMainWindow):
 if __name__ == '__main__':
     rospy.init_node("rr_viz")
     app = QApplication(sys.argv)
-    main_window = MainWindow()
+    main_window = RossRoboticsRViz()
     main_window.show()
     ros_state_checker = rr_qt_helper.StateCheckerTimer(
         main_window.ros_is_up, main_window.ross_loss_signal, Hz=1)

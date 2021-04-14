@@ -6,8 +6,9 @@ from rviz_tabs import *
 from ross.ross_robotics import *
 from webview.rr_webview import *
 from webview.rr_webview_tab import *
+import managers.file_management as file_management
 
-class MainWindowTabs(QWidget):
+class RRVizTabs(QWidget):
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
         self.main_window_layout = QVBoxLayout(self)
@@ -28,7 +29,18 @@ class MainWindowTabs(QWidget):
         self.title_label.setFont(QFont('Ubuntu',11,QFont.Bold))
         self.ross_robotics_tab.v_layout1.addWidget(self.title_label)
 
-        self.ross_robotics_tab.v_layout2.addWidget(RossRobotics(self),6)
+        self.logo_label = QLabel(self)
+        logo_path = file_management.get_rrviz_resdir() + "/logo.png"
+        logo_pixmap = QPixmap(logo_path)
+        #x = logo_pixmap.scaled(200,33,Qt.KeepAspectRatio)
+        x = logo_pixmap.scaledToWidth(400)
+        self.logo_label.setPixmap(x)
+        
+        self.logo_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+
+        self.ross_robotics_tab.v_layout2.addWidget(self.logo_label,1)
+        
+        self.ross_robotics_tab.v_layout2.addWidget(RossRobotics(self),5)
         self.ross_robotics_tab.v_layout2.addWidget(RRQWebView(self),4)
 
         self.ross_robotics_tab.h_layout.addLayout(self.ross_robotics_tab.v_layout1, 7)

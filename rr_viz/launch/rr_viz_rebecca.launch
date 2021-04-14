@@ -9,7 +9,7 @@
   <arg name="move_base_namespace" default="/move_base"/>
   <arg name="build_bt_srv" default="/build_bt"/>
 
-  <node pkg="rr_viz" type="main_window.py" name="rr_viz" output="screen" required="true">
+  <node pkg="rr_viz" type="rr_viz.py" name="rr_viz" output="screen" required="true">
     <param name="default_map_name" value="$(arg default_map_name)"/>
     <param name="add_waypoint_topic" value="$(arg add_waypoint_topic)"/>
     <param name="connect_movebase" value="$(arg connect_movebase)"/>
@@ -22,4 +22,3 @@
 
   </node>
 </launch>
-
