@@ -14,7 +14,7 @@ class MainWindow(QMainWindow):
 
     def __init__(self, parent=None):
         super(QMainWindow, self).__init__(parent)
-        self.setWindowTitle("Test")
+        self.setWindowTitle("RossRobotics RViz")
         self.x = 10
         self.y = 10
         self.width = 1482
@@ -59,4 +59,3 @@ if __name__ == '__main__':
     # Needed for ctrl+c to work on pyqt applications
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     sys.exit(app.exec_())
-
