@@ -325,6 +325,11 @@ Visualization Manager:
       Topic: /initialpose
       X std deviation: 0.5
       Y std deviation: 0.5
+    - Class: rviz/SetInitialPose
+      Theta std deviation: 0.2617993950843811
+      Topic: /spawn_waypoint
+      X std deviation: 0.5
+      Y std deviation: 0.5
     - Class: rviz/SetGoal
       Topic: /move_base_simple/goal
     - Class: rviz/PublishPoint
