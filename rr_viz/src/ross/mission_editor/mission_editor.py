@@ -123,15 +123,15 @@ class MissionEditor(QWidget):
 
         self.setLayout(self.v_layout)
 
-        self.btAction = BuildBTAction()
-        self.mbAction = WaypointMoveBaseAction()
+        self.bt_action = BuildBTAction()
+        self.mb_action = WaypointMoveBaseAction()
         
         # Setup state checker:
         self.bt_state_checker = rr_qt_helper.StateCheckerTimer(
-            self.btAction.is_connected,  self.set_enable_send_mission, Hz=1./3.)
+            self.bt_action.is_connected,  self.set_enable_send_mission, Hz=1./3.)
         self.bt_state_checker.start()
         self.mb_state_checker = rr_qt_helper.StateCheckerTimer(
-            self.mbAction.is_connected,  self.set_enable_go_to_buttons, Hz=1./3.)
+            self.mb_action.is_connected,  self.set_enable_go_to_buttons, Hz=1./3.)
         self.mb_state_checker.start()
 
     def robot_pose_cb(self, msg):
@@ -150,7 +150,6 @@ class MissionEditor(QWidget):
             msg = PoseWithCovarianceStamped()
             msg.header = self.robot_pose.header
             msg.pose.pose = self.robot_pose.pose
-            print(msg)
             self.spawn_waypoint_signal.emit(msg)
         else:
             rospy.logwarn("Robot pose not connected")
@@ -206,10 +205,10 @@ class MissionEditor(QWidget):
         self.send_mission_button.setEnabled(enabled)
 
     def go_to_selected(self):
-        print("go to selected")
+        self.mb_action.goto_action(self.waypoint_list)
 
     def go_to_all(self):
-        print("go to all")
+        self.mb_action.gotoall_action(self.waypoint_list)
 
     def send_mission(self):
-        print("send mission")
+        self.bt_action.build_bt_action(self.waypoint_list)
