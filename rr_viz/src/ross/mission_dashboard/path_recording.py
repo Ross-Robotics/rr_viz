@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import sys
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QLabel, QPushButton, QGridLayout
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QLabel, QPushButton, QGridLayout, QInputDialog
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 from PyQt5 import QtCore
@@ -11,6 +11,8 @@ from std_srvs.srv import Trigger, TriggerRequest
 from rr_custom_msgs.msg import RecordPathAction, RecordPathResult, RecordPathFeedback, RecordPathGoal
 from rr_custom_msgs.msg import TrackPathAction, TrackPathResult, TrackPathFeedback, TrackPathGoal
 from helpers import rr_qt_helper
+import string
+import managers.file_management as file_management
 
 class PathRecording(QWidget):
     set_enable_record = QtCore.pyqtSignal(bool)
@@ -19,6 +21,9 @@ class PathRecording(QWidget):
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
 
+        # Get parameters
+        self.file_path = rospy.get_param("/path_recorder/target_file_path","")
+                
         # Setup services
         self.stop_recording_srv_name = "/path_recorder/finish_path"
         self.stop_recording_srv = rospy.ServiceProxy(self.stop_recording_srv_name, Trigger)
@@ -86,7 +91,13 @@ class PathRecording(QWidget):
         self.follow_state_checker.start()
 
     def start_recording(self):
-        self.start_recording_action.send_goal(RecordPathGoal(file_path=""))
+        path_name, ok = QInputDialog.getText(self, "Path file name","Specify file name to save recorded path:")
+
+        if ok:
+            if path_name != "":
+                self.file_path = string.replace(self.file_path, "path.txt", path_name + ".txt")
+            
+            self.start_recording_action.send_goal(RecordPathGoal(file_path=self.file_path))
 
     def stop_recording(self):
         try:
@@ -102,7 +113,12 @@ class PathRecording(QWidget):
             rospy.logwarn(msg)
 
     def start_following(self):
-        self.tracking_action.send_goal(TrackPathGoal(file_path=""))
+        file_path_to_search = string.replace(self.file_path, "/path.txt", "")
+        path_files = file_management.get_files(file_path_to_search, ".txt")
+        path_to_follow, ok = QInputDialog.getItem(self, "Select path to follow", "Available paths:", path_files, 0, False)
+        
+        if ok:
+            self.tracking_action.send_goal(TrackPathGoal(file_path=path_to_follow))
 
     def stop_following(self):
         self.tracking_action.cancel_all_goals()
