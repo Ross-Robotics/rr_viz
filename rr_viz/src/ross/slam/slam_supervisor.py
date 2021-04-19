@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import sys
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QLabel, QPushButton, QListWidget, QLineEdit, QMessageBox
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QLabel, QPushButton, QListWidget, QLineEdit, QMessageBox, QInputDialog
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 from PyQt5 import QtCore
@@ -13,6 +13,7 @@ from std_srvs.srv import Trigger, TriggerResponse, TriggerRequest
 from rr_custom_msgs.srv import String, StringResponse, StringRequest
 from rr_custom_msgs.msg import StringArray
 from helpers import rr_qt_helper
+import managers.file_management as file_management
 
 class SlamSupervisor(QWidget):
     set_enable_panel = QtCore.pyqtSignal(bool)
@@ -132,18 +133,6 @@ class SlamSupervisor(QWidget):
         self.mapping_button = QPushButton('Switch to Mapping')
         self.mapping_button.pressed.connect(self.switch_to_mapping)
         self.v_layout.addWidget(self.mapping_button)
-
-        # File name
-        self.h_layout_file_name = QHBoxLayout()
-        self.filename_label = QLabel('Filename:')
-        self.filename_label.setFont(QFont('Ubuntu', 10, QFont.Bold))
-        self.h_layout_file_name.addWidget(self.filename_label, 2)
-
-        self.file_name_text_edit = QLineEdit()
-        self.file_name_text_edit.setFont(QFont('Ubuntu', 10))
-        self.h_layout_file_name.addWidget(self.file_name_text_edit, 8)
-
-        self.v_layout.addLayout(self.h_layout_file_name)
 
         # Save map
         self.h_layout_save_map = QHBoxLayout()
@@ -274,54 +263,56 @@ class SlamSupervisor(QWidget):
 
     def save_map(self):
         _str = StringRequest()
-        map_name = self.file_name_text_edit.text()
+        map_name, ok = QInputDialog.getText(self, "Map file name","Specify file name to save the map:")
 
-        if map_name != '':
-            _str.str = string.replace(map_name, '.', '_')
-        else:
-            if not self.default_map_name:
-                _str.str = randomTimeString()
+        if ok:
+            if map_name != '':
+                _str.str = string.replace(map_name, '.', '_')
             else:
-                _str.str = self.default_map_name
+                if not self.default_map_name:
+                    _str.str = randomTimeString()
+                else:
+                    _str.str = self.default_map_name
 
-        trig_resp = self.save_map_srv.call(_str)
+            trig_resp = self.save_map_srv.call(_str)
 
-        if trig_resp.success:
-            print(trig_resp.message)
-            self.file_name_text_edit.clear()
-        else:
-            print("failed calling slam_save_map_srv")
-            print(trig_resp.message)
+            if trig_resp.success:
+                print(trig_resp.message)
+                self.file_name_text_edit.clear()
+            else:
+                print("failed calling slam_save_map_srv")
+                print(trig_resp.message)
 
     def save_map_image(self):
-        map_name = self.file_name_text_edit.text()
+        map_name, ok = QInputDialog.getText(self, "Map file name","Specify file name to save the map image:")
 
-        if map_name != '':
-            map_name = string.replace(map_name, '.', '_')
-        else:
-            if not self.default_map_name:
-                map_name = randomTimeString()
+        if ok:
+            if map_name != '':
+                map_name = string.replace(map_name, '.', '_')
             else:
-                map_name = self.default_map_name
+                if not self.default_map_name:
+                    map_name = randomTimeString()
+                else:
+                    map_name = self.default_map_name
 
-        save_map_image_dir = file_management.get_map_images_dir()
-        map_path = save_map_image_dir + '/' +  map_name
+            save_map_image_dir = file_management.get_map_images_dir()
+            map_path = save_map_image_dir + '/' +  map_name
 
-        package = "map_server"
-        executable = "map_saver"
-        args = "-f " + map_path
-        node = roslaunch.core.Node(package, executable, args=args, output="screen")
+            package = "map_server"
+            executable = "map_saver"
+            args = "-f " + map_path
+            node = roslaunch.core.Node(package, executable, args=args, output="screen")
 
-        launch = roslaunch.scriptapi.ROSLaunch()
-        launch.start()
+            launch = roslaunch.scriptapi.ROSLaunch()
+            launch.start()
 
-        process = launch.launch(node)
-        r = rospy.Rate(5)
+            process = launch.launch(node)
+            r = rospy.Rate(5)
 
-        while process.is_alive() and not rospy.is_shutdown():
-            rospy.loginfo_throttle(1, "Map saver running")
-            r.sleep()
-        rospy.loginfo("Map saved")
+            while process.is_alive() and not rospy.is_shutdown():
+                rospy.loginfo_throttle(1, "Map saver running")
+                r.sleep()
+            rospy.loginfo("Map saved")
 
     def map_list_update(self):
         if self.isEnabled() and not rospy.is_shutdown():
