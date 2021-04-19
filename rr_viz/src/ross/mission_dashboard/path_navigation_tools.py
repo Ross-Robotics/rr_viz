@@ -127,7 +127,7 @@ class PathNavigationTools(QWidget):
         if trig_resp.success:
             path_files = str(trig_resp.message).split(",")
 
-            path_files = file_management.get_files(file_path_to_search, ".txt")
+            # path_files = file_management.get_files(file_path_to_search, ".txt")
             path_to_follow, ok = QInputDialog.getItem(self, "Select path to follow", "Available paths:", path_files, 0, False)
             
             if ok:
