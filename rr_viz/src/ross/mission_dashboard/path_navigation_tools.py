@@ -14,7 +14,7 @@ from helpers import rr_qt_helper
 import string
 import managers.file_management as file_management
 
-class PathRecording(QWidget):
+class PathNavigationTools(QWidget):
     set_enable_record = QtCore.pyqtSignal(bool)
     set_enable_follow = QtCore.pyqtSignal(bool)
 
@@ -22,11 +22,14 @@ class PathRecording(QWidget):
         super(QWidget, self).__init__(parent)
 
         # Get parameters
-        self.file_path = rospy.get_param("/path_recorder/target_file_path","")
+        self.file_path = rospy.get_param("/path_navigation/file_path","")
                 
         # Setup services
         self.stop_recording_srv_name = "/path_recorder/finish_path"
         self.stop_recording_srv = rospy.ServiceProxy(self.stop_recording_srv_name, Trigger)
+
+        self.get_path_files_srv_name = "/path_tracker/get_path_files"
+        self.get_path_files_srv = rospy.ServiceProxy(self.get_path_files_srv_name, Trigger)
 
         # Setup action clients
         self.start_recording_action_name = "/path_recorder/record"
@@ -114,11 +117,23 @@ class PathRecording(QWidget):
 
     def start_following(self):
         file_path_to_search = string.replace(self.file_path, "/path.txt", "")
-        path_files = file_management.get_files(file_path_to_search, ".txt")
-        path_to_follow, ok = QInputDialog.getItem(self, "Select path to follow", "Available paths:", path_files, 0, False)
-        
-        if ok:
-            self.tracking_action.send_goal(TrackPathGoal(file_path=path_to_follow))
+
+        try:
+            trig_resp = self.get_path_files_srv.call(TriggerRequest())
+        except Exception as e:
+            rospy.logwarn_throttle(10, "Failed to fetch path files: {}".format(e))
+            return
+
+        if trig_resp.success:
+            path_files = str(trig_resp.message).split(",")
+
+            path_files = file_management.get_files(file_path_to_search, ".txt")
+            path_to_follow, ok = QInputDialog.getItem(self, "Select path to follow", "Available paths:", path_files, 0, False)
+            
+            if ok:
+                self.tracking_action.send_goal(TrackPathGoal(file_path=path_to_follow))
+        else:
+            rospy.logwarn_throttle(10, "Failed to get path files")
 
     def stop_following(self):
         self.tracking_action.cancel_all_goals()

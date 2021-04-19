@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QVBoxLayout, QWidget, QFrame, QLabel
 from PyQt5.QtGui import QFont
 
 from docking import *
-from path_recording import *
+from path_navigation_tools import *
 from mission_controls import *
 
 class MissionDashboard(QWidget):
@@ -24,8 +24,8 @@ class MissionDashboard(QWidget):
 
             self.v_layout.addWidget(self.line)
 
-            self.path_recording_widget = PathRecording(self)
-            self.v_layout.addWidget(self.path_recording_widget,4)
+            self.path_navigation_tools_widget = PathNavigationTools(self)
+            self.v_layout.addWidget(self.path_navigation_tools_widget,4)
 
 
             self.line2 = QFrame()
