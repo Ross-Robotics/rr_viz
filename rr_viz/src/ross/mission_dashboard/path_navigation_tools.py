@@ -40,7 +40,7 @@ class PathNavigationTools(QWidget):
         self.v_layout = QVBoxLayout()
 
         # Title
-        self.title_label = QLabel('Path Recording')
+        self.title_label = QLabel('Path Navigation Tools')
         self.title_label.setFont(QFont('Ubuntu', 11, QFont.Bold))
         self.title_label.setAlignment(Qt.AlignRight)
         self.v_layout.addWidget(self.title_label)
