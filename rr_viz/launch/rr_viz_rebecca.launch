@@ -4,7 +4,9 @@
   <arg name="connect_movebase" default="true"/>
   <arg name="enable_saving" default="true"/>
   <arg name="waypoint_server_name" default="mission_path_srv"/>
-  <arg name="web_ui_url" default="http://10.42.0.59/ui/en/hosts/sn23n-180004/remote-control"/>
+  <!-- <arg name="web_ui_url" default="http://10.42.0.59/ui/en/hosts/sn23n-180004/remote-control"/> -->
+  <arg name="web_ui_url" default="http://10.42.0.59"/>
+  <arg name="gui_hostname" default="10.42.0.59"/>
   <!-- TODO:get the hostname of the verifinder some other way -->
   <arg name="web_ui_url_tab" default="http://10.42.0.59/ui/en/hosts/sn23n-180004"/>
   <arg name="move_base_namespace" default="/move_base"/>
