@@ -20,6 +20,7 @@
     <param name="waypoint_server_name" value="$(arg waypoint_server_name)"/>
     <param name="web_ui_url_tab" value="$(arg web_ui_url_tab)"/>
     <param name="web_ui_url" value="$(arg web_ui_url)"/>
+    <param name="gui_hostname" value="$(arg gui_hostname)"/>
     <param name="move_base_namespace" value="$(arg move_base_namespace)"/>
     <param name="build_bt_srv" value="$(arg build_bt_srv)"/>
 

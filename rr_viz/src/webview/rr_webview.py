@@ -1,4 +1,5 @@
 import os
+import urllib2
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from PyQt5.QtCore import QUrl
 from PyQt5.QtCore import *
@@ -8,8 +9,7 @@ from PyQt5.QtWebKitWidgets import QWebView
 from PyQt5.QtWebKitWidgets import QWebPage
 import rospy
 import rospkg
-from enum import Enum
-import urllib
+
 
 # TODO
 # make a timer to start as the widget is init
@@ -41,51 +41,86 @@ import urllib
 class RRQWebView(QWebView):
     def __init__(self, parent=None):
         super(self.__class__, self).__init__(parent)
+        # gui variables
         rospack = rospkg.RosPack()
         self.placeholder_webpage_path = "file://" + rospack.get_path('rr_viz')+"/res/placeholder_webpage.html"
-        self.gui_hostname = rospy.get_param("~gui_hostname", "https://www.robosynthesis.com/")
-        self.loading_stages = Enum('Loading_stages', 'NOT_AVAILABLE CONNECTING AUTENTICATING TRANSITION FORMATTING FINISHED')
+        self.gui_hostname = rospy.get_param("~gui_hostname", "10.42.0.1")
         self.url_loading_state = "Not started"
-        self.loading_stage = self.loading_stages.CONNECTING
+        self.host_available = False
         self.gui_available = False
+        self.current_url = "None"
         self.gui_placeholder_loaded = False
+        self.gui_url_dict = {
+            "host_page":"/ui/en/",
+            "host_login_transition":"/ui/en/login",
+            "login_page":"/ui/en/login?redirectUrl=",
+            "login_landing_transition":"/ui/en/landing/true",
+            "home_page":"/ui/en/hosts/sn23n-180004",
+            "remote_screen":"/ui/en/hosts/sn23n-180004/remote-control"
+        }
+        # timers config
         self.timer_period = 500
         self.timer = QTimer(self)
         self.timer.timeout.connect(self._gui_manager)
+        # load signal connection
         self.loadFinished.connect(self._on_load_finished)
         self.loadStarted.connect(self._on_load_started)
         self.loadProgress.connect(self._on_load_progress)
         self.urlChanged.connect(self._on_url_change)
-        #self.load(self.placeholder_webpage_path)
-        #self.load(self.gui_url)
-        self.loading_stage = self.loading_stages.CONNECTING
-        print("Remote Screen ",self.loading_stage)
         self.timer.start(self.timer_period)
 
     def _gui_manager(self):
-        print("Remote Screen ",self.loading_stage)
-        if self.gui_available:
+        #Update variables
+        #update ping to host
+        self.host_available = self._is_page_available(self.gui_hostname)
+        if self.host_available:
+            if self.gui_available:
+                if self.current_url == "login_page":
+                    self._login()
+                elif self.current_url == "home_page":
+                    self._open_remote_screen()
+                elif  self.current_url == "remote_screen":
+                    if self._is_remote_screen_loaded():
+                        self._remove_control_gui_elements()
+                    else:
+                        pass
+        else:
+            #self._load_placeholder_gui()
             pass
-        elif not self.gui_placeholder_loaded:
-            if self.url_loading_state == "Not started":
-                self.load(self.placeholder_webpage_path)
-                print("Loading placeholder")
-            elif self.url_loading_state == "Finished":
-                self._show_overlay_text("Connecting ...")
-    def _is_the_website_up(self, url):
-        code = 0
+
+
+
+
+
+        # if self.gui_available:
+        #     pass
+        # elif not self.gui_placeholder_loaded:
+        #     if self.url_loading_state == "Not started":
+        #         self.load(self.placeholder_webpage_path)
+        #         print("Loading placeholder")
+        #     elif self.url_loading_state == "Finished":
+        #         self._show_overlay_text("Connecting ...")
+
+    def _is_page_available(self, host):
+        print("looking for the host")
+        url = self._url_builder(host,self.gui_url_dict.get("host_page"))
         try:
-            code = urllib.urlopen(self.url).getcode()
-            print(code)
-            if code == 200 or code == 401:
+            page = urllib2.urlopen(url, timeout = 1.0)
+            page_code = page.getcode()
+            print(page_code)
+            if page_code > "200":
                 return True
-        except:
-            print("Website is not up")
-            return False
+        except urllib2.URLError, e:
+            print("There was an error: %r" % e)
+        return False
+
+    def _url_builder(self,hostname,page):
+        url = "http://" + hostname + page
+        return url
 
     def load(self, url):
         print("Loading -> " + self.url().toString())
-        print(url)
+        self.url_loading_state = "Not started"
         self.setUrl(QUrl(url))
 
     def _on_load_finished(self):
@@ -94,10 +129,10 @@ class RRQWebView(QWebView):
     def _on_load_started(self):
         print("WEB PAGE LOADING SIGNAL")
         self.url_loading_state = "Started"
-        #self._show_connecting_image()
 
     def _on_load_progress(self,load):
-        self.url_loading_state = self.url().toString() + " Loading -> " + str(load) + "%"
+        #self.url_loading_state = self.url().toString() + " Loading -> " + str(load) + "%"
+        pass
 
     def _on_url_change(self):
         print("Web page URL changed to:")
@@ -115,17 +150,19 @@ class RRQWebView(QWebView):
         frame.evaluateJavaScript("document.getElementById('mat-input-0').value = 'advanced'")
         frame.evaluateJavaScript("document.getElementById('mat-input-1').value = 'symetricas'")
         frame.evaluateJavaScript("document.getElementById('login-button').click()")
-        self.loading_stage = self.loading_stages.FORMATTING
+
+    def _open_remote_screen(self):
+        pass
+
 
     def _remove_control_gui_elements(self):
         frame = self.page().currentFrame()
         if self._is_remote_screen_loaded():
             frame.evaluateJavaScript("document.getElementsByClassName('nav')[0].parentNode.removeChild(document.getElementsByClassName('nav')[0])")
-            frame.evaluateJavaScript("document.getElementsByClassName('status-wrapper StatusBarGeneral')[0].parentNode.removeChild(document.getElementsByClassName('status-wrapper StatusBarGeneral')[0])")
+            frame.evaluateJavaScript("document.getElementsByClassName('status-bar')[0].parentNode.removeChild(document.getElementsByClassName('status-bar')[0])")
             frame.evaluateJavaScript("document.getElementsByClassName('doseinfo')[0].parentNode.removeChild(document.getElementsByClassName('doseinfo')[0])")
             frame.evaluateJavaScript("document.getElementsByTagName('h1')[0].style.display = 'none'")
             frame.evaluateJavaScript("document.getElementsByTagName('p')[0].style.display = 'none'")
-            self.loading_stage = self.loading_stages.FINISHED
             return True
         else:
             #self.timer.start(self.timer_period)
@@ -134,7 +171,7 @@ class RRQWebView(QWebView):
     def _is_remote_screen_loaded(self):
         frame = self.page().currentFrame()
         if frame.evaluateJavaScript("document.getElementsByClassName('nav').length"):
-            if frame.evaluateJavaScript("document.getElementsByClassName('status-wrapper StatusBarGeneral').length"):
+            if frame.evaluateJavaScript("document.getElementsByClassName('status-bar').length"):
                 if frame.evaluateJavaScript("document.getElementsByClassName('doseinfo').length"):
                     if frame.evaluateJavaScript("document.getElementsByTagName('h1').length"):
                         if frame.evaluateJavaScript("document.getElementsByTagName('p').length"):
