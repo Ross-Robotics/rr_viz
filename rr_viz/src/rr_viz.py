@@ -6,7 +6,7 @@ import rosgraph
 
 from PyQt5.QtWidgets import QApplication, QMainWindow
 
-from rr_viz_tabs import *
+from rr_viz_tabs import RRVizTabs
 from helpers import rr_qt_helper
 
 class RossRoboticsRViz(QMainWindow):
@@ -43,7 +43,6 @@ class RossRoboticsRViz(QMainWindow):
                 "RR_VIZ lost connection to the ROS MASTER. Please restart RR_VIZ")
             msg.setWindowTitle("Connection Lost")
             msg.setStandardButtons(QMessageBox.Ok)
-            # msg.buttonClicked.connect(msgbtn)
             msg.exec_()
             sys.exit()
 

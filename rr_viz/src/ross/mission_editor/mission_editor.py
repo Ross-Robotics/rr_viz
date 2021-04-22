@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-import sys
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QLabel, QGridLayout, QPushButton, QListWidget, QFrame, QFileDialog, QLineEdit, QMessageBox, QInputDialog
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QLabel, QGridLayout, QPushButton, QFrame, QMessageBox, QInputDialog
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 from PyQt5 import QtCore
@@ -13,7 +12,7 @@ import managers.file_management as file_management
 from helpers import rr_qt_helper
 import string
 
-from rr_custom_msgs.srv import BuildBT, BuildBTRequest
+from rr_custom_msgs.srv import BuildBT
 from mission_actions import BuildBTAction, WaypointMoveBaseAction
 
 class MissionEditor(QWidget):
@@ -156,7 +155,7 @@ class MissionEditor(QWidget):
                 self.waypoint_list.get_wp(self.waypoint_list.len()-1))
 
     def save(self):
-        mission_name, ok = QInputDialog.getText(self, "Mission file name","Specify file name to save mission:")
+        mission_name, ok = QInputDialog.getText(self, "Mission file name", "Specify file name to save mission:")
 
         if ok:
             if mission_name[-5:] == ".yaml":
@@ -164,14 +163,12 @@ class MissionEditor(QWidget):
 
             mission_name = string.replace(mission_name, '.', '_')
             mission_name = mission_name + ".yaml"
-            
-            
-            print(mission_name)
+                        
             save_path = file_management.get_mission_files_dir() + "/" + mission_name            
             self.waypoint_list.saveToPath(save_path, "Mission" + str(rospy.Time.now()))
 
     def load(self):
-        mission_files = file_management.get_files(file_management.get_mission_files_dir(),".yaml")
+        mission_files = file_management.get_files(file_management.get_mission_files_dir(), ".yaml")
         
         mission_file, ok = QInputDialog.getItem(self, "Select mission to load", "Available missions:", mission_files, 0, False)
         

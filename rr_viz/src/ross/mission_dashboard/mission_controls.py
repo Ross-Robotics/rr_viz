@@ -1,12 +1,11 @@
 #!/usr/bin/env python
-import sys
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QLabel, QPushButton, QGridLayout
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 
 import rospy
 from std_srvs.srv import Trigger, TriggerRequest
-from rr_custom_msgs.srv import SetMode, SetModeRequest, SetModeResponse
+from rr_custom_msgs.srv import SetMode
 from rr_custom_msgs.msg import Mode
 from std_msgs.msg import String
 import string
@@ -32,13 +31,13 @@ class MissionControls(QWidget):
 
         self.v_layout = QVBoxLayout()
 
-        #Title
+        # Title
         self.title_label = QLabel('Mission Controls')
         self.title_label.setFont(QFont('Ubuntu', 11, QFont.Bold))
         self.title_label.setAlignment(Qt.AlignRight)
         self.v_layout.addWidget(self.title_label)
 
-        #Status
+        # Status
         self.h_layout = QHBoxLayout()
         self.status_text_label = QLabel('Status:')
         self.status_text_label.setFont(QFont('Ubuntu', 10, QFont.Bold))
@@ -49,7 +48,7 @@ class MissionControls(QWidget):
         
         self.v_layout.addLayout(self.h_layout)
 
-        #buttons
+        # Buttons
         self.grid_layout = QGridLayout()
 
         self.start_mission_button = QPushButton('Start Mission')

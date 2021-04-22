@@ -1,9 +1,8 @@
 #!/usr/bin/env python
-import sys
-from PyQt5.QtWidgets import QTabWidget, QVBoxLayout, QWidget, QHBoxLayout, QPushButton, QLabel
+from PyQt5.QtWidgets import QTabWidget, QVBoxLayout, QWidget, QHBoxLayout, QLabel
 
-from rviz_tabs import *
-from ross.ross_robotics import *
+from rviz_tabs import RvizTabs
+from ross.ross_robotics import RossRobotics
 import managers.file_management as file_management
 
 class RRVizTabs(QWidget):
@@ -32,7 +31,7 @@ class RRVizTabs(QWidget):
         
         self.logo_label.setAlignment(Qt.AlignCenter | Qt.AlignVCenter)
 
-        self.ross_robotics_tab.v_layout2.addWidget(self.logo_label,3)
+        self.ross_robotics_tab.v_layout2.addWidget(self.logo_label, 3)
 
         self.ross_robotics_tab.h_layout.addLayout(self.ross_robotics_tab.v_layout1, 7)
         self.ross_robotics_tab.h_layout.addLayout(self.ross_robotics_tab.v_layout2, 3)

@@ -1,12 +1,10 @@
 #!/usr/bin/env python
-import sys
+from PyQt5.QtWidgets import QTabWidget, QVBoxLayout, QWidget
 
-from PyQt5.QtWidgets import QTabWidget, QVBoxLayout, QWidget, QHBoxLayout, QPushButton
-
-from rviz_tabs import *
-from mission_editor.mission_editor import *
-from mission_dashboard.mission_dashboard import *
-from slam.slam_supervisor import *
+from rviz_tabs import RRVizTabs
+from mission_editor.mission_editor import MissionEditor
+from mission_dashboard.mission_dashboard import MissionDashboard
+from slam.slam_supervisor import SlamSupervisor
 
 class RossRobotics(QWidget):
     def __init__(self, parent):

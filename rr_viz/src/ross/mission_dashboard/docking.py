@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-import sys
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QLabel, QPushButton
+from PyQt5.QtWidgets import QVBoxLayout, QWidget, QLabel, QPushButton
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 
@@ -23,7 +22,7 @@ class Docking(QWidget):
         self.title_label.setAlignment(Qt.AlignRight)
         self.v_layout.addWidget(self.title_label)
 
-        # Buttons
+        # Button
         self.set_pose_button = QPushButton('Set Home Pose')
         self.set_pose_button.pressed.connect(self.set_pose)
 

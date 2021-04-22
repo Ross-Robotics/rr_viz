@@ -1,16 +1,14 @@
 #!/usr/bin/env python
-import sys
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QLabel, QPushButton, QListWidget, QLineEdit, QMessageBox, QInputDialog
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QLabel, QPushButton, QListWidget, QMessageBox, QInputDialog
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 from PyQt5 import QtCore
 
 import rospy
 import string
-import os
 import roslaunch
-from std_srvs.srv import Trigger, TriggerResponse, TriggerRequest
-from rr_custom_msgs.srv import String, StringResponse, StringRequest
+from std_srvs.srv import Trigger, TriggerRequest
+from rr_custom_msgs.srv import String, StringRequest
 from rr_custom_msgs.msg import StringArray
 from helpers import rr_qt_helper
 import managers.file_management as file_management
@@ -24,9 +22,9 @@ class SlamSupervisor(QWidget):
         # Get parameters from server
         self.slam_sup_name = rospy.get_param("slam_supervisor_name", "slam_supervisor")
         self.default_map_name = rospy.get_param("~default_map_name", "")
-        self.slam_package = rospy.get_param(self.slam_sup_name+'/slam_package',"")
-        self.initial_mode = rospy.get_param(self.slam_sup_name+"/slam_mode","")
-        self.loaded_map_path = rospy.get_param(self.slam_sup_name+"/default_map_path","")
+        self.slam_package = rospy.get_param(self.slam_sup_name + '/slam_package', "")
+        self.initial_mode = rospy.get_param(self.slam_sup_name + "/slam_mode", "")
+        self.loaded_map_path = rospy.get_param(self.slam_sup_name + "/default_map_path", "")
 
         # Setup services
         self.kill_nodes_srv = rospy.ServiceProxy(self.slam_sup_name+"/kill_nodes", Trigger)
@@ -168,7 +166,7 @@ class SlamSupervisor(QWidget):
             return False
         try:
             rospy.wait_for_service(
-                self.slam_sup_name+"/kill_nodes", rospy.Duration(3))
+                self.slam_sup_name + "/kill_nodes", rospy.Duration(3))
             return True
         except:
             # Exit if theres no service
@@ -185,7 +183,7 @@ class SlamSupervisor(QWidget):
             temp_timer = rospy.Timer(
                 rospy.Duration(.1), lambda _: self.waitTillDead_and_execute(self.run_mapping), oneshot=True)
         else:
-            print("failed calling slam_killnodes_srv")
+            print("Failed calling slam_killnodes_srv")
     
     def run_mapping(self):
         trig_resp = self.launch_mapping_srv.call(TriggerRequest())
@@ -196,7 +194,7 @@ class SlamSupervisor(QWidget):
             self.loaded_map_label.setText("")
             self.loaded_map_name = ""
         else:
-            print("failed calling slam_launch_mapping_srv")
+            print("Failed calling slam_launch_mapping_srv")
 
     def switch_to_localization(self):
         trig_resp = self.kill_nodes_srv.call(TriggerRequest())
@@ -206,7 +204,7 @@ class SlamSupervisor(QWidget):
             temp_timer = rospy.Timer(
                 rospy.Duration(.1), lambda _: self.waitTillDead_and_execute(self.run_localization), oneshot=True)
         else:
-            print("failed calling slam_killnodes_srv")
+            print("Failed calling slam_killnodes_srv")
 
     def run_localization(self):
         _str = StringRequest()
@@ -219,7 +217,7 @@ class SlamSupervisor(QWidget):
             self.loaded_map_name = _str.str
             self.loaded_map_label.setText(self.loaded_map_name)
         else:
-            print("failed calling slam_launch_localization_srv")
+            print("Failed calling slam_launch_localization_srv")
         
     def waitTillDead_and_execute(self, func):
         if len(self.active_nodes) == 0:
@@ -240,8 +238,7 @@ class SlamSupervisor(QWidget):
             return
 
         current_item = self.map_list_widget.currentItem()
-        self.localization_button.setEnabled(
-            current_item is not None)
+        self.localization_button.setEnabled(current_item is not None)
 
         if trig_resp.success:
             remote_maps = str(trig_resp.message).split(",")
@@ -258,12 +255,12 @@ class SlamSupervisor(QWidget):
                 if trig_resp.success:
                     print(trig_resp.message)
                 else:
-                    print("failed calling slam delete map service")
+                    print("Failed calling slam delete map service")
                     print(trig_resp.message)
 
     def save_map(self):
         _str = StringRequest()
-        map_name, ok = QInputDialog.getText(self, "Map file name","Specify file name to save the map:")
+        map_name, ok = QInputDialog.getText(self, "Map file name", "Specify file name to save the map:")
 
         if ok:
             if map_name != '':
@@ -280,11 +277,11 @@ class SlamSupervisor(QWidget):
                 print(trig_resp.message)
                 self.file_name_text_edit.clear()
             else:
-                print("failed calling slam_save_map_srv")
+                print("Failed calling slam_save_map_srv")
                 print(trig_resp.message)
 
     def save_map_image(self):
-        map_name, ok = QInputDialog.getText(self, "Map file name","Specify file name to save the map image:")
+        map_name, ok = QInputDialog.getText(self, "Map file name"," Specify file name to save the map image:")
 
         if ok:
             if map_name != '':
@@ -320,7 +317,7 @@ class SlamSupervisor(QWidget):
                 trig_resp = self.list_maps_srv.call(TriggerRequest())
             except Exception as e:
                 rospy.logwarn_throttle(
-                    10, "failed to fetch maps: {}".format(e))
+                    10, "Failed to fetch maps: {}".format(e))
                 return
             current_item = self.map_list_widget.currentItem()
 
@@ -335,7 +332,7 @@ class SlamSupervisor(QWidget):
                 except:
                     rospy.logwarn_throttle(10, "No maps in the maps folder.")
             else:
-                rospy.logwarn_throttle(10, "failed to fetch maps")
+                rospy.logwarn_throttle(10, "Failed to fetch maps")
 
     def map_list_handle(self, remote_list):
         local_maps = []
