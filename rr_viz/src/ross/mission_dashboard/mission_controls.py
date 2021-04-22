@@ -128,7 +128,7 @@ class MissionControls(QWidget):
 
     def status_label_update(self, msg):
         if(len(msg.data) > 30):
-            text_to_display = string.replace(data, ',', ',\n')
+            text_to_display = string.replace(msg.data, ',', ',\n')
         else:
             text_to_display = msg.data
 

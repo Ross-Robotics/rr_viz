@@ -127,7 +127,7 @@ class PathNavigationTools(QWidget):
 
             path_to_follow, ok = QInputDialog.getItem(self, "Select path to follow", "Available paths:", path_files, 0, False)
             path = file_path_to_search + "/" + path_to_follow
-
+            print(path)
             if ok:
                 self.tracking_action.send_goal(TrackPathGoal(file_path=path))
         else:

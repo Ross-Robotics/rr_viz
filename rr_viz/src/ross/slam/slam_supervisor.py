@@ -275,7 +275,6 @@ class SlamSupervisor(QWidget):
 
             if trig_resp.success:
                 print(trig_resp.message)
-                self.file_name_text_edit.clear()
             else:
                 print("Failed calling slam_save_map_srv")
                 print(trig_resp.message)
