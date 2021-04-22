@@ -1,11 +1,11 @@
 #!/usr/bin/env python
+import sys
 from PyQt5.QtWidgets import QTabWidget, QVBoxLayout, QWidget, QApplication
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtGui import QIcon, QCursor
-from PyQt5 import QtWidgets
 import managers.file_management as file_management
 
-from rviz_frame import RViz_frame
+from rviz_frame import *
 
 DEFAULT_RVIZ_CONFIG = "rr_viz_conf.rviz"
 CAMERA_360_RVIZ_CONFIG = "rviz_textured_sphere.rviz"
