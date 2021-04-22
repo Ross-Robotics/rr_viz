@@ -1,5 +1,4 @@
 import os
-import urllib2
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from PyQt5.QtCore import QUrl
 from PyQt5.QtCore import *
@@ -10,193 +9,170 @@ from PyQt5.QtWebKitWidgets import QWebPage
 import rospy
 import rospkg
 
-
-# TODO
-# make a timer to start as the widget is init
-# load the placeholder html
-# check if the webpage is available
-#     if available load
-#     if need to autenticate
-#         autenticate
-#     if need to remove elements
-#         remove elements
-#     if need action
-#         do action
-#initial url
-#PyQt5.QtCore.QUrl(u'http://10.42.0.59/ui/en/')
-#transition login url
-#but with the hostname
-#PyQt5.QtCore.QUrl(u'http://10.42.0.59/ui/en/login')
-#login url
-#PyQt5.QtCore.QUrl(u'http://10.42.0.59/ui/en/login?redirectUrl=')
-#transition url
-#PyQt5.QtCore.QUrl(u'http://10.42.0.59/ui/en/landing/true')
-#home url
-#PyQt5.QtCore.QUrl(u'http://10.42.0.59/ui/en/hosts/sn23n-180004')
-#remote control url
-#PyQt5.QtCore.QUrl(u'http://10.42.0.59/ui/en/hosts/sn23n-180004/remote-control')
 #http://devtools.fg.oisin.rc-harwell.ac.uk/nightly/7.0/ccp4-src-7.0/checkout/PyQt-x11-gpl-4.11.2/doc/html/qwebview.html
 
-
-class RRQWebView(QWebView):
-    def __init__(self, parent=None):
-        super(self.__class__, self).__init__(parent)
-        # gui variables
+class RRQWebView(QWidget):
+    def __init__(self, parent):
+        super(QWidget, self).__init__(parent)
         rospack = rospkg.RosPack()
-        self.placeholder_webpage_path = "file://" + rospack.get_path('rr_viz')+"/res/placeholder_webpage.html"
-        self.gui_hostname = rospy.get_param("~gui_hostname", "10.42.0.1")
-        self.url_loading_state = "Not started"
-        self.host_available = False
-        self.gui_available = False
-        self.current_url = "None"
-        self.gui_placeholder_loaded = False
-        self.gui_url_dict = {
-            "host_page":"/ui/en/",
-            "host_login_transition":"/ui/en/login",
-            "login_page":"/ui/en/login?redirectUrl=",
-            "login_landing_transition":"/ui/en/landing/true",
-            "home_page":"/ui/en/hosts/sn23n-180004",
-            "remote_screen":"/ui/en/hosts/sn23n-180004/remote-control"
-        }
-        # timers config
+        main_layout = QHBoxLayout(self)
+        self.loading_layout = QVBoxLayout(self)
+        self.setMaximumWidth(600)
+        self.projectS_logo = rospack.get_path('rr_viz') + "/res/projectS_logo.png"
+        pixmap = QPixmap(self.projectS_logo)
+        self.status_label = QLabel('Connecting to remote screen')
+        self.status_label.setFont(QFont('Ubuntu',20,QFont.Bold))
+        self.status_label.setHidden(True)
+        self.status_label.setAlignment(Qt.AlignCenter)
+
+        self.logo_label = QLabel(self)
+        self.logo_label.setPixmap(pixmap)
+        self.logo_label.setAlignment(Qt.AlignCenter)
+        self.logo_label.setHidden(True)
+
+        self.loading_layout.addWidget(self.logo_label)
+        self.loading_layout.addWidget(self.status_label)
+        main_layout.addLayout(self.loading_layout,1)
+        self.remote_screen = self.RRQWebGui()
+        main_layout.addWidget(self.remote_screen )
         self.timer_period = 500
         self.timer = QTimer(self)
-        self.timer.timeout.connect(self._gui_manager)
-        # load signal connection
-        self.loadFinished.connect(self._on_load_finished)
-        self.loadStarted.connect(self._on_load_started)
-        self.loadProgress.connect(self._on_load_progress)
-        self.urlChanged.connect(self._on_url_change)
+        self.timer.timeout.connect(self._visibility_manager)
+        self.setLayout(main_layout)
         self.timer.start(self.timer_period)
 
-    def _gui_manager(self):
-        #Update variables
-        #update ping to host
-        self.host_available = self._is_page_available(self.gui_hostname)
-        if self.host_available:
-            if self.gui_available:
-                if self.current_url == "login_page":
-                    self._login()
-                elif self.current_url == "home_page":
-                    self._open_remote_screen()
-                elif  self.current_url == "remote_screen":
-                    if self._is_remote_screen_loaded():
-                        self._remove_control_gui_elements()
+    def _visibility_manager(self):
+        self.status_label.setHidden(not self.remote_screen.is_hidden)
+        self.logo_label.setHidden(not self.remote_screen.is_hidden)
+        self.loading_layout.setEnabled(self.remote_screen.is_hidden)
+        self.status_label.setText(self.remote_screen.gui_state + " ...")
+
+    class RRQWebGui(QWebView):
+        def __init__(self, parent=None):
+            super(self.__class__, self).__init__(parent)
+            # gui variables
+            self.gui_hostname = rospy.get_param("~gui_hostname", "10.42.0.1")
+            self.gui_serial_number = rospy.get_param("~gui_serial_number", "sn23n-180004")
+            self.url_loading_state = "Not started"
+            self.gui_state = "Connecting"
+            self.current_url_loading_progress = 0
+            self.is_finished_loading = False
+            self.is_hidden = True
+            self.gui_available = False
+            self.current_url = "None"
+            self.current_page = "None"
+            self.gui_url_dict = {
+                "host_page":"/ui/en/",
+                "host_login_transition":"/ui/en/login",
+                "login_page":"/ui/en/login?redirectUrl=",
+                "login_landing_transition":"/ui/en/landing/true",
+                "home_page":"/ui/en/hosts/" + self.gui_serial_number,
+                "remote_screen":"/ui/en/hosts/" + self.gui_serial_number + "/remote-control"
+            }
+            # timers config
+            self.timer_period = 500
+            self.timer = QTimer(self)
+            self.timer.timeout.connect(self._gui_manager)
+            # load signal connection
+            self.loadFinished.connect(self._on_load_finished)
+            self.loadStarted.connect(self._on_load_started)
+            self.loadProgress.connect(self._on_load_progress)
+            self.urlChanged.connect(self._on_url_change)
+            self.setHidden(self.is_hidden)
+            self.timer.start(self.timer_period)
+
+        def _gui_manager(self):
+            self.setHidden(self.is_hidden)
+            if self.current_url == "None":
+                self.load_page("host_page")
+            elif self.current_url.find(self.gui_url_dict.get("login_page")) >= 0:
+                self.gui_state = "Logging into the GUI"
+                self._login()
+            elif self.current_url.find(self.gui_url_dict.get("remote_screen")) >= 0:
+                if self.is_finished_loading:
+                    if self._remove_control_gui_elements() or self.gui_state == "Remote screen fully loaded":
+                        self.gui_state = "Remote screen fully loaded"
+                        self.is_hidden = False
                     else:
-                        pass
-        else:
-            #self._load_placeholder_gui()
-            pass
+                        self.gui_state = "Configuring GUI"
+            elif self.current_url.find(self.gui_url_dict.get("home_page")) >= 0:
+                if self.is_finished_loading:
+                    self.gui_state = "Opening remote screen"
+                    self.load_page("remote_screen")
+            if self.url_loading_state == "Failed":
+                self._load( self.current_url)
 
 
-
-
-
-        # if self.gui_available:
-        #     pass
-        # elif not self.gui_placeholder_loaded:
-        #     if self.url_loading_state == "Not started":
-        #         self.load(self.placeholder_webpage_path)
-        #         print("Loading placeholder")
-        #     elif self.url_loading_state == "Finished":
-        #         self._show_overlay_text("Connecting ...")
-
-    def _is_page_available(self, host):
-        print("looking for the host")
-        url = self._url_builder(host,self.gui_url_dict.get("host_page"))
-        try:
-            page = urllib2.urlopen(url, timeout = 1.0)
-            page_code = page.getcode()
-            print(page_code)
-            if page_code > "200":
+        def load_page(self,page):
+            page_tail = self.gui_url_dict.get(page)
+            if page_tail != None:
+                self.is_finished_loading = False
+                url = self._url_builder(self.gui_hostname,page_tail)
+                self._load(url)
+                self.current_url = url
                 return True
-        except urllib2.URLError, e:
-            print("There was an error: %r" % e)
-        return False
-
-    def _url_builder(self,hostname,page):
-        url = "http://" + hostname + page
-        return url
-
-    def load(self, url):
-        print("Loading -> " + self.url().toString())
-        self.url_loading_state = "Not started"
-        self.setUrl(QUrl(url))
-
-    def _on_load_finished(self):
-        self.url_loading_state = "Finished"
-
-    def _on_load_started(self):
-        print("WEB PAGE LOADING SIGNAL")
-        self.url_loading_state = "Started"
-
-    def _on_load_progress(self,load):
-        #self.url_loading_state = self.url().toString() + " Loading -> " + str(load) + "%"
-        pass
-
-    def _on_url_change(self):
-        print("Web page URL changed to:")
-        print(self.url().host())
-        print(self.url().toString())
-        #self._show_connecting_image()
-
-    def _is_login_page(self):
-        frame = self.page().currentFrame()
-        #self._show_connecting_image()
-        return bool(frame.evaluateJavaScript("document.getElementsByClassName('login').length"))
-
-    def _login(self):
-        frame = self.page().currentFrame()
-        frame.evaluateJavaScript("document.getElementById('mat-input-0').value = 'advanced'")
-        frame.evaluateJavaScript("document.getElementById('mat-input-1').value = 'symetricas'")
-        frame.evaluateJavaScript("document.getElementById('login-button').click()")
-
-    def _open_remote_screen(self):
-        pass
-
-
-    def _remove_control_gui_elements(self):
-        frame = self.page().currentFrame()
-        if self._is_remote_screen_loaded():
-            frame.evaluateJavaScript("document.getElementsByClassName('nav')[0].parentNode.removeChild(document.getElementsByClassName('nav')[0])")
-            frame.evaluateJavaScript("document.getElementsByClassName('status-bar')[0].parentNode.removeChild(document.getElementsByClassName('status-bar')[0])")
-            frame.evaluateJavaScript("document.getElementsByClassName('doseinfo')[0].parentNode.removeChild(document.getElementsByClassName('doseinfo')[0])")
-            frame.evaluateJavaScript("document.getElementsByTagName('h1')[0].style.display = 'none'")
-            frame.evaluateJavaScript("document.getElementsByTagName('p')[0].style.display = 'none'")
-            return True
-        else:
-            #self.timer.start(self.timer_period)
             return False
 
-    def _is_remote_screen_loaded(self):
-        frame = self.page().currentFrame()
-        if frame.evaluateJavaScript("document.getElementsByClassName('nav').length"):
-            if frame.evaluateJavaScript("document.getElementsByClassName('status-bar').length"):
-                if frame.evaluateJavaScript("document.getElementsByClassName('doseinfo').length"):
-                    if frame.evaluateJavaScript("document.getElementsByTagName('h1').length"):
-                        if frame.evaluateJavaScript("document.getElementsByTagName('p').length"):
-                            return True
-        return False
+        def _url_builder(self,hostname,page):
+            url = "http://" + hostname + page
+            return url
 
-    def _show_overlay_text(self, display_text = "Loading..."):
-        text_cmd = "var text = document.createTextNode('" + display_text + "')"
-        frame = self.page().currentFrame()
-        frame.evaluateJavaScript("var overlay = document.createElement('overlay')")
-        frame.evaluateJavaScript("var att = document.createAttribute('class')")
-        frame.evaluateJavaScript("var st = document.createAttribute('style')")
-        frame.evaluateJavaScript("att.value = 'overlay'")
-        frame.evaluateJavaScript("st.value = 'position: fixed;font-family: Helvetica;font-weight: bold; text-align: center; padding: 50% 0;  display: none;  width: 100%;  height: 100%;  top: 0;  left: 0;  right: 0;  bottom: 0;  background-color: rgba(255,255,255,1.0);  z-index: 2;  cursor:pointer;'")
-        frame.evaluateJavaScript(text_cmd)
-        frame.evaluateJavaScript("overlay.appendChild(text)")
-        frame.evaluateJavaScript("overlay.setAttributeNode(st)")
-        frame.evaluateJavaScript("overlay.setAttributeNode(att)")
-        frame.evaluateJavaScript("document.getElementsByTagName('body')[0].appendChild(overlay)")
-        frame.evaluateJavaScript("document.getElementsByClassName('overlay')[0].style.display = 'block'")
-        #var text = document.createTextNode("Loading Verifinder remote screen.");
-        #overlay.appendChild(text)
+        def _load(self, url):
+            print("Loading -> " + url)
+            self.url_loading_state = "Not started"
+            self.setUrl(QUrl(url))
+            self.is_finished_loading = False
 
-    def _remove_overlay_text(self):
-        frame = self.page().currentFrame()
-        print("Removing the overlay")
-        print(frame.evaluateJavaScript("document.getElementsByClassName('overlay')[0].lemgth"))
-        frame.evaluateJavaScript("document.getElementsByClassName('overlay')[0].style.display = 'none'")
+        def _on_load_finished(self,sucess):
+            print("Finished Loading -> " + self.url().toString())
+            if sucess:
+                self.url_loading_state = "Finished"
+            else:
+                self.url_loading_state = "Failed"
+            self.is_finished_loading = True
+
+            print(sucess)
+
+        def _on_load_started(self):
+            print("Started Loading -> " + self.url().toString())
+            self.url_loading_state = "Started"
+            self.is_finished_loading = False
+
+        def _on_load_progress(self,load):
+            self.current_url_loading_progress = load
+            print("URL loaded: " + str(load) + "%")
+            pass
+
+        def _on_url_change(self):
+            print("Web page URL changed to:")
+            self.current_url = self.url().toString()
+            print(self.current_url)
+
+        def _login(self):
+            print("Logging into the GUI")
+            frame = self.page().currentFrame()
+            frame.evaluateJavaScript("document.getElementById('mat-input-0').value = 'advanced'")
+            frame.evaluateJavaScript("document.getElementById('mat-input-1').value = 'symetricas'")
+            frame.evaluateJavaScript("document.getElementById('login-button').click()")
+
+        def _remove_control_gui_elements(self):
+            frame = self.page().currentFrame()
+            if self._is_remote_screen_loaded():
+                frame.evaluateJavaScript("document.getElementsByClassName('nav')[0].parentNode.removeChild(document.getElementsByClassName('nav')[0])")
+                frame.evaluateJavaScript("document.getElementsByClassName('status-bar')[0].parentNode.removeChild(document.getElementsByClassName('status-bar')[0])")
+                frame.evaluateJavaScript("document.getElementsByClassName('doseinfo')[0].parentNode.removeChild(document.getElementsByClassName('doseinfo')[0])")
+                frame.evaluateJavaScript("document.getElementsByTagName('h1')[0].style.display = 'none'")
+                frame.evaluateJavaScript("document.getElementsByTagName('p')[0].style.display = 'none'")
+                return True
+            else:
+                return False
+
+        def _is_remote_screen_loaded(self):
+            frame = self.page().currentFrame()
+            if frame.evaluateJavaScript("document.getElementsByClassName('nav').length"):
+                if frame.evaluateJavaScript("document.getElementsByClassName('status-bar').length"):
+                    if frame.evaluateJavaScript("document.getElementsByClassName('doseinfo').length"):
+                        if frame.evaluateJavaScript("document.getElementsByTagName('h1').length"):
+                            if frame.evaluateJavaScript("document.getElementsByTagName('p').length"):
+                                return True
+            return False

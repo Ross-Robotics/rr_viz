@@ -15,10 +15,10 @@ class MainWindowTabs(QWidget):
         self.main_window_tabs = QTabWidget()
         self.ross_robotics_tab = QWidget()
         self.verifinder_tab = QWidget()
-        
+
         self.main_window_tabs.addTab(self.ross_robotics_tab, "Ross Robotics")
-        self.main_window_tabs.addTab(self.verifinder_tab, "Verifinder")
-        
+        self.main_window_tabs.addTab(self.verifinder_tab, "VeriFinder")
+
         self.ross_robotics_tab.h_layout = QHBoxLayout(self)
         self.ross_robotics_tab.v_layout1 = QVBoxLayout(self)
         self.ross_robotics_tab.v_layout2 = QVBoxLayout(self)
@@ -29,7 +29,7 @@ class MainWindowTabs(QWidget):
         self.ross_robotics_tab.v_layout1.addWidget(self.title_label)
 
         self.ross_robotics_tab.v_layout2.addWidget(RossRobotics(self),6)
-        self.ross_robotics_tab.v_layout2.addWidget(RRQWebView(self),4)
+        self.ross_robotics_tab.v_layout2.addWidget(RRQWebView(self),4,Qt.AlignCenter)
 
         self.ross_robotics_tab.h_layout.addLayout(self.ross_robotics_tab.v_layout1, 7)
         self.ross_robotics_tab.h_layout.addLayout(self.ross_robotics_tab.v_layout2, 3)
@@ -38,7 +38,7 @@ class MainWindowTabs(QWidget):
 
 
         self.verifinder_tab.layout = QVBoxLayout(self)
-        self.verifinder_tab.layout.addWidget(RRQWebViewTab(self))
+        self.verifinder_tab.layout.addWidget(RRQWebViewTab(self),Qt.AlignCenter)
         self.verifinder_tab.setLayout(self.verifinder_tab.layout)
 
         self.main_window_layout.addWidget(self.main_window_tabs)
