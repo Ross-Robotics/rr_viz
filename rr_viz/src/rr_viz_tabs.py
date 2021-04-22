@@ -4,8 +4,6 @@ from PyQt5.QtWidgets import QTabWidget, QVBoxLayout, QWidget, QHBoxLayout, QPush
 
 from rviz_tabs import *
 from ross.ross_robotics import *
-from webview.rr_webview import *
-from webview.rr_webview_tab import *
 import managers.file_management as file_management
 
 class RRVizTabs(QWidget):
