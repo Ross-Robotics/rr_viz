@@ -2,6 +2,7 @@
 from PyQt5.QtWidgets import QTabWidget, QVBoxLayout, QWidget, QApplication
 from PyQt5.QtCore import QTimer
 from PyQt5.QtGui import QIcon, QCursor
+from PyQt5 import QtWidgets
 import managers.file_management as file_management
 
 from rviz_frame import RViz_frame

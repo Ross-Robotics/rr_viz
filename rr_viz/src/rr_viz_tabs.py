@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 from PyQt5.QtWidgets import QTabWidget, QVBoxLayout, QWidget, QHBoxLayout, QLabel
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtCore import Qt
 
 from rviz_tabs import RvizTabs
 from ross.ross_robotics import RossRobotics

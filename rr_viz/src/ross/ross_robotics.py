@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from PyQt5.QtWidgets import QTabWidget, QVBoxLayout, QWidget
 
-from rviz_tabs import RRVizTabs
+from rviz_tabs import RvizTabs
 from mission_editor.mission_editor import MissionEditor
 from mission_dashboard.mission_dashboard import MissionDashboard
 from slam.slam_supervisor import SlamSupervisor

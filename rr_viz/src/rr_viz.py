@@ -5,6 +5,7 @@ import rospy
 import rosgraph
 
 from PyQt5.QtWidgets import QApplication, QMainWindow
+from PyQt5 import QtCore
 
 from rr_viz_tabs import RRVizTabs
 from helpers import rr_qt_helper
