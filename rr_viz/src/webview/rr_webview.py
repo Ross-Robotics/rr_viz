@@ -17,7 +17,7 @@ class RRQWebView(QWidget):
         rospack = rospkg.RosPack()
         main_layout = QHBoxLayout(self)
         self.loading_layout = QVBoxLayout(self)
-        self.setMaximumWidth(600)
+        self.setMaximumWidth(400)
         self.projectS_logo = rospack.get_path('rr_viz') + "/res/projectS_logo.png"
         pixmap = QPixmap(self.projectS_logo)
         self.status_label = QLabel('Connecting to remote screen')
@@ -130,8 +130,6 @@ class RRQWebView(QWidget):
             else:
                 self.url_loading_state = "Failed"
             self.is_finished_loading = True
-
-            print(sucess)
 
         def _on_load_started(self):
             print("Started Loading -> " + self.url().toString())

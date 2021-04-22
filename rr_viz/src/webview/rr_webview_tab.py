@@ -124,8 +124,6 @@ class RRQWebViewTab(QWidget):
                 self.url_loading_state = "Failed"
             self.is_finished_loading = True
 
-            print(sucess)
-
         def _on_load_started(self):
             print("Started Loading -> " + self.url().toString())
             self.url_loading_state = "Started"
@@ -147,3 +145,8 @@ class RRQWebViewTab(QWidget):
             frame.evaluateJavaScript("document.getElementById('mat-input-0').value = 'advanced'")
             frame.evaluateJavaScript("document.getElementById('mat-input-1').value = 'symetricas'")
             frame.evaluateJavaScript("document.getElementById('login-button').click()")
+
+        class WebPage(QWebPage):
+            def javaScriptConsoleMessage(self, msg, line, source):
+                print("JS CONSOLE OUTPUT")
+                print '%s line %d: %s' % (source, line, msg)
