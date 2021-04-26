@@ -25,17 +25,14 @@ class RRQWebViewTab(QWidget):
         self.loading_layout = QVBoxLayout(self)
         self.projectS_logo = rospack.get_path('rr_viz') + "/res/projectS_logo.png"
         pixmap = QPixmap(self.projectS_logo)
-        self.status_label = QLabel('Connecting to remote screen')
+        self.status_label = QLabel('Connecting to VeriFinder')
         self.status_label.setFont(QFont('Ubuntu',20,QFont.Bold))
         self.status_label.setHidden(True)
         self.status_label.setAlignment(Qt.AlignCenter)
 
         #CEF stuff
         sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
-        # app = self.CefApplication(sys.argv)
         self.cef_widget = self.CefWidget()
-
-        #self.web_gui = self.RRQWebTab()
 
         self.logo_label = QLabel(self)
         self.logo_label.setPixmap(pixmap)
@@ -48,7 +45,7 @@ class RRQWebViewTab(QWidget):
 
         self.tab_timer_period = 500
         self.tab_timer = QTimer(self)
-        self.tab_timer.timeout.connect(self._resize_manager)
+        self.tab_timer.timeout.connect(self._window_manager)
         self.setLayout(main_layout)
         self.cef_widget.embedBrowser()
         self.cef_container = QWidget.createWindowContainer(self.cef_widget.hidden_window, parent=self)
@@ -56,8 +53,18 @@ class RRQWebViewTab(QWidget):
         self.tab_timer.start(self.tab_timer_period)
 
 
-    def _resize_manager(self):
+    def _window_manager(self):
         self.cef_widget.resizeWindow(self.cef_container.width() ,self.cef_container.height())
+        if self.cef_widget.browser.GetUrl() == '':
+            self.cef_container.setHidden(True)
+            self.logo_label.setHidden(False)
+            self.status_label.setHidden(False)
+        else:
+            self.cef_container.setHidden(False)
+            self.logo_label.setHidden(True)
+            self.status_label.setHidden(True)
+
+
 
     class CefWidget(QWidget):
         def __init__(self, parent=None):
@@ -92,6 +99,8 @@ class RRQWebViewTab(QWidget):
             cef.MessageLoopWork()
             if(self.browser.GetUrl() == self._url_builder(self.gui_hostname,self.gui_url_dict.get("login_page"))):
                 self._login()
+            if self.browser.GetUrl() == '':
+                self.browser.LoadUrl(self._url_builder(self.gui_hostname,self.gui_url_dict.get("host_page")))
 
         def _login(self):
             self.browser.ExecuteJavascript("document.getElementById('mat-input-0').value = 'advanced'")
