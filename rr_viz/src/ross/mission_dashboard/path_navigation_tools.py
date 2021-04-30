@@ -11,6 +11,7 @@ from rr_custom_msgs.msg import RecordPathAction, RecordPathGoal
 from rr_custom_msgs.msg import TrackPathAction, TrackPathGoal
 from helpers import rr_qt_helper
 import string
+import os
 
 class PathNavigationTools(QWidget):
     set_enable_record = QtCore.pyqtSignal(bool)
@@ -114,7 +115,7 @@ class PathNavigationTools(QWidget):
             rospy.logwarn(msg)
 
     def start_following(self):
-        file_path_to_search = string.replace(self.file_path, "/path.txt", "")
+        file_path_to_search = os.path.dirname(self.file_path)
 
         try:
             trig_resp = self.get_path_files_srv.call(TriggerRequest())
@@ -123,11 +124,11 @@ class PathNavigationTools(QWidget):
             return
 
         if trig_resp.success:
-            path_files = str(trig_resp.message).split(",")
+            follow_path_files_array = str(trig_resp.message).split(",")
 
-            path_to_follow, ok = QInputDialog.getItem(self, "Select path to follow", "Available paths:", path_files, 0, False)
+            path_to_follow, ok = QInputDialog.getItem(self, "Select path to follow", "Available paths:", follow_path_files_array, 0, False)
             path = file_path_to_search + "/" + path_to_follow
-            print(path)
+
             if ok:
                 self.tracking_action.send_goal(TrackPathGoal(file_path=path))
         else:

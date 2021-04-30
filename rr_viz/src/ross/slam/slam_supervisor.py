@@ -67,11 +67,15 @@ class SlamSupervisor(QWidget):
 
         self.loaded_map_label = QLabel('')
         self.loaded_map_label.setFont(QFont('Ubuntu', 10))
+        self.loaded_map_name = ""
         if(self.initial_mode == "localization"):
             loaded_map_path_split = self.loaded_map_path.split('/')
             x = len(loaded_map_path_split)
             self.loaded_map_name = loaded_map_path_split[x-1]
             self.loaded_map_label.setText(self.loaded_map_name)
+        else:
+            self.loaded_map_label.setText(self.loaded_map_name)
+
         self.h_layout_map.addWidget(self.loaded_map_label, 8)
 
         self.v_layout.addLayout(self.h_layout_map)

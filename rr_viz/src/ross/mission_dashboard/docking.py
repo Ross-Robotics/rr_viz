@@ -33,12 +33,10 @@ class Docking(QWidget):
     def set_pose(self):
         try:
             trig_resp = self.set_pose_srv.call(TriggerRequest())
-            if trig_resp.success:
-                print(trig_resp.message)
-            else:
-                print(trig_resp.message)
+            print(trig_resp.message)
+            if not trig_resp.success:
                 msg = "Failed to call '" + self.set_pose_srv_name + "' service"
-                print(msg)
+                rospy.logerr(msg)
         except:
             msg = "Service '" + self.set_pose_srv_name + "' unavailable"
             rospy.logwarn(msg)

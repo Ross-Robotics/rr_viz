@@ -10,6 +10,8 @@ from rr_custom_msgs.msg import Mode
 from std_msgs.msg import String
 import string
 
+MAX_LABEL_CHAR_WIDTH = 30
+
 class MissionControls(QWidget):
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
@@ -75,12 +77,10 @@ class MissionControls(QWidget):
     def start_mission(self):
         try:
             trig_resp = self.start_mission_srv.call(TriggerRequest())
-            if trig_resp.success:
-                print(trig_resp.message)
-            else:
-                print(trig_resp.message)
+            print(trig_resp.message)
+            if not trig_resp.success:
                 msg = "Failed to call '" + self.start_mission_srv_name + "' service"
-                print(msg)
+                rospy.logerr(msg)
         except:
             msg = "Service '" + self.start_mission_srv_name + "' unavailable"
             rospy.logwarn(msg)
@@ -88,12 +88,10 @@ class MissionControls(QWidget):
     def next_waypoint(self):
         try:
             trig_resp = self.next_waypoint_srv.call(TriggerRequest())
-            if trig_resp.success:
-                print(trig_resp.message)
-            else:
-                print(trig_resp.message)
+            print(trig_resp.message)
+            if not trig_resp.success:
                 msg = "Failed to call '" + self.next_waypoint_srv_name + "' service"
-                print(msg)
+                rospy.logerr(msg)
         except:
             msg = "Service '" + self.next_waypoint_srv_name + "' unavailable"
             rospy.logwarn(msg)
@@ -101,12 +99,10 @@ class MissionControls(QWidget):
     def stop_mission(self):
         try:
             trig_resp = self.stop_mission_srv.call(TriggerRequest())
-            if trig_resp.success:
-                print(trig_resp.message)
-            else:
-                print(trig_resp.message)
+            print(trig_resp.message)
+            if not trig_resp.success:
                 msg = "Failed to call '" + self.stop_mission_srv_name + "' service"
-                print(msg)
+                rospy.logerr(msg)
         except:
             msg = "Service '" + self.stop_mission_srv_name + "' unavailable"
             rospy.logwarn(msg)
@@ -117,17 +113,16 @@ class MissionControls(QWidget):
 
         try:
             trig_resp = self.set_active_mode_srv.call(mode)
-            if trig_resp:
-                print(trig_resp)
-            else:
+            print(trig_resp.message)
+            if not trig_resp.success:
                 msg = "Failed to call '" + self.set_active_mode_srv_name + "' service"
-                print(msg)
+                rospy.logerr(msg)
         except:
             msg = "Service '" + self.set_active_mode_srv_name + "' unavailable"
             rospy.logwarn(msg)
 
     def status_label_update(self, msg):
-        if(len(msg.data) > 30):
+        if(len(msg.data) > MAX_LABEL_CHAR_WIDTH):
             text_to_display = string.replace(msg.data, ',', ',\n')
         else:
             text_to_display = msg.data

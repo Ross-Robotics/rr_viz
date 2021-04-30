@@ -6,7 +6,7 @@ from mission_editor.mission_editor import MissionEditor
 from mission_dashboard.mission_dashboard import MissionDashboard
 from slam.slam_supervisor import SlamSupervisor
 
-class RossRobotics(QWidget):
+class RRInteractiveTools(QWidget):
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
         self.layout = QVBoxLayout()
