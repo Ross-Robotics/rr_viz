@@ -13,7 +13,7 @@ class EnvironmentalSensingModule(QWidget):
 
         self.v_layout = QVBoxLayout(self)
         # Set up ESM info 
-        self.title_label = QLabel('ESM data:')
+        self.title_label = QLabel('Environmental Sensing Module data:')
         self.title_label.setFont(QFont('Ubuntu', 11, QFont.Bold))
         self.v_layout.addWidget(self.title_label)
 
