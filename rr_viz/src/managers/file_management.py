@@ -6,58 +6,26 @@ from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFil
 
 RR_VIZ_USER_DIR = os.path.expanduser("~/Desktop/RossRobotics")
 
-def get_rrviz_dir():
-    rospack = rospkg.RosPack()
-    return rospack.get_path('rr_viz')
-
 def get_rrviz_resdir():
-    return get_rrviz_dir() + "/res"
+    is_userdir()
+    return RR_VIZ_USER_DIR + "/res"
 
 def get_rrviz_cfgdir():
-    return get_rrviz_resdir() + "/cfg"
+    is_userdir()
+    return RR_VIZ_USER_DIR + "/cfg"
 
 def get_mission_files_dir():
-    return get_user_dir() + "/mission"
+    is_userdir()
+    return RR_VIZ_USER_DIR + "/mission"
 
 def get_map_images_dir():
-    return get_user_dir() + "/map_images"
+    is_userdir()
+    return RR_VIZ_USER_DIR + "/map_images"
 
 def is_userdir():
     # Check if  the ~/.rr directory is setup and if it isnt, set it up.
-    is_setup = False
-    def msgbtn(i):
-        if "Yes" in i.text():
-            try:
-                os.mkdir(RR_VIZ_USER_DIR)
-                os.mkdir(RR_VIZ_USER_DIR +"/mission")
-                os.mkdir(RR_VIZ_USER_DIR + "/map_images")                
-            except OSError:
-                print ("Creation of the directory %s failed" %
-                       RR_VIZ_USER_DIR)
-            else:
-                is_setup = True
-                print ("Successfully created the directory %s " %
-                       RR_VIZ_USER_DIR)
-
     if not os.path.exists(RR_VIZ_USER_DIR):
-        msg = QMessageBox()
-        msg.setIcon(QMessageBox.Warning)
-        msg.setText("This user does not have Ross Robotics directory set up. Would you like it set up now? (creates a folder at ~/Desktop/RossRobotics to store local files)")
-        msg.setWindowTitle("RR directory setup")
-        msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-        msg.buttonClicked.connect(msgbtn)
-        msg.exec_()
-        return is_setup
-    else:
-        return True
-
-def get_user_dir(terminate=False):
-    if is_userdir():       
-        return RR_VIZ_USER_DIR
-    elif terminate:
-        return None
-    else:
-        return get_user_dir(terminate=True)#Call recursively to avoid errors
+        create_user_dir()
 
 def get_files(dir_path, extension):
     if not os.path.exists(dir_path):
@@ -68,3 +36,8 @@ def get_files(dir_path, extension):
       if f.endswith(extension):
         files.append(f)
     return files
+
+def create_user_dir():
+    os.mkdir(RR_VIZ_USER_DIR)
+    os.mkdir(RR_VIZ_USER_DIR +"/mission")
+    os.mkdir(RR_VIZ_USER_DIR + "/map_images") 
