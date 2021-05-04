@@ -5,6 +5,7 @@ from PyQt5.QtCore import Qt, QTimer
 
 from rviz_tabs import RvizTabs
 from ross.rr_interactive_tools import RRInteractiveTools
+from ross.esm.environmental_sensing_module import EnvironmentalSensingModule
 import managers.file_management as file_management
 import subprocess
 
@@ -22,7 +23,10 @@ class RRVizTabs(QWidget):
         self.rr_interactive_tools_tab.v_layout1 = QVBoxLayout(self)
         self.rr_interactive_tools_tab.v_layout2 = QVBoxLayout(self)
 
+        # Set up rviz screens
         self.rr_interactive_tools_tab.v_layout1.addWidget(RvizTabs(self))
+
+        self.rr_interactive_tools_tab.v_layout1.addWidget(EnvironmentalSensingModule(self))
 
         # Set up Connection status labels
         self.connection_h_layout = QHBoxLayout()

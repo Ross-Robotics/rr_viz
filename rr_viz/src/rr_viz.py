@@ -10,7 +10,7 @@ from PyQt5.QtCore import QTimer
 
 from rr_viz_tabs import RRVizTabs
 from helpers import rr_qt_helper
-from fping import FastPing
+import managers.file_management as file_management
 
 class RossRoboticsRViz(QMainWindow):
     def __init__(self, parent=None):
@@ -21,6 +21,9 @@ class RossRoboticsRViz(QMainWindow):
         self.width = 1482
         self.height = 868
         self.setGeometry(self.x, self.y, self.width, self.height)
+
+        file_management.is_userdir()
+        
         self.tabWidget = RRVizTabs(self)
         self.setCentralWidget(self.tabWidget)
 
