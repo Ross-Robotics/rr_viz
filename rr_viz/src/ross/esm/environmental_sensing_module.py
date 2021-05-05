@@ -69,29 +69,19 @@ class EnvironmentalSensingModule(QWidget):
         self.vis_topic_sub = rospy.Subscriber(self.vis_topic_name, Illuminance, self.vis_update)
 
     def ir_update(self, msg):
-        data_trimmed = self.trim_to_two_decimal_points(str(msg.illuminance))
-        self.ir_data_label.setText("IR: " + data_trimmed)
+        self.ir_data_label.setText("IR: " + format(msg.illuminance, ".2f"))
 
     def humidity_update(self, msg):
-        data_trimmed = self.trim_to_two_decimal_points(str(msg.relative_humidity))
-        self.humidity_data_label.setText("Humidity: " + data_trimmed)
+    self.humidity_data_label.setText("Humidity: " + format(msg.relative_humidity, ".2f"))
 
     def pressure_update(self, msg):
-        data_trimmed = self.trim_to_two_decimal_points(str(msg.fluid_pressure))
-        self.pressure_data_label.setText("Pressure: " + data_trimmed)
+        self.pressure_data_label.setText("Pressure: " + format(msg.fluid_pressure, ".2f"))
 
     def temp_update(self, msg):
-        data_trimmed = self.trim_to_two_decimal_points(str(msg.temperature))
-        self.temp_data_label.setText("Temp: " + data_trimmed)
+        self.temp_data_label.setText("Temp: " + format(msg.temperature, ".2f"))
 
     def uv_update(self, msg):
-        data_trimmed = self.trim_to_two_decimal_points(str(msg.data))
-        self.uv_data_label.setText("UV: " + data_trimmed)
+        self.uv_data_label.setText("UV: " + format(msg.data, ".2f"))
 
     def vis_update(self, msg):
-        data_trimmed = self.trim_to_two_decimal_points(str(msg.illuminance))
-        self.vis_data_label.setText("Visible light: " + data_trimmed)
-
-    def trim_to_two_decimal_points(self, data):
-        point_index = data.find('.')
-        return data[:point_index + 3]
+        self.vis_data_label.setText("Visible light: " + format(msg.illuminance, ".2f"))
