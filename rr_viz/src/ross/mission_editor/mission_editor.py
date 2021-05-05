@@ -179,11 +179,6 @@ class MissionEditor(QWidget):
             
             self.waypoint_list.loadFromPath(load_path)         
 
-    def message_popup(self):
-        msg = QMessageBox()
-        msg.setText(self.msg_to_show)
-        msg.exec_()
-
     def enable_go_to_buttons(self, enabled):
         self.go_to_selected_button.setEnabled(enabled)
         self.go_to_all_button.setEnabled(enabled)
