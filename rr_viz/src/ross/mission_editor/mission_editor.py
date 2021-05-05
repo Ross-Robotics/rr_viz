@@ -158,6 +158,8 @@ class MissionEditor(QWidget):
         mission_name, ok = QInputDialog.getText(self, "Mission file name", "Specify file name to save mission:")
 
         if ok:
+            if mission_name == "":
+                mission_name = "default"
             if mission_name[-5:] == ".yaml":
                 mission_name = mission_name[0:-5]
 
@@ -170,14 +172,22 @@ class MissionEditor(QWidget):
     def load(self):
         mission_files = file_management.get_files(file_management.get_mission_files_dir(), ".yaml")
         
-        mission_file, ok = QInputDialog.getItem(self, "Select mission to load", "Available missions:", mission_files, 0, False)
+        if mission_files == []:
+            msg = QMessageBox()
+            msg.setWindowTitle("Load Mission")
+            msg.setIcon(QMessageBox.Information)
+            msg.setText("No mission files available")
+            msg.setStandardButtons(QMessageBox.Ok)
+            msg.exec_()
+        else:
+            mission_file, ok = QInputDialog.getItem(self, "Select mission to load", "Available missions:", mission_files, 0, False)
         
-        if ok:
-            load_path = file_management.get_mission_files_dir() + "/" + mission_file
-            if load_path[-5:] != ".yaml":
-                load_path = load_path + ".yaml"
-            
-            self.waypoint_list.loadFromPath(load_path)         
+            if ok:
+                load_path = file_management.get_mission_files_dir() + "/" + mission_file
+                if load_path[-5:] != ".yaml":
+                    load_path = load_path + ".yaml"
+                
+                self.waypoint_list.loadFromPath(load_path)         
 
     def enable_go_to_buttons(self, enabled):
         self.go_to_selected_button.setEnabled(enabled)
