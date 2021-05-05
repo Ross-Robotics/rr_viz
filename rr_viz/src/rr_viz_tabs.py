@@ -8,6 +8,8 @@ from ross.rr_interactive_tools import RRInteractiveTools
 from ross.esm.environmental_sensing_module import EnvironmentalSensingModule
 import managers.file_management as file_management
 import subprocess
+from sensor_msgs.msg import BatteryState
+import rospy
 
 class RRVizTabs(QWidget):
     def __init__(self, parent):
@@ -28,8 +30,8 @@ class RRVizTabs(QWidget):
 
         self.rr_interactive_tools_tab.v_layout1.addWidget(EnvironmentalSensingModule(self))
 
-        # Set up Connection status labels
-        self.connection_h_layout = QHBoxLayout()
+        # Set up status labels
+        self.status_h_layout = QHBoxLayout()
         self.connection_label_text = QLabel('Connection status:')
         self.connection_label_text.setFont(QFont('Ubuntu', 14, QFont.Bold))
         self.connection_label_text.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
@@ -39,9 +41,21 @@ class RRVizTabs(QWidget):
         self.connection_status.setStyleSheet("color: red")
         self.connection_status.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
 
-        self.connection_h_layout.addWidget(self.connection_label_text, 7)
-        self.connection_h_layout.addWidget(self.connection_status, 3)
-        self.rr_interactive_tools_tab.v_layout2.addLayout(self.connection_h_layout,1)
+        self.battery_label = QLabel('Battery Level:')
+        self.battery_label.setFont(QFont('Ubuntu', 14, QFont.Bold))
+        self.battery_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+
+        self.battery_level = QLabel('N/A')
+        self.battery_level.setFont(QFont('Ubuntu', 14, QFont.Bold))
+        self.battery_level.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+
+        self.status_h_layout.addWidget(self.connection_label_text, 3)
+        self.status_h_layout.addWidget(self.connection_status, 3)
+
+        self.status_h_layout.addWidget(self.battery_label, 3)
+        self.status_h_layout.addWidget(self.battery_level, 1)
+
+        self.rr_interactive_tools_tab.v_layout2.addLayout(self.status_h_layout,1)
      
         # Add rr interactive tools to layout
         self.rr_interactive_tools_tab.v_layout2.addWidget(RRInteractiveTools(self),7)
@@ -65,6 +79,15 @@ class RRVizTabs(QWidget):
 
         self.main_window_layout.addWidget(self.main_window_tabs)
         self.setLayout(self.main_window_layout)
+
+        # Set up topic subscribers
+        self.battery_level_sub_name = "/vesc_driver/battery"
+        self.battery_level_sub = rospy.Subscriber(self.battery_level_sub_name, BatteryState, self.battery_level_update)
+
+        # Get Battery levels 
+        self.good_voltage = rospy.get_param("/battery/good_voltage", "31")
+        self.ok_voltage = rospy.get_param("/battery/ok_voltage", "26")
+        self.low_voltage = rospy.get_param("/battery/low_voltage", "22")
 
         # Variables required to detect if connected to ROS MASTER
         self.ros_loss_triggered = True
@@ -90,3 +113,13 @@ class RRVizTabs(QWidget):
             self.connection_status.setText("Connected")
             self.connection_status.setStyleSheet("color: green")
             self.ros_loss_triggered = False
+
+    def battery_level_update(self, msg):
+        bat_level = format(msg.voltage, ".1f") + 'V'
+        self.battery_level.setText(bat_level)
+        if bat_level >= self.ok_voltage:
+            self.battery_level.setStyleSheet("color: green")
+        elif bat_level <= self.ok_voltage and bat_level >= self.low_voltage:
+            self.battery_level.setStyleSheet("color: orange")
+        else:
+            self.battery_level.setStyleSheet("color: red")
