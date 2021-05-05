@@ -240,7 +240,7 @@ Visualization Manager:
       Show Axes: false
       Show Descriptions: true
       Show Visual Aids: false
-      Update Topic: /slam_toolbox/update
+      Update Topic: /mission_path_srv/update
       Value: true
     - Class: rviz/MarkerArray
       Enabled: false
