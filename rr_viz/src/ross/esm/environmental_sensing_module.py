@@ -72,7 +72,7 @@ class EnvironmentalSensingModule(QWidget):
         self.ir_data_label.setText("IR: " + format(msg.illuminance, ".2f"))
 
     def humidity_update(self, msg):
-    self.humidity_data_label.setText("Humidity: " + format(msg.relative_humidity, ".2f"))
+        self.humidity_data_label.setText("Humidity: " + format(msg.relative_humidity, ".2f"))
 
     def pressure_update(self, msg):
         self.pressure_data_label.setText("Pressure: " + format(msg.fluid_pressure, ".2f"))
