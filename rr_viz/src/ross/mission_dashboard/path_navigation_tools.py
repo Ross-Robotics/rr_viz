@@ -104,12 +104,10 @@ class PathNavigationTools(QWidget):
     def stop_recording(self):
         try:
             trig_resp = self.stop_recording_srv.call(TriggerRequest())
-            if trig_resp.success:
-                print(trig_resp.message)
-            else:
-                print(trig_resp.message)
+            rospy.loginfo(trig_resp.message)
+            if not trig_resp.success:
                 msg = "Failed to call '" + self.stop_mission_srv_name + "' service"
-                print(msg)
+                rospy.logerr(msg)
         except:
             msg = "Service '" + self.stop_mission_srv_name + "' unavailable"
             rospy.logwarn(msg)

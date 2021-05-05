@@ -183,32 +183,32 @@ class SlamSupervisor(QWidget):
         trig_resp = self.kill_nodes_srv.call(TriggerRequest())
         
         if trig_resp.success:
-            print(trig_resp.message)
+            rospy.loginfo(trig_resp.message)
             temp_timer = rospy.Timer(
                 rospy.Duration(.1), lambda _: self.waitTillDead_and_execute(self.run_mapping), oneshot=True)
         else:
-            print("Failed calling slam_killnodes_srv")
+            rospy.logwarn("Failed calling slam_killnodes_srv")
     
     def run_mapping(self):
         trig_resp = self.launch_mapping_srv.call(TriggerRequest())
 
         if trig_resp.success:
-            print(trig_resp.message)
+            rospy.loginfo(trig_resp.message)
             self.mode_label.setText("Mapping")
             self.loaded_map_label.setText("")
             self.loaded_map_name = ""
         else:
-            print("Failed calling slam_launch_mapping_srv")
+            rospy.logerr("Failed calling slam_launch_mapping_srv")
 
     def switch_to_localization(self):
         trig_resp = self.kill_nodes_srv.call(TriggerRequest())
 
         if trig_resp.success:
-            print(trig_resp.message)
+            rospy.loginfo(trig_resp.message)
             temp_timer = rospy.Timer(
                 rospy.Duration(.1), lambda _: self.waitTillDead_and_execute(self.run_localization), oneshot=True)
         else:
-            print("Failed calling slam_killnodes_srv")
+            rospy.logerr("Failed calling slam_killnodes_srv")
 
     def run_localization(self):
         _str = StringRequest()
@@ -216,12 +216,12 @@ class SlamSupervisor(QWidget):
         trig_resp = self.launch_localization_srv.call(_str)
 
         if trig_resp.success:
-            print(trig_resp.message)
+            rospy.loginfo(trig_resp.message)
             self.mode_label.setText("Localization")
             self.loaded_map_name = _str.str
             self.loaded_map_label.setText(self.loaded_map_name)
         else:
-            print("Failed calling slam_launch_localization_srv")
+            rospy.logerr("Failed calling slam_launch_localization_srv")
         
     def waitTillDead_and_execute(self, func):
         if len(self.active_nodes) == 0:
@@ -256,12 +256,10 @@ class SlamSupervisor(QWidget):
                 self.message_popup()
             else:
                 trig_resp = self.delete_map_srv.call(_str)
-                if trig_resp.success:
-                    print(trig_resp.message)
-                else:
-                    print("Failed calling slam delete map service")
-                    print(trig_resp.message)
-
+                rospy.loginfo(trig_resp.message)
+                if not trig_resp.success:
+                    rospy.logerr("Failed calling slam delete map service")
+ 
     def save_map(self):
         _str = StringRequest()
         map_name, ok = QInputDialog.getText(self, "Map file name", "Specify file name to save the map:")
@@ -277,11 +275,9 @@ class SlamSupervisor(QWidget):
 
             trig_resp = self.save_map_srv.call(_str)
 
-            if trig_resp.success:
-                print(trig_resp.message)
-            else:
-                print("Failed calling slam_save_map_srv")
-                print(trig_resp.message)
+            rospy.loginfo(trig_resp.message)
+            if not trig_resp.success:
+                rospy.logerr("Failed calling slam_save_map_srv")
 
     def save_map_image(self):
         map_name, ok = QInputDialog.getText(self, "Map file name"," Specify file name to save the map image:")

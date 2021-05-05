@@ -77,7 +77,7 @@ class MissionControls(QWidget):
     def start_mission(self):
         try:
             trig_resp = self.start_mission_srv.call(TriggerRequest())
-            print(trig_resp.message)
+            rospy.loginfo(trig_resp.message)
             if not trig_resp.success:
                 msg = "Failed to call '" + self.start_mission_srv_name + "' service"
                 rospy.logerr(msg)
@@ -88,7 +88,7 @@ class MissionControls(QWidget):
     def next_waypoint(self):
         try:
             trig_resp = self.next_waypoint_srv.call(TriggerRequest())
-            print(trig_resp.message)
+            rospy.loginfo(trig_resp.message)
             if not trig_resp.success:
                 msg = "Failed to call '" + self.next_waypoint_srv_name + "' service"
                 rospy.logerr(msg)
@@ -99,7 +99,7 @@ class MissionControls(QWidget):
     def stop_mission(self):
         try:
             trig_resp = self.stop_mission_srv.call(TriggerRequest())
-            print(trig_resp.message)
+            rospy.loginfo(trig_resp.message)
             if not trig_resp.success:
                 msg = "Failed to call '" + self.stop_mission_srv_name + "' service"
                 rospy.logerr(msg)
@@ -113,7 +113,7 @@ class MissionControls(QWidget):
 
         try:
             trig_resp = self.set_active_mode_srv.call(mode)
-            print(trig_resp.message)
+            rospy.loginfo(trig_resp.message)
             if not trig_resp.success:
                 msg = "Failed to call '" + self.set_active_mode_srv_name + "' service"
                 rospy.logerr(msg)
