@@ -22,7 +22,7 @@ class RossRoboticsRViz(QMainWindow):
         self.height = 868
         self.setGeometry(self.x, self.y, self.width, self.height)
 
-        file_management.is_userdir()
+        file_management.check_user_dir()
         
         self.tabWidget = RRVizTabs(self)
         self.setCentralWidget(self.tabWidget)

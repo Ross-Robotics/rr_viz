@@ -17,14 +17,14 @@ def get_rrviz_cfgdir():
     return get_rrviz_resdir() + "/cfg"
 
 def get_mission_files_dir():
-    is_userdir()
+    check_user_dir()
     return RR_VIZ_USER_DIR + "/mission"
 
 def get_map_images_dir():
-    is_userdir()
+    check_user_dir()
     return RR_VIZ_USER_DIR + "/map_images"
 
-def is_userdir():
+def check_user_dir():
     # Check if  the ~/.rr directory is setup and if it isnt, set it up.
     if not os.path.exists(RR_VIZ_USER_DIR):
         create_user_dir()
