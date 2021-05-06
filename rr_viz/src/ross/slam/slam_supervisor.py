@@ -21,7 +21,7 @@ class SlamSupervisor(QWidget):
 
         # Get parameters from server
         self.slam_sup_name = rospy.get_param("slam_supervisor_name", "slam_supervisor")
-        self.default_map_name = rospy.get_param("~default_map_name", "")
+        self.default_map_name = rospy.get_param("~default_map_name", "map")
         self.slam_package = rospy.get_param(self.slam_sup_name + '/slam_package', "")
         self.initial_mode = rospy.get_param(self.slam_sup_name + "/slam_mode", "")
         self.loaded_map_path = rospy.get_param(self.slam_sup_name + "/default_map_path", "")
@@ -268,10 +268,7 @@ class SlamSupervisor(QWidget):
             if map_name != '':
                 _str.str = string.replace(map_name, '.', '_')
             else:
-                if not self.default_map_name:
-                    _str.str = randomTimeString()
-                else:
-                    _str.str = self.default_map_name
+                _str.str = self.default_map_name
 
             trig_resp = self.save_map_srv.call(_str)
 
@@ -286,10 +283,7 @@ class SlamSupervisor(QWidget):
             if map_name != '':
                 map_name = string.replace(map_name, '.', '_')
             else:
-                if not self.default_map_name:
-                    map_name = randomTimeString()
-                else:
-                    map_name = self.default_map_name
+                map_name = self.default_map_name
 
             save_map_image_dir = file_management.get_map_images_dir()
             map_path = save_map_image_dir + '/' +  map_name
