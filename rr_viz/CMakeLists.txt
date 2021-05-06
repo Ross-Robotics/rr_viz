@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   rviz_textured_sphere
   rr_custom_msgs
   message_generation
+  sensor_msgs
 )
 catkin_python_setup()
 
