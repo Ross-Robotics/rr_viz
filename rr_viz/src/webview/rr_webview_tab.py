@@ -13,7 +13,7 @@ from PyQt5.QtWebKitWidgets import QWebView
 from PyQt5.QtWebKitWidgets import QWebPage
 import rospy
 import rospkg
-
+import managers.file_management as file_management
 
 
 #http://devtools.fg.oisin.rc-harwell.ac.uk/nightly/7.0/ccp4-src-7.0/checkout/PyQt-x11-gpl-4.11.2/doc/html/qwebview.html
@@ -24,7 +24,7 @@ class RRQWebViewTab(QWidget):
         rospack = rospkg.RosPack()
         main_layout = QHBoxLayout(self)
         self.loading_layout = QVBoxLayout(self)
-        self.projectS_logo = rospack.get_path('rr_viz') + "/res/projectS_logo.png"
+        self.projectS_logo = file_management.get_rrviz_resdir()+ "/projectS_logo.png"
         pixmap = QPixmap(self.projectS_logo)
         self.status_label = QLabel('Connecting to VeriFinder')
         self.status_label.setFont(QFont('Ubuntu',20,QFont.Bold))
