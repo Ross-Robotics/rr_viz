@@ -72,7 +72,7 @@ class RRVizTabs(QWidget):
         self.rr_interactive_tools_tab.setLayout(self.rr_interactive_tools_tab.h_layout)
 
         self.verifinder_tab.layout = QVBoxLayout(self)
-        self.verifinder_tab.layout.addWidget(RRQWebViewTab(self))
+        self.verifinder_tab.layout.addWidget(RRQWebViewTab(self), Qt.AlignCenter)
         self.verifinder_tab.setLayout(self.verifinder_tab.layout)
 
         self.main_window_layout.addWidget(self.main_window_tabs)
