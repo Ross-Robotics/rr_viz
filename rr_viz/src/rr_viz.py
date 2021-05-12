@@ -27,6 +27,9 @@ class RossRoboticsRViz(QMainWindow):
         self.tabWidget = RRVizTabs(self)
         self.setCentralWidget(self.tabWidget)
 
+    def closeEvent(self, event):
+        sys.exit(0)
+
 if __name__ == '__main__':
     rospy.init_node("rr_viz")
     app = QApplication(sys.argv)
