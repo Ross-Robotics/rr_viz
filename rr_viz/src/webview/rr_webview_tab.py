@@ -9,13 +9,13 @@ from PyQt5.QtWebKitWidgets import QWebView
 import rospy
 
 
-class RRQWebView(QWebView):
+class RRQWebViewTab(QWebView):
     def __init__(self, parent=None):
         super(self.__class__, self).__init__(parent)
         self.setWindowTitle('Loading Web UI...')
         self.titleChanged.connect(self.adjustTitle)
         self.load(rospy.get_param(
-            "~web_ui_url", "https://www.robosynthesis.com/"))
+            "~web_ui_url_tab", "https://www.bbc.co.uk/"))
 
     def load(self, url):
         self.setUrl(QUrl(url))

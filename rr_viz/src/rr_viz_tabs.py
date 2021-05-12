@@ -4,6 +4,8 @@ from PyQt5.QtGui import QPixmap, QFont
 from PyQt5.QtCore import Qt, QTimer
 
 from rviz_tabs import RvizTabs
+from webview.rr_webview import *
+from webview.rr_webview_tab import *
 from ross.rr_interactive_tools import RRInteractiveTools
 from ross.esm.environmental_sensing_module import EnvironmentalSensingModule
 import managers.file_management as file_management
@@ -18,8 +20,10 @@ class RRVizTabs(QWidget):
 
         self.main_window_tabs = QTabWidget()
         self.rr_interactive_tools_tab = QWidget()
+        self.verifinder_tab = QWidget()
         
         self.main_window_tabs.addTab(self.rr_interactive_tools_tab, "Ross Robotics")
+        self.main_window_tabs.addTab(self.verifinder_tab, "Verifinder")
         
         self.rr_interactive_tools_tab.h_layout = QHBoxLayout(self)
         self.rr_interactive_tools_tab.v_layout1 = QVBoxLayout(self)
@@ -58,24 +62,18 @@ class RRVizTabs(QWidget):
         self.rr_interactive_tools_tab.v_layout2.addLayout(self.status_h_layout,1)
      
         # Add rr interactive tools to layout
-        self.rr_interactive_tools_tab.v_layout2.addWidget(RRInteractiveTools(self),7)
-
-        # Set up logo
-        self.logo_label = QLabel(self)
-        logo_path = file_management.get_rrviz_resdir() + "/logo.png"
-        logo_pixmap = QPixmap(logo_path)
-        logo_scaled = logo_pixmap.scaledToWidth(300)
-        self.logo_label.setPixmap(logo_scaled)
-        
-        self.logo_label.setAlignment(Qt.AlignCenter | Qt.AlignVCenter)
-
-        self.rr_interactive_tools_tab.v_layout2.addWidget(self.logo_label, 2)
+        self.rr_interactive_tools_tab.v_layout2.addWidget(RRInteractiveTools(self),5)
+        self.rr_interactive_tools_tab.v_layout2.addWidget(RRQWebView(self),4)
 
         # Add vertical layouts to the horizontal layout
         self.rr_interactive_tools_tab.h_layout.addLayout(self.rr_interactive_tools_tab.v_layout1, 7)
         self.rr_interactive_tools_tab.h_layout.addLayout(self.rr_interactive_tools_tab.v_layout2, 3)
 
         self.rr_interactive_tools_tab.setLayout(self.rr_interactive_tools_tab.h_layout)
+
+        self.verifinder_tab.layout = QVBoxLayout(self)
+        self.verifinder_tab.layout.addWidget(RRQWebViewTab(self))
+        self.verifinder_tab.setLayout(self.verifinder_tab.layout)
 
         self.main_window_layout.addWidget(self.main_window_tabs)
         self.setLayout(self.main_window_layout)
