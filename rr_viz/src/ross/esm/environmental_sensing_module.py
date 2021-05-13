@@ -69,19 +69,19 @@ class EnvironmentalSensingModule(QWidget):
         self.vis_topic_sub = rospy.Subscriber(self.vis_topic_name, Illuminance, self.vis_update)
 
     def ir_update(self, msg):
-        self.ir_data_label.setText("IR: " + format(msg.illuminance, ".2f"))
+        self.ir_data_label.setText("IR: " + format(msg.illuminance, ".2f") + " Lux")
 
     def humidity_update(self, msg):
-        self.humidity_data_label.setText("Humidity: " + format(msg.relative_humidity, ".2f"))
+        self.humidity_data_label.setText("Humidity: " + format(msg.relative_humidity, ".2f") + "%")
 
     def pressure_update(self, msg):
-        self.pressure_data_label.setText("Pressure: " + format(msg.fluid_pressure, ".2f"))
+        self.pressure_data_label.setText("Pressure: " + format(msg.fluid_pressure, ".2f") + " Pascals")
 
     def temp_update(self, msg):
-        self.temp_data_label.setText("Temp: " + format(msg.temperature, ".2f"))
+        self.temp_data_label.setText("Temp: " + format(msg.temperature, ".2f") + " degC")
 
     def uv_update(self, msg):
-        self.uv_data_label.setText("UV: " + format(msg.data, ".2f"))
+        self.uv_data_label.setText("UV index: " + format(msg.data, ".2f"))
 
     def vis_update(self, msg):
-        self.vis_data_label.setText("Visible light: " + format(msg.illuminance, ".2f"))
+        self.vis_data_label.setText("Visible light: " + format(msg.illuminance, ".2f") + " Lux")
