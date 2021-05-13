@@ -5,7 +5,7 @@ from PyQt5.QtGui import QFont
 from docking import Docking
 from path_navigation_tools import PathNavigationTools
 from mission_controls import MissionControls
-from emergency_stop import EmergencyStop
+from ..estop.emergency_stop import EmergencyStop
 
 class MissionDashboard(QWidget):
     def __init__(self, parent):

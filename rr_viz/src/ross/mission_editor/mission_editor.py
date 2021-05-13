@@ -14,6 +14,7 @@ import string
 
 from rr_custom_msgs.srv import BuildBT
 from mission_actions import BuildBTAction, WaypointMoveBaseAction
+from ..estop.emergency_stop import EmergencyStop
 
 class MissionEditor(QWidget):
     # Set up signals
@@ -107,6 +108,9 @@ class MissionEditor(QWidget):
         self.h_layout_command.addWidget(self.send_mission_button)
 
         self.v_layout.addLayout(self.h_layout_command)
+
+        self.emergency_stop_widget = EmergencyStop(self)
+        self.v_layout.addWidget(self.emergency_stop_widget)
 
         self.setLayout(self.v_layout)
 

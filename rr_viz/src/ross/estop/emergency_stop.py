@@ -5,6 +5,7 @@ from PyQt5.QtCore import Qt
 
 import rospy
 from std_srvs.srv import SetBool, SetBoolRequest
+from std_msgs.msg import Bool
 
 class EmergencyStop(QWidget):
     def __init__(self, parent):
@@ -42,6 +43,10 @@ class EmergencyStop(QWidget):
         self.eStop_srv_name = '/emergency_stop/trigger_eStop'
         self.eStop_srv = rospy.ServiceProxy(self.eStop_srv_name, SetBool)
         self.eStop_req = SetBoolRequest()
+
+        # Set up subscriber
+        self.eStop_status_topic_name = '/emergency_stop/status'
+        self.eStop_status_sub = rospy.Subscriber(self.eStop_status_topic_name, Bool, self.eStop_status_update)
 
     def enable_eStop(self):
         self.eStop_req.data = True
@@ -82,3 +87,15 @@ class EmergencyStop(QWidget):
         except:
             msg = "Service '" + self.eStop_srv_name + "' unavailable"
             rospy.logwarn(msg)
+
+    def eStop_status_update(self, msg):
+        if msg.data:
+            self.enable_eStop_button.setStyleSheet("")
+            self.disable_eStop_button.setStyleSheet("color: white;"
+                                                    "background-color: green;"
+                                                    "font-weight: bold;")
+        else:
+            self.enable_eStop_button.setStyleSheet("color: white;"
+                                                    "background-color: red;"
+                                                    "font-weight: bold;")
+            self.disable_eStop_button.setStyleSheet("")      
