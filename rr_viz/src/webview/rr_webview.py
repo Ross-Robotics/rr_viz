@@ -1,16 +1,12 @@
 #!/usr/bin/env python
-from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from PyQt5.QtCore import QUrl
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtWebKitWidgets import QWebView
-from PyQt5.QtWebKitWidgets import QWebPage
 import rospy
 import rospkg
 import managers.file_management as file_management
-
-#http://devtools.fg.oisin.rc-harwell.ac.uk/nightly/7.0/ccp4-src-7.0/checkout/PyQt-x11-gpl-4.11.2/doc/html/qwebview.html
 
 class RRQWebView(QWidget):
     def __init__(self, parent):

@@ -1,27 +1,15 @@
 #!/usr/bin/env python
-import os
 import sys
-import ctypes
-import platform
 from cefpython3 import cefpython as cef
-from PyQt5 import QtCore, QtGui, QtWidgets, uic
-from PyQt5.QtCore import QUrl
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from PyQt5.QtWebKitWidgets import QWebView
-from PyQt5.QtWebKitWidgets import QWebPage
 import rospy
-import rospkg
 import managers.file_management as file_management
-
-
-#http://devtools.fg.oisin.rc-harwell.ac.uk/nightly/7.0/ccp4-src-7.0/checkout/PyQt-x11-gpl-4.11.2/doc/html/qwebview.html
 
 class RRQWebViewTab(QWidget):
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
-        rospack = rospkg.RosPack()
         main_layout = QHBoxLayout(self)
         self.loading_layout = QVBoxLayout(self)
         self.projectS_logo = file_management.get_rrviz_resdir()+ "/projectS_logo.png"
@@ -105,7 +93,6 @@ class RRQWebViewTab(QWidget):
 
         def _login(self):
             self.browser.ExecuteJavascript("document.getElementById('mat-input-0').value = 'advanced'")
-            # self.browser.ExecuteJavascript("document.getElementById('mat-input-0').value = 'advanced'")
             self.browser.ExecuteJavascript("document.getElementById('mat-input-1').value = 'symetricas'")
             self.browser.ExecuteJavascript("document.getElementById('login-button').click()")
 
