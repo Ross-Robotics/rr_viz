@@ -41,6 +41,11 @@ class RvizTabs(QWidget):
         self.layout.addWidget(self.tabs)
         self.setLayout(self.layout)
 
+        # Get png files for spawn waypoint
+        self.spawn_waypoint_png = file_management.get_rrviz_resdir() + "/spawn_waypoint.png"
+        self.spawn_waypoint_cursor_png = file_management.get_rrviz_resdir() + "/cursor.png"
+        self.cursor_pixmap = QtGui.QPixmap(self.spawn_waypoint_cursor_png)  
+
         self.pose_estimates = []
         self.timer = QTimer(self)
         for button in self.findChildren(QtWidgets.QToolButton):
@@ -49,20 +54,17 @@ class RvizTabs(QWidget):
 
         # Workaround for the refresh that rviz does
         self.timer.timeout.connect(self.rr_viz_visual_overrides)
-        self.timer.start(10)
+        self.timer.start(100)
 
     def rr_viz_visual_overrides(self):
         try:
             self.pose_estimates[3].setText("Set Pose Estimate")
-            
             self.pose_estimates[4].setText("Spawn Waypoint")
-            spawn_waypoint_png = file_management.get_rrviz_resdir() + "/spawn_waypoint.png"
-            self.pose_estimates[4].setIcon(QIcon(spawn_waypoint_png))
+            
+            self.pose_estimates[4].setIcon(QIcon(self.spawn_waypoint_png))
 
             if(self.pose_estimates[4].isChecked()):
-                bmp = file_management.get_rrviz_resdir() + "/cursor.png"
-                pm = QtGui.QPixmap(bmp)                
-                QApplication.setOverrideCursor(QCursor(pm))
+                QApplication.setOverrideCursor(QCursor(self.cursor_pixmap))
             else:
                 QApplication.restoreOverrideCursor()
         except:
