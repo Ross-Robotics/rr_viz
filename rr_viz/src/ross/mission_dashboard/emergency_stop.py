@@ -4,7 +4,7 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 
 import rospy
-from std_srvs.srv import Trigger, TriggerRequest
+from std_srvs.srv import SetBool, SetBoolRequest
 
 class EmergencyStop(QWidget):
     def __init__(self, parent):
@@ -35,10 +35,40 @@ class EmergencyStop(QWidget):
 
         self.setLayout(self.v_layout)
 
+        # Set up service
+        self.eStop_srv_name = '/emergency_stop/trigger_eStop'
+        self.eStop_srv = rospy.ServiceProxy(self.eStop_srv_name, SetBool)
+        self.eStop_req = SetBoolRequest()
+
     def enable_eStop(self):
-        self.enable_eStop_button.setEnabled(False)
-        self.disable_eStop_button.setEnabled(True)
+        self.eStop_req.data = True
+
+        try:
+            trig_resp = self.eStop_srv.call(self.eStop_req)
+            rospy.loginfo(trig_resp.message)
+            if not trig_resp.success:
+                msg = "Failed to call '" + self.eStop_srv_name + "' service"
+                rospy.logerr(msg)
+            else:
+                self.enable_eStop_button.setEnabled(False)
+                self.disable_eStop_button.setEnabled(True)
+        except:
+            msg = "Service '" + self.eStop_srv_name + "' unavailable"
+            rospy.logwarn(msg)
+
 
     def disable_eStop(self):
-        self.enable_eStop_button.setEnabled(True)
-        self.disable_eStop_button.setEnabled(False)
+        self.eStop_req.data = False
+
+        try:
+            trig_resp = self.eStop_srv.call(self.eStop_req)
+            rospy.loginfo(trig_resp.message)
+            if not trig_resp.success:
+                msg = "Failed to call '" + self.eStop_srv_name + "' service"
+                rospy.logerr(msg)
+            else:
+                self.enable_eStop_button.setEnabled(True)
+                self.disable_eStop_button.setEnabled(False)
+        except:
+            msg = "Service '" + self.eStop_srv_name + "' unavailable"
+            rospy.logwarn(msg)
