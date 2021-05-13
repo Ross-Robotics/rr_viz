@@ -11,7 +11,6 @@ import managers.file_management as file_management
 class RRQWebView(QWidget):
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
-        rospack = rospkg.RosPack()
         main_layout = QHBoxLayout(self)
         self.loading_layout = QVBoxLayout(self)
         self.setMaximumWidth(400)
