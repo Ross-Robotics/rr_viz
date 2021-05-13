@@ -1,5 +1,4 @@
-import os
-from PyQt5 import QtCore, QtGui, QtWidgets, uic
+#!/usr/bin/env python
 from PyQt5.QtCore import QUrl
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -7,9 +6,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtWebKitWidgets import QWebView
 from PyQt5.QtWebKitWidgets import QWebPage
 import rospy
-import rospkg
-
-#http://devtools.fg.oisin.rc-harwell.ac.uk/nightly/7.0/ccp4-src-7.0/checkout/PyQt-x11-gpl-4.11.2/doc/html/qwebview.html
+import managers.file_management as file_management
 
 class RRQWebView(QWidget):
     def __init__(self, parent):
@@ -18,7 +15,7 @@ class RRQWebView(QWidget):
         main_layout = QHBoxLayout(self)
         self.loading_layout = QVBoxLayout(self)
         self.setMaximumWidth(400)
-        self.projectS_logo = rospack.get_path('rr_viz') + "/res/projectS_logo.png"
+        self.projectS_logo = file_management.get_rrviz_resdir()+ "/projectS_logo.png"
         pixmap = QPixmap(self.projectS_logo)
         self.status_label = QLabel('Connecting to remote screen')
         self.status_label.setFont(QFont('Ubuntu',20,QFont.Bold))

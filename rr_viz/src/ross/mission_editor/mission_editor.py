@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-import sys
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QLabel, QGridLayout, QPushButton, QListWidget, QFrame, QFileDialog, QLineEdit, QMessageBox
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QLabel, QGridLayout, QPushButton, QFrame, QMessageBox, QInputDialog
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 from PyQt5 import QtCore
@@ -10,10 +9,17 @@ import rospy
 from geometry_msgs.msg import PoseWithCovarianceStamped, PoseStamped
 from rr_custom_msgs.msg import TaskWaypoint as TaskWaypointMsg
 import managers.file_management as file_management
+from helpers import rr_qt_helper
+import string
+
+from rr_custom_msgs.srv import BuildBT
+from mission_actions import BuildBTAction, WaypointMoveBaseAction
 
 class MissionEditor(QWidget):
-    # Set up signal
+    # Set up signals
     spawn_waypoint_signal = QtCore.pyqtSignal(PoseWithCovarianceStamped)
+    set_enable_go_to_buttons = QtCore.pyqtSignal(bool)
+    set_enable_send_mission = QtCore.pyqtSignal(bool)
    
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
@@ -68,18 +74,6 @@ class MissionEditor(QWidget):
         self.button_layout.addWidget(self.load_mission_button, 2, 1)
         self.v_layout.addLayout(self.button_layout)
 
-        # Filename
-        self.h_layout_file_name = QHBoxLayout()
-        self.filename_label = QLabel('Filename:')
-        self.filename_label.setFont(QFont('Ubuntu', 10, QFont.Bold))
-        self.h_layout_file_name.addWidget(self.filename_label, 2)
-
-        self.file_name_text_edit = QLineEdit()
-        self.file_name_text_edit.setFont(QFont('Ubuntu', 10))
-        self.h_layout_file_name.addWidget(self.file_name_text_edit, 8)
-
-        self.v_layout.addLayout(self.h_layout_file_name)
-
         # Line
         self.line = QFrame()
         self.line.setFrameShape(QFrame.HLine)
@@ -93,15 +87,39 @@ class MissionEditor(QWidget):
 
         # Command buttons
         self.h_layout_command = QHBoxLayout()
+
         self.go_to_selected_button = QPushButton('Go to Selected')
+        self.go_to_selected_button.pressed.connect(self.go_to_selected)
+        
         self.go_to_all_button = QPushButton('Go to All')
+        self.go_to_all_button.pressed.connect(self.go_to_all)
+
+        self.enable_go_to_buttons(False)
+        self.set_enable_go_to_buttons.connect(self.enable_go_to_buttons)
+
         self.send_mission_button = QPushButton('Send Mission')
+        self.send_mission_button.pressed.connect(self.send_mission)
+        self.enable_send_mission_button(False)
+        self.set_enable_send_mission.connect(self.enable_send_mission_button)
+
         self.h_layout_command.addWidget(self.go_to_selected_button)
         self.h_layout_command.addWidget(self.go_to_all_button)
         self.h_layout_command.addWidget(self.send_mission_button)
+
         self.v_layout.addLayout(self.h_layout_command)
 
         self.setLayout(self.v_layout)
+
+        self.bt_action = BuildBTAction()
+        self.mb_action = WaypointMoveBaseAction()
+        
+        # Setup state checker:
+        self.bt_state_checker = rr_qt_helper.StateCheckerTimer(
+            self.bt_action.is_connected,  self.set_enable_send_mission, Hz=1./3.)
+        self.bt_state_checker.start()
+        self.mb_state_checker = rr_qt_helper.StateCheckerTimer(
+            self.mb_action.is_connected,  self.set_enable_go_to_buttons, Hz=1./3.)
+        self.mb_state_checker.start()
 
     def robot_pose_cb(self, msg):
         self.robot_pose = msg
@@ -119,7 +137,6 @@ class MissionEditor(QWidget):
             msg = PoseWithCovarianceStamped()
             msg.header = self.robot_pose.header
             msg.pose.pose = self.robot_pose.pose
-            print(msg)
             self.spawn_waypoint_signal.emit(msg)
         else:
             rospy.logwarn("Robot pose not connected")
@@ -138,31 +155,52 @@ class MissionEditor(QWidget):
                 self.waypoint_list.get_wp(self.waypoint_list.len()-1))
 
     def save(self):
-        file_name = self.file_name_text_edit.text()
-        if file_name == '':
-            self.msg_to_show= "No file name specified."
-            self.message_popup()
-        else:
-            save_path = file_management.get_user_dir() + "/paths/" + file_name
-        
-            if save_path[-5:] != ".yaml":
-                save_path = save_path + ".yaml"
+        mission_name, ok = QInputDialog.getText(self, "Mission file name", "Specify file name to save mission:")
 
+        if ok:
+            if mission_name == "":
+                mission_name = "default"
+            if mission_name[-5:] == ".yaml":
+                mission_name = mission_name[0:-5]
+
+            mission_name = string.replace(mission_name, '.', '_')
+            mission_name = mission_name + ".yaml"
+                        
+            save_path = file_management.get_mission_files_dir() + "/" + mission_name            
             self.waypoint_list.saveToPath(save_path, "Mission" + str(rospy.Time.now()))
 
     def load(self):
-        file_name = self.file_name_text_edit.text()
-        if file_name == '':
-            self.msg_to_show= "No file name specified."
-            self.message_popup()
+        mission_files = file_management.get_files(file_management.get_mission_files_dir(), ".yaml")
+        
+        if mission_files == []:
+            msg = QMessageBox()
+            msg.setWindowTitle("Load Mission")
+            msg.setIcon(QMessageBox.Information)
+            msg.setText("No mission files available")
+            msg.setStandardButtons(QMessageBox.Ok)
+            msg.exec_()
         else:
-            load_path = file_management.get_user_dir() + "/paths/" + file_name
-            if load_path[-5:] != ".yaml":
-                load_path = load_path + ".yaml"
-            
-            self.waypoint_list.loadFromPath(load_path)         
+            mission_file, ok = QInputDialog.getItem(self, "Select mission to load", "Available missions:", mission_files, 0, False)
+        
+            if ok:
+                load_path = file_management.get_mission_files_dir() + "/" + mission_file
+                if load_path[-5:] != ".yaml":
+                    load_path = load_path + ".yaml"
+                
+                self.waypoint_list.loadFromPath(load_path)         
 
-    def message_popup(self):
-        msg = QMessageBox()
-        msg.setText(self.msg_to_show)
-        msg.exec_()                                
+    def enable_go_to_buttons(self, enabled):
+        self.go_to_selected_button.setEnabled(enabled)
+        self.go_to_all_button.setEnabled(enabled)
+
+    def enable_send_mission_button(self, enabled):
+        self.send_mission_button.setEnabled(enabled)
+
+    def go_to_selected(self):
+        self.mb_action.goto_action(self.waypoint_list)
+
+    def go_to_all(self):
+        self.mb_action.gotoall_action(self.waypoint_list)
+
+    def send_mission(self):
+        self.bt_action.build_bt_action(self.waypoint_list)

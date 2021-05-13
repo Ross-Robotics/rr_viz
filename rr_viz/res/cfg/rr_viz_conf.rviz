@@ -240,7 +240,7 @@ Visualization Manager:
       Show Axes: false
       Show Descriptions: true
       Show Visual Aids: false
-      Update Topic: /slam_toolbox/update
+      Update Topic: /mission_path_srv/update
       Value: true
     - Class: rviz/MarkerArray
       Enabled: false
@@ -323,6 +323,11 @@ Visualization Manager:
     - Class: rviz/SetInitialPose
       Theta std deviation: 0.2617993950843811
       Topic: /initialpose
+      X std deviation: 0.5
+      Y std deviation: 0.5
+    - Class: rviz/SetInitialPose
+      Theta std deviation: 0.2617993950843811
+      Topic: /spawn_waypoint
       X std deviation: 0.5
       Y std deviation: 0.5
     - Class: rviz/SetGoal

@@ -4,8 +4,9 @@ import rospy
 import rospkg
 from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog, QMessageBox
 
-RR_VIZ_USER_DIR = os.path.expanduser("~/.rr")
-
+RR_VIZ_USER_DIR = os.path.expanduser("~/Desktop/RossRobotics")
+RR_VIZ_MISSION_DIR = RR_VIZ_USER_DIR + "/mission"
+RR_VIZ_MAP_IMAGES_DIR = RR_VIZ_USER_DIR + "/map_images"
 
 def get_rrviz_dir():
     rospack = rospkg.RosPack()
@@ -14,43 +15,44 @@ def get_rrviz_dir():
 def get_rrviz_resdir():
     return get_rrviz_dir() + "/res"
 
-
 def get_rrviz_cfgdir():
     return get_rrviz_resdir() + "/cfg"
 
+def get_mission_files_dir():
+    check_user_dir()
+    return RR_VIZ_MISSION_DIR
 
-def is_userdir():
+def get_map_images_dir():
+    check_user_dir()
+    return RR_VIZ_MAP_IMAGES_DIR
+
+def check_user_dir():
     # Check if  the ~/.rr directory is setup and if it isnt, set it up.
-    is_setup = False
-    def msgbtn(i):
-        if "Yes" in i.text():
-            try:
-                os.mkdir(RR_VIZ_USER_DIR)
-                os.mkdir(RR_VIZ_USER_DIR +"/paths")                
-            except OSError:
-                print ("Creation of the directory %s failed" %
-                       RR_VIZ_USER_DIR)
-            else:
-                is_setup = True
-                print ("Successfully created the directory %s " %
-                       RR_VIZ_USER_DIR)
-
     if not os.path.exists(RR_VIZ_USER_DIR):
-        msg = QMessageBox()
-        msg.setIcon(QMessageBox.Warning)
-        msg.setText("This user does not have Ross Robotics directory set up. Would you like it set up now? (creates a folder at ~/.rr to store local files)")
-        msg.setWindowTitle("RR directory setup")
-        msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-        msg.buttonClicked.connect(msgbtn)
-        msg.exec_()
-        return is_setup
-    else:
-        return True
+        create_ross_robotics_dir()
+        rospy.logerr(RR_VIZ_USER_DIR + " directory did not exist, and has been created. It is needed for RR_VIZ to work.")
+    if not os.path.exists(RR_VIZ_MISSION_DIR):
+        create_mission_dir()
+        rospy.logerr(RR_VIZ_MISSION_DIR + " directory did not exist, and has been created. It is needed for RR_VIZ to work.")
+    if not os.path.exists(RR_VIZ_MAP_IMAGES_DIR):
+        create_map_images_dir()
+        rospy.logerr(RR_VIZ_MAP_IMAGES_DIR + " directory did not exist, and has been created. It is needed for RR_VIZ to work.")
 
-def get_user_dir(terminate=False):
-    if is_userdir():       
-        return RR_VIZ_USER_DIR
-    elif terminate:
-        return None
-    else:
-        return get_user_dir(terminate=True)#Call recursively to avoid errors
+def get_files(dir_path, extension):
+    if not os.path.exists(dir_path):
+        raise OSError("The specified path, %s, does not exist" % dir_path)
+
+    files = []
+    for f in os.listdir(dir_path):
+      if f.endswith(extension):
+        files.append(f)
+    return files
+
+def create_ross_robotics_dir():
+    os.mkdir(RR_VIZ_USER_DIR)
+
+def create_mission_dir():
+    os.mkdir(RR_VIZ_MISSION_DIR)
+
+def create_map_images_dir():
+    os.mkdir(RR_VIZ_MAP_IMAGES_DIR) 

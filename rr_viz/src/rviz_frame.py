@@ -6,6 +6,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 import rviz
+import rospy
 import managers.file_management as file_management
 
 
@@ -31,7 +32,7 @@ class RViz_frame():
             self.rviz_manager = rviz_manager
             return self.rviz_frame
         else:
-            print("attempt to load rviz config before setting it")
+            rospy.logerr("attempt to load rviz config before setting it")
 
     def set_rviz_config(self, rviz_config):
         if rviz_config != self.rviz_config:
@@ -60,9 +61,9 @@ def get_rviz(config_name, hide_menu=True, hide_status=True, splash=""):
     reader = rviz.YamlConfigReader()
     config = rviz.Config()
     reader.readFile(config, config_name)
-    print("Loading rviz config: {}".format(config_name))
+    rospy.loginfo("Loading rviz config: {}".format(config_name))
     rviz_frame.load(config)
-    print("rviz config loaded")
+    rospy.loginfo("rviz config loaded")
     # Here we disable the menu bar (from the top), status bar
     # (from the bottom), and the "hide-docks" buttons, which are
     # the tall skinny buttons on the left and right sides of the
