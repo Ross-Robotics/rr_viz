@@ -105,7 +105,7 @@ class RRQWebViewTab(QWidget):
 
         def _login(self):
             self.browser.ExecuteJavascript("document.getElementById('mat-input-0').value = 'advanced'")
-            self.browser.ExecuteJavascript("document.getElementById('mat-input-0').value = 'advanced'")
+            # self.browser.ExecuteJavascript("document.getElementById('mat-input-0').value = 'advanced'")
             self.browser.ExecuteJavascript("document.getElementById('mat-input-1').value = 'symetricas'")
             self.browser.ExecuteJavascript("document.getElementById('login-button').click()")
 
