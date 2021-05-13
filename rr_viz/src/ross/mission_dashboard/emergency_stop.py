@@ -21,6 +21,9 @@ class EmergencyStop(QWidget):
         # Buttons
         self.h_layout = QHBoxLayout()
         self.enable_eStop_button = QPushButton('Emergency Stop')
+        self.enable_eStop_button.setStyleSheet("color: white;"
+                                                "background-color: red;"
+                                                "font-weight: bold;")
         self.enable_eStop_button.pressed.connect(self.enable_eStop)
 
         self.disable_eStop_button = QPushButton('Reset Emergency Stop')
@@ -51,11 +54,14 @@ class EmergencyStop(QWidget):
                 rospy.logerr(msg)
             else:
                 self.enable_eStop_button.setEnabled(False)
+                self.enable_eStop_button.setStyleSheet("")
                 self.disable_eStop_button.setEnabled(True)
+                self.disable_eStop_button.setStyleSheet("color: white;"
+                                        "background-color: green;"
+                                        "font-weight: bold;")
         except:
             msg = "Service '" + self.eStop_srv_name + "' unavailable"
             rospy.logwarn(msg)
-
 
     def disable_eStop(self):
         self.eStop_req.data = False
@@ -68,7 +74,11 @@ class EmergencyStop(QWidget):
                 rospy.logerr(msg)
             else:
                 self.enable_eStop_button.setEnabled(True)
+                self.enable_eStop_button.setStyleSheet("color: white;"
+                                                        "background-color: red;"
+                                                        "font-weight: bold;")
                 self.disable_eStop_button.setEnabled(False)
+                self.disable_eStop_button.setStyleSheet("")
         except:
             msg = "Service '" + self.eStop_srv_name + "' unavailable"
             rospy.logwarn(msg)
