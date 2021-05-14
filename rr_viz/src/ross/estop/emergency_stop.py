@@ -10,7 +10,22 @@ from std_msgs.msg import Bool
 class EmergencyStop(QWidget):
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
+        
+        self.layout_init()
 
+        # Set up service
+        self.eStop_srv_name = '/emergency_stop/trigger_eStop'
+        self.eStop_srv = rospy.ServiceProxy(self.eStop_srv_name, SetBool)
+        self.eStop_req = SetBoolRequest()
+        self.eStop_srv_timer = rospy.Timer(rospy.Duration(
+            1), self.ping_srv)
+        self.eStop_srv_connected = False
+
+        # Set up subscriber
+        self.eStop_status_topic_name = '/emergency_stop/status'
+        self.eStop_status_sub = rospy.Subscriber(self.eStop_status_topic_name, Bool, self.eStop_status_update)
+
+    def layout_init(self):
         self.v_layout = QVBoxLayout()
 
         # Title
@@ -36,19 +51,7 @@ class EmergencyStop(QWidget):
 
         self.setLayout(self.v_layout)
 
-        # Set up service
-        self.eStop_srv_name = '/emergency_stop/trigger_eStop'
-        self.eStop_srv = rospy.ServiceProxy(self.eStop_srv_name, SetBool)
-        self.eStop_req = SetBoolRequest()
-        self.eStop_srv_timer = rospy.Timer(rospy.Duration(
-            1), lambda event: self.ping_srv())
-        self.eStop_srv_connected = False
-
-        # Set up subscriber
-        self.eStop_status_topic_name = '/emergency_stop/status'
-        self.eStop_status_sub = rospy.Subscriber(self.eStop_status_topic_name, Bool, self.eStop_status_update)
-
-    def ping_srv(self):
+    def ping_srv(self, period):
         if rospy.is_shutdown():
             return False
         try:
@@ -56,31 +59,25 @@ class EmergencyStop(QWidget):
             if not self.eStop_srv_connected:
                 rospy.loginfo_throttle(1,'Connected to {}.'.format(self.eStop_srv_name))
             self.eStop_srv_connected = True
+            return True
         except:
             rospy.loginfo_throttle(1,
                                    "Lost Connection to {}".format(self.eStop_srv_name) if self.eStop_srv_connected else "Failed to connect to {}".format(self.eStop_srv_name))
             self.eStop_srv_connected = False
-            self.enable_eStop_button.setStyleSheet("")
-            self.disable_eStop_button.setStyleSheet("")
-            self.enable_eStop_button.setEnabled(False)
-            self.disable_eStop_button.setEnabled(False)
+
+        
+        self.layout_estop_enable_btn(False)
+        self.layout_estop_disable_btn(False)
 
     def enable_eStop(self):
         self.eStop_req.data = True
-
-        try:
-            trig_resp = self.eStop_srv.call(self.eStop_req)
-            rospy.loginfo(trig_resp.message)
-            if not trig_resp.success:
-                msg = "Failed to call '" + self.eStop_srv_name + "' service"
-                rospy.logerr(msg)
-        except:
-            msg = "Service '" + self.eStop_srv_name + "' unavailable"
-            rospy.logwarn(msg)
+        self.trigger_service()
 
     def disable_eStop(self):
         self.eStop_req.data = False
+        self.trigger_service()
 
+    def trigger_service(self):
         try:
             trig_resp = self.eStop_srv.call(self.eStop_req)
             rospy.loginfo(trig_resp.message)
@@ -92,17 +89,34 @@ class EmergencyStop(QWidget):
             rospy.logwarn(msg)
 
     def eStop_status_update(self, msg):
+        # This watches a topic created by the Estop script which outputs whether the eStop is 
+        # engaged or not. This is so that if the eStop is engaged on one of the controls then
+        # all controls know of its engaged and reflect that in their displays. 
+        # True = Enabled, False = Disabled
         if msg.data:
+            self.layout_estop_enable_btn(False)
+            self.layout_estop_disable_btn(True)
+        else:
+            self.layout_estop_enable_btn(True)
+            self.layout_estop_disable_btn(False)
+             
+
+    def layout_estop_enable_btn(self, state):
+        if state:
+            self.enable_eStop_button.setEnabled(True)
+            self.enable_eStop_button.setStyleSheet("color: white;"
+                                                    "background-color: red;"
+                                                    "font-weight: bold;")
+        else:
             self.enable_eStop_button.setEnabled(False)
             self.enable_eStop_button.setStyleSheet("")
+
+    def layout_estop_disable_btn(self, state):
+        if state:
             self.disable_eStop_button.setEnabled(True)
             self.disable_eStop_button.setStyleSheet("color: white;"
                                     "background-color: green;"
                                     "font-weight: bold;")
         else:
-            self.enable_eStop_button.setEnabled(True)
-            self.enable_eStop_button.setStyleSheet("color: white;"
-                                                    "background-color: red;"
-                                                    "font-weight: bold;")
             self.disable_eStop_button.setEnabled(False)
-            self.disable_eStop_button.setStyleSheet("")      
+            self.disable_eStop_button.setStyleSheet("")   
