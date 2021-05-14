@@ -68,6 +68,7 @@ class EnvironmentalSensingModule(QWidget):
         self.vis_topic_name = "/" + self.esm_namespace + "/environmental_sensor/visible_light"
         self.vis_topic_sub = rospy.Subscriber(self.vis_topic_name, Illuminance, self.vis_update)
 
+        self.degree_symbol = u'\N{DEGREE SIGN}'
     def ir_update(self, msg):
         self.ir_data_label.setText("IR: " + format(msg.illuminance, ".2f") + " Lux")
 
@@ -78,7 +79,7 @@ class EnvironmentalSensingModule(QWidget):
         self.pressure_data_label.setText("Pressure: " + format(msg.fluid_pressure, ".2f") + " Pascals")
 
     def temp_update(self, msg):
-        self.temp_data_label.setText("Temp: " + format(msg.temperature, ".2f") + " degC")
+        self.temp_data_label.setText("Temp: " + format(msg.temperature, ".2f") + self.degree_symbol + "C")
 
     def uv_update(self, msg):
         self.uv_data_label.setText("UV index: " + format(msg.data, ".2f"))
