@@ -102,17 +102,19 @@ class RRVizTabs(QWidget):
         self.timer.start(self.timer_period)
 
     def ros_is_up(self):
-        process = subprocess.Popen(self.subprocess_command, shell=True, stdout=subprocess.PIPE)
-        stdout = process.communicate()[0]
-
-        if not self.fp_status in stdout and not self.ros_loss_triggered:
-            self.connection_status.setText("Connection lost")
-            self.connection_status.setStyleSheet("color: red")
-            self.ros_loss_triggered = True
-        elif self.fp_status in stdout and self.ros_loss_triggered:
             self.connection_status.setText("Connected")
             self.connection_status.setStyleSheet("color: green")
-            self.ros_loss_triggered = False
+        # process = subprocess.Popen(self.subprocess_command, shell=True, stdout=subprocess.PIPE)
+        # stdout = process.communicate()[0]
+
+        # if not self.fp_status in stdout and not self.ros_loss_triggered:
+        #     self.connection_status.setText("Connection lost")
+        #     self.connection_status.setStyleSheet("color: red")
+        #     self.ros_loss_triggered = True
+        # elif self.fp_status in stdout and self.ros_loss_triggered:
+        #     self.connection_status.setText("Connected")
+        #     self.connection_status.setStyleSheet("color: green")
+        #     self.ros_loss_triggered = False
 
     def battery_level_update(self, msg):
         bat_level = format(msg.voltage, ".1f") + 'V'
