@@ -46,10 +46,18 @@ RRVIZ requires fping to be installed on the ocu
 To do this use:
 pip install fping
 
-and then follow the instructions on the following link
+and then follow the instructions below which were got form the following link
 https://github.com/NetworkEng/fping/tree/csv 
 
+In the home directory
+`git clone https://github.com/NetworkEng/fping.git`
+
+`cd fping`
+`./autogen.sh`
+`./configure --prefix=/usr/local --enable-ipv4 --enable-ipv6`
+`make`
+`sudo make install`
+`sudo setcap cap_net_raw+ep /usr/local/sbin/fping`
+`sudo setcap cap_net_raw+ep /usr/local/sbin/fping6`
+
 fping: Version 3.13csv
-
-
-On the github instructions I followed the IPv6 support 
