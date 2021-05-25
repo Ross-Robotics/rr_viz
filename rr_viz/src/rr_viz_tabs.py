@@ -9,6 +9,7 @@ from ross.esm.environmental_sensing_module import EnvironmentalSensingModule
 import managers.file_management as file_management
 import subprocess
 from sensor_msgs.msg import BatteryState
+from std_msgs.msg import Time
 import rospy
 
 class RRVizTabs(QWidget):
@@ -84,6 +85,15 @@ class RRVizTabs(QWidget):
         self.battery_level_sub_name = "/vesc_driver/battery"
         self.battery_level_sub = rospy.Subscriber(self.battery_level_sub_name, BatteryState, self.battery_level_update)
 
+        # Set up core connection variables
+        self.core_clock_sub_name ="/core_clock_publisher/clock"
+        self.core_clock_sub = rospy.Subscriber(self.core_clock_sub_name, Time, self.core_clock_cb)
+        self.last_received_time = Time()
+
+        self.read_time = Time()
+        self.no_time_change = 0
+        self.latch = 0
+
         # Get Battery levels 
         self.good_voltage = rospy.get_param("/battery/good_voltage", "31")
         self.ok_voltage = rospy.get_param("/battery/ok_voltage", "26")
@@ -96,25 +106,36 @@ class RRVizTabs(QWidget):
         self.fp_status = "alive"  
 
         # Set up timer 
-        self.timer_period = 1500
+        self.timer_period = 1000
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.ros_is_up)
         self.timer.start(self.timer_period)
 
-    def ros_is_up(self):
-            self.connection_status.setText("Connected")
-            self.connection_status.setStyleSheet("color: green")
-        # process = subprocess.Popen(self.subprocess_command, shell=True, stdout=subprocess.PIPE)
-        # stdout = process.communicate()[0]
+    def core_clock_cb(self, msg):
+        self.read_time = msg
+        
 
-        # if not self.fp_status in stdout and not self.ros_loss_triggered:
-        #     self.connection_status.setText("Connection lost")
-        #     self.connection_status.setStyleSheet("color: red")
-        #     self.ros_loss_triggered = True
-        # elif self.fp_status in stdout and self.ros_loss_triggered:
-        #     self.connection_status.setText("Connected")
-        #     self.connection_status.setStyleSheet("color: green")
-        #     self.ros_loss_triggered = False
+    def ros_is_up(self):
+        if self.last_received_time.data.secs == 0:
+            self.last_received_time = self.read_time
+            return
+
+        if self.read_time.data.secs - self.last_received_time.data.secs == 0:
+            self.no_time_change += 1
+        else:
+            self.no_time_change = 0
+
+        if(self.no_time_change <= 3):
+            self.connection_status.setText("Good")
+            self.connection_status.setStyleSheet("color: green")
+        elif self.no_time_change > 3 and self.no_time_change <= 5: 
+            self.connection_status.setText("Poor")
+            self.connection_status.setStyleSheet("color: orange")
+        else:
+            self.connection_status.setText("Lost")
+            self.connection_status.setStyleSheet("color: red")
+
+        self.last_received_time = self.read_time
 
     def battery_level_update(self, msg):
         bat_level = format(msg.voltage, ".1f") + 'V'
