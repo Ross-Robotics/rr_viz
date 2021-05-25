@@ -22,6 +22,7 @@ class PathNavigationTools(QWidget):
 
         # Get parameters
         self.file_path = rospy.get_param("/path_navigation/file_path", "")
+        self.directory = string.replace(self.file_path, "path.txt", "")
                 
         # Setup services
         self.stop_recording_srv_name = "/path_recorder/finish_path"
@@ -97,9 +98,11 @@ class PathNavigationTools(QWidget):
 
         if ok:
             if path_name != "":
-                self.file_path = string.replace(self.file_path, "path.txt", path_name + ".txt")
+                file_path = self.directory + path_name + '.txt'
+            else:
+                file_path = self.file_path
             
-            self.start_recording_action.send_goal(RecordPathGoal(file_path=self.file_path))
+            self.start_recording_action.send_goal(RecordPathGoal(file_path=file_path))
 
     def stop_recording(self):
         try:
