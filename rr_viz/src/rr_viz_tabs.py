@@ -113,8 +113,7 @@ class RRVizTabs(QWidget):
 
     def core_clock_cb(self, msg):
         self.read_time = msg
-        
-
+       
     def ros_is_up(self):
         if self.last_received_time.data.secs == 0:
             self.last_received_time = self.read_time

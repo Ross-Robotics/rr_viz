@@ -12,13 +12,13 @@ class RRInteractiveTools(QWidget):
         self.layout = QVBoxLayout()
 
         self.tabs = QTabWidget()
-        self.mission_dashboard_tab = QWidget()
+        # self.mission_dashboard_tab = QWidget()
         self.mission_editor_tab = QWidget()
         self.slam_supervisor_tab = QWidget()
 
         self.tabs.addTab(self.mission_editor_tab, "Mission Editor")
         self.tabs.addTab(self.slam_supervisor_tab, "Slam Supervisor")
-        self.tabs.addTab(self.mission_dashboard_tab, "Mission Dashboard")
+        # self.tabs.addTab(self.mission_dashboard_tab, "Mission Dashboard")
         
         self.mission_editor_tab.layout = QVBoxLayout()
         self.mission_editor_tab.layout.addWidget(MissionEditor(self))
@@ -28,9 +28,9 @@ class RRInteractiveTools(QWidget):
         self.slam_supervisor_tab.layout.addWidget(SlamSupervisor(self))
         self.slam_supervisor_tab.setLayout(self.slam_supervisor_tab.layout)
 
-        self.mission_dashboard_tab.layout = QVBoxLayout()
-        self.mission_dashboard_tab.layout.addWidget(MissionDashboard(self))
-        self.mission_dashboard_tab.setLayout(self.mission_dashboard_tab.layout)
+        # self.mission_dashboard_tab.layout = QVBoxLayout()
+        # self.mission_dashboard_tab.layout.addWidget(MissionDashboard(self))
+        # self.mission_dashboard_tab.setLayout(self.mission_dashboard_tab.layout)
 
         self.layout.addWidget(self.tabs)
         self.setLayout(self.layout)
