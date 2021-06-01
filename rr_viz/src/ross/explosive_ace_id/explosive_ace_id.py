@@ -3,15 +3,19 @@ import sys
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QLabel, QPushButton, QListWidget, QLineEdit, QMessageBox, QTableWidget, QTableWidgetItem
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
+from PyQt5.QtCore import *
 from PyQt5 import QtCore
 import sys
 import telnetlib
+import rospy
 
 class ExplosiveAceID(QWidget):
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
-        self.host = "92.207.233.130"
-        self.port = "8007"
+
+        self.ace_id_hostname = rospy.get_param("~ace_id_hostname", "92.207.233.130")
+        self.ace_id_port = rospy.get_param("~ace_id_port", "92.207.233.130")
+        self.tn = telnetlib.Telnet()
         self.connected = False
 
         self.v_layout = QVBoxLayout()
@@ -21,7 +25,6 @@ class ExplosiveAceID(QWidget):
         self.title_label.setFont(QFont('Ubuntu', 11, QFont.Bold))
         self.title_label.setAlignment(Qt.AlignRight)
         self.v_layout.addWidget(self.title_label)
-
         # Table
         self.table = QTableWidget()
 
@@ -34,6 +37,7 @@ class ExplosiveAceID(QWidget):
         self.connect_button.pressed.connect(self.connect)
 
         self.acquire_button = QPushButton("Acquire")
+        self.acquire_button.setEnabled(False)
         self.acquire_button.pressed.connect(self.acquire)
 
         self.h_layout_buttons.addWidget(self.connect_button)
@@ -42,17 +46,25 @@ class ExplosiveAceID(QWidget):
         self.v_layout.addLayout(self.h_layout_buttons)
 
         self.setLayout(self.v_layout)
+        self.timer_period = 500
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self._visibility_manager)
+        self.timer.start(self.timer_period)
+
+    def _visibility_manager(self):
+        if self.connected == True:
+            self.acquire_button.setEnabled(True)
+        else:
+            self.acquire_button.setEnabled(False)
+        pass
 
     def connect(self):
         try:
-            self.tn = telnetlib.Telnet(self.host,self.port)
+            self.tn.open(self.ace_id_hostname,self.ace_id_port)
             self.connected = True
         except:
             print("Cannot connect to the ACE-ID host machine")
             self.connected = False
-
-
-        print(tn.read_all())
 
     def acquire(self):
         if self.connected == True:
