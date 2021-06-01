@@ -4,10 +4,15 @@ from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QLabel, QPushButt
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 from PyQt5 import QtCore
+import sys
+import telnetlib
 
 class ExplosiveAceID(QWidget):
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
+        self.host = "92.207.233.130"
+        self.port = "8007"
+        self.connected = False
 
         self.v_layout = QVBoxLayout()
 
@@ -39,26 +44,37 @@ class ExplosiveAceID(QWidget):
         self.setLayout(self.v_layout)
 
     def connect(self):
-        print("connect")
+        try:
+            self.tn = telnetlib.Telnet(self.host,self.port)
+            self.connected = True
+        except:
+            print("Cannot connect to the ACE-ID host machine")
+            self.connected = False
+
+
+        print(tn.read_all())
 
     def acquire(self):
-        data = [[1,2,3],[4,5,6],[7,8,9],[10,11,12]]
- 
-        x = 0
-        while x < len(data):
-            self.table.insertRow(x)
-            x += 1
-        
-        y = 0
-        while y < len(data[0]):
-            self.table.insertColumn(y)
-            y += 1
+        if self.connected == True:
+            self.tn.write("sync results" + "\n")
+            print(tn.read_all())
+            data = [[1,2,3],[4,5,6],[7,8,9],[10,11,12]]
 
-        column_titles = ['x','y','z']
-        self.table.setHorizontalHeaderLabels(column_titles)
+            x = 0
+            while x < len(data):
+                self.table.insertRow(x)
+                x += 1
 
-        for row in data:
-            index = data.index(row)
-            self.table.setItem(index,0,QTableWidgetItem(str(row[0])))
-            self.table.setItem(index,1,QTableWidgetItem(str(row[1])))
-            self.table.setItem(index,2,QTableWidgetItem(str(row[2])))
+            y = 0
+            while y < len(data[0]):
+                self.table.insertColumn(y)
+                y += 1
+
+            column_titles = ['x','y','z']
+            self.table.setHorizontalHeaderLabels(column_titles)
+
+            for row in data:
+                index = data.index(row)
+                self.table.setItem(index,0,QTableWidgetItem(str(row[0])))
+                self.table.setItem(index,1,QTableWidgetItem(str(row[1])))
+                self.table.setItem(index,2,QTableWidgetItem(str(row[2])))
