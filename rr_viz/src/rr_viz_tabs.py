@@ -91,23 +91,17 @@ class RRVizTabs(QWidget):
         self.battery_state = False
 
         # Set up topic subscribers
-        self.battery_level_sub_name = "/vesc_driver/battery"
+        self.battery_level_sub_name = rospy.get_param("/battery/level", "/vesc_driver/battery")
         self.battery_level_sub = rospy.Subscriber(self.battery_level_sub_name, BatteryState, self.battery_level_update)
 
         # Set up core connection variables
-        self.core_clock_sub_name ="/core_clock_publisher/clock"
+        self.core_clock_sub_name = rospy.get_param("/core_clock_sub","/core_clock_publisher/clock")
         self.core_clock_sub = rospy.Subscriber(self.core_clock_sub_name, Time, self.core_clock_cb)
         self.last_received_time = Time()
 
         self.read_time = Time()
         self.no_time_change = 0
         self.latch = 0
-
-        # Variables required to detect if connected to ROS MASTER
-        self.ros_loss_triggered = True
-        self.rosMasterIP = '192.168.10.100'
-        self.subprocess_command = 'fping -nV -t 50 ' + self.rosMasterIP
-        self.fp_status = "alive"  
 
         # Set up timer 
         self.timer_period = 1000
