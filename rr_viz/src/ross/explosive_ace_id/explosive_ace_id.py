@@ -109,8 +109,6 @@ class ExplosiveAceID(QWidget):
                 self.acquisition_timer.stop()
                 self.get_results()
 
-
-
     def get_results(self):
         self.tn.write("sync results" + "\n")
         self.results_timer.start(self.results_timer_period)
@@ -119,8 +117,11 @@ class ExplosiveAceID(QWidget):
     def _results_timer(self):
         print("ACE-ID Waiting for results.")
         self.telnet_read = self.telnet_read + self.tn.read_very_eager()
+        got_materials = False
         for line in self.telnet_read.split("\n"):
             if "Quality" in line:
+                print("ACE-ID Results received.")
+                got_materials = True
                 result_line = line.strip()
                 result_line = result_line.split("] = ")[1].split("] [Contribution")[0]
                 material = result_line.split(" [Quality=")[0]
@@ -129,6 +130,12 @@ class ExplosiveAceID(QWidget):
                 self.results_number = self.results_number + 1
                 self.results_timer.stop()
                 self.fill_table()
+        if not got_materials:
+            self.results_number = 0
+            print("ACE-ID No materials found.")
+            self.results_timer.stop()
+            self.fill_table()
+
         pass
 
     def _results_parser(self):
@@ -198,7 +205,7 @@ Getting search results...
     def acquire(self):
         if self.connected == True:
             if self.started_acquisition == False:
-                #self.tn.write("RC Start" + "\n")
+                self.tn.write("RC Start" + "\n")
                 self.started_acquisition = True
                 self.acquisition_timer.start(self.acquisition_timer_period)
                 self.acquire_button.setEnabled(False)
