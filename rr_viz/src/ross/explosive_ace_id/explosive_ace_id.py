@@ -110,6 +110,7 @@ class ExplosiveAceID(QWidget):
                 self.get_results()
 
 
+
     def get_results(self):
         self.tn.write("sync results" + "\n")
         self.results_timer.start(self.results_timer_period)
@@ -118,16 +119,15 @@ class ExplosiveAceID(QWidget):
     def _results_timer(self):
         print("ACE-ID Waiting for results.")
         self.telnet_read = self.telnet_read + self.tn.read_very_eager()
-        self.telnet_read = self.telnet_read.replace("\n",'')
-        substrings = self.telnet_read.split("\r")
-        for i in range(len(substrings)):
-            if substrings[i].find("tsGetComponents returned") > -1:
-                self.results_number = int(substrings[i].split("returned ")[1])
-                print("ACE-ID Results received.")
-                print("Components found: ", self.results_number)
-                self.telnet_read = ""
+        for line in self.telnet_read.split("\n"):
+            if "Quality" in line:
+                result_line = line.strip()
+                result_line = result_line.split("] = ")[1].split("] [Contribution")[0]
+                material = result_line.split(" [Quality=")[0]
+                quality = result_line.split(" [Quality=")[1]
+                self.results_dict[material] = quality
+                self.results_number = self.results_number + 1
                 self.results_timer.stop()
-                self._results_parser()
                 self.fill_table()
         pass
 
@@ -148,8 +148,11 @@ Getting search results...
 
          UCID = 75058, CAS Text = 75-05-8
 
-         Entry 106 from Library 'ACE-ID_Std.lib' """
+         Entry 106 from Library 'ACE-ID_Std.lib'
 
+ """
+        for a in example_string:
+            print(a,ord(a))
         for line in example_string.split("\n"):
             if "Quality" in line:
                 result_line = line.strip()
@@ -158,9 +161,6 @@ Getting search results...
                 quality = result_line.split(" [Quality=")[1]
                 self.results_dict[material] = quality
                 self.results_number = self.results_number + 1
-                print(result_line)
-                print(material,quality)
-                print(self.results_dict)
 
     def fill_table(self):
         if self.results_number == 0:
@@ -176,7 +176,8 @@ Getting search results...
             quality_item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled )
             self.table.setItem(row_count,0,material_item)
             self.table.setItem(row_count,1,quality_item)
-        pass
+        self.results_number = 0
+        self.results_dict = {}
 
     def clear_table(self):
         while self.table.rowCount() > 0:
@@ -197,7 +198,7 @@ Getting search results...
     def acquire(self):
         if self.connected == True:
             if self.started_acquisition == False:
-                self.tn.write("RC Start" + "\n")
+                #self.tn.write("RC Start" + "\n")
                 self.started_acquisition = True
                 self.acquisition_timer.start(self.acquisition_timer_period)
                 self.acquire_button.setEnabled(False)
