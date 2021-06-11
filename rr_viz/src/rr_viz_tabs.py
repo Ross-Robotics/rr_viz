@@ -95,7 +95,7 @@ class RRVizTabs(QWidget):
         self.battery_level_sub = rospy.Subscriber(self.battery_level_sub_name, BatteryState, self.battery_level_update)
 
         # Set up core connection variables
-        self.core_clock_sub_name = rospy.get_param("/core_clock_sub","/core_clock_publisher/clock")
+        self.core_clock_sub_name = rospy.get_param("/core_clock_sub","/core_clock_topic")
         self.core_clock_sub = rospy.Subscriber(self.core_clock_sub_name, Time, self.core_clock_cb)
         self.last_received_time = Time()
 
@@ -103,6 +103,13 @@ class RRVizTabs(QWidget):
         self.no_time_change = 0
         self.latch = 0
 
+        # Core timer
+        core_clock_pub_freq = rospy.get_param("~publish_frequency", 10)
+        freq = float(core_clock_pub_freq) - (float(core_clock_pub_freq) / 100 * 10)
+        self.core_clock_timer_dur = rospy.Duration(1.0 / freq)
+        self.core_clock_timer = rospy.Timer(self.core_clock_timer_dur, self.core_clock_timer_cb, oneshot = True)
+        self.core_clock_timer_trig = False
+        
         # Set up timer 
         self.timer_period = 1000
         self.timer = QTimer(self)
@@ -111,7 +118,18 @@ class RRVizTabs(QWidget):
 
         self.low_battery_popup.connect(self.bat_message_popup)
 
+    def core_clock_timer_cb(self, event):
+        self.core_clock_timer_trig = True
+        self.connection_status.setText("Lost")
+        self.connection_status.setStyleSheet("color: red")
+
     def core_clock_cb(self, msg):
+        if self.core_clock_timer_trig:
+            self.core_clock_timer_trig = False
+        else:
+            self.core_clock_timer.shutdown()
+            self.core_clock_timer = rospy.Timer(self.core_clock_timer_dur, self.core_clock_timer_cb, oneshot = True)
+        
         self.read_time = msg
        
     def ros_is_up(self):
