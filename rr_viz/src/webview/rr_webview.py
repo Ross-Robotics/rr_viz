@@ -62,7 +62,7 @@ class RRQWebView(QWidget):
                 "host_login_transition":"/ui/en/login",
                 "login_page":"/ui/en/login?redirectUrl=",
                 "login_landing_transition":"/ui/en/landing/true",
-                "home_page":"/ui/en/hosts/" + self.gui_serial_number,
+                "home_page":"/ui/en/hosts/",
                 "remote_screen":"/ui/en/hosts/" + self.gui_serial_number + "/remote-control"
             }
             # timers config
@@ -94,10 +94,16 @@ class RRQWebView(QWidget):
             elif self.current_url.find(self.gui_url_dict.get("home_page")) >= 0:
                 if self.is_finished_loading:
                     self.gui_state = "Opening remote screen"
+                    self.find_serial_number(self.current_url,'/')
+                    self.gui_url_dict.update(remote_screen = "/ui/en/hosts/" + self.gui_serial_number + "/remote-control")
                     self.load_page("remote_screen")
             if self.url_loading_state == "Failed":
                 self._load( self.current_url)
 
+        def find_serial_number(self,s,ch):
+            x = [i for i, ltr in enumerate(s) if ltr == ch]
+            final = x[len(x)-1]
+            self.gui_serial_number = s[final+1:]
 
         def load_page(self,page):
             page_tail = self.gui_url_dict.get(page)

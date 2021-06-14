@@ -60,14 +60,13 @@ class RRQWebViewTab(QWidget):
             # noinspection PyArgumentList
             super(self.__class__, self).__init__(parent)
             self.gui_hostname = rospy.get_param("~gui_hostname", "10.42.0.1")
-            self.gui_serial_number = rospy.get_param("~gui_serial_number", "sn23n-180004")
             self.gui_url_dict = {
                 "host_page":"/ui/en/",
                 "host_login_transition":"/ui/en/login",
                 "login_page":"/ui/en/login?redirectUrl=",
                 "login_landing_transition":"/ui/en/landing/true",
-                "home_page":"/ui/en/hosts/" + self.gui_serial_number,
-                "remote_screen":"/ui/en/hosts/" + self.gui_serial_number + "/remote-control"
+                "home_page":"/ui/en/hosts/" + self.gui_hostname,
+                "remote_screen":"/ui/en/hosts/" + self.gui_hostname + "/remote-control"
             }
             cef.Initialize()
             self.parent = parent
