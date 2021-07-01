@@ -105,6 +105,10 @@ class RRVizTabs(QWidget):
 
         # Core timer
         core_clock_pub_freq = rospy.get_param("~publish_frequency", 10)
+
+        # To calculate the period for the timer to monitor if the clock cb times out we want the timer to timeout after an 
+        # additional 10%. As this maths is being done as a frequency the 10% needs to be subtracted so that on the following line
+        # the period ends up being 10% longer than the clock publishing
         freq = float(core_clock_pub_freq) - (float(core_clock_pub_freq) / 100 * 10)
         self.core_clock_timer_dur = rospy.Duration(1.0 / freq)
         self.core_clock_timer = rospy.Timer(self.core_clock_timer_dur, self.core_clock_timer_cb, oneshot = True)
