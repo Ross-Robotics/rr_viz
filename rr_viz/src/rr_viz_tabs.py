@@ -149,7 +149,7 @@ class RRVizTabs(QWidget):
         if(self.no_time_change <= 3):
             self.connection_status.setText("Good")
             self.connection_status.setStyleSheet("color: green")
-        elif self.no_time_change > 3 and self.no_time_change <= 5: 
+        elif self.no_time_change > 3:
             self.connection_status.setText("Poor")
             self.connection_status.setStyleSheet("color: orange")
         else:
