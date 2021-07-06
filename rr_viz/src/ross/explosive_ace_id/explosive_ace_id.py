@@ -47,14 +47,14 @@ class ExplosiveAceID(QWidget):
         # Buttons
         self.h_layout_buttons = QHBoxLayout()
 
-        self.connect_button = QPushButton("Connect")
-        self.connect_button.pressed.connect(self.connect)
+        #self.connect_button = QPushButton("Connect")
+        #self.connect_button.pressed.connect(self.connect)
 
         self.acquire_button = QPushButton("Begin Acquisition")
         self.acquire_button.setEnabled(False)
         self.acquire_button.pressed.connect(self.acquire)
 
-        self.h_layout_buttons.addWidget(self.connect_button)
+        #self.h_layout_buttons.addWidget(self.connect_button)
         self.h_layout_buttons.addWidget(self.acquire_button)
 
         self.v_layout.addLayout(self.h_layout_buttons)
@@ -86,11 +86,15 @@ class ExplosiveAceID(QWidget):
         else:
             self.acquire_button.setEnabled(False)
             self.status_label.setText('Not connected')
+            #try to connect all the time
+            self.connect()
         pass
 
     def connect(self):
         try:
             self.tn.open(self.ace_id_hostname,self.ace_id_port)
+            #TODO the above means that the pi is connected to the system, but we still need to check if the ACE-ID is connected to the pi
+            #TODO check if the ace-id is connected to the pi
             self.connected = True
         except:
             print("Cannot connect to the ACE-ID host machine")
