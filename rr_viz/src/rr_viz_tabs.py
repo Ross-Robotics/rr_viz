@@ -25,10 +25,10 @@ class RRVizTabs(QWidget):
         self.main_window_tabs = QTabWidget()
         self.rr_interactive_tools_tab = QWidget()
         self.verifinder_tab = QWidget()
-        
+
         self.main_window_tabs.addTab(self.rr_interactive_tools_tab, "Ross Robotics")
-        self.main_window_tabs.addTab(self.verifinder_tab, "Verifinder")
-        
+        self.main_window_tabs.addTab(self.verifinder_tab, "VeriFinder")
+
         self.rr_interactive_tools_tab.h_layout = QHBoxLayout(self)
         self.rr_interactive_tools_tab.v_layout1 = QVBoxLayout(self)
         self.rr_interactive_tools_tab.v_layout2 = QVBoxLayout(self)
@@ -43,7 +43,7 @@ class RRVizTabs(QWidget):
         self.connection_label_text = QLabel('Connection status:')
         self.connection_label_text.setFont(QFont('Ubuntu', 14, QFont.Bold))
         self.connection_label_text.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
-        
+
         self.connection_status = QLabel('Lost')
         self.connection_status.setFont(QFont('Ubuntu', 14, QFont.Bold))
         self.connection_status.setStyleSheet("color: red")
@@ -64,7 +64,7 @@ class RRVizTabs(QWidget):
         self.status_h_layout.addWidget(self.battery_level, 1)
 
         self.rr_interactive_tools_tab.v_layout2.addLayout(self.status_h_layout,1)
-     
+
         # Add rr interactive tools to layout
         self.rr_interactive_tools_tab.v_layout2.addWidget(RRInteractiveTools(self),5)
         self.rr_interactive_tools_tab.v_layout2.addWidget(RRQWebView(self),4, Qt.AlignCenter)
@@ -82,7 +82,7 @@ class RRVizTabs(QWidget):
         self.main_window_layout.addWidget(self.main_window_tabs)
         self.setLayout(self.main_window_layout)
 
-        # Get Battery levels 
+        # Get Battery levels
         self.good_voltage = rospy.get_param("/battery/good_voltage", "31")
         self.ok_voltage = rospy.get_param("/battery/ok_voltage", "26")
         self.low_voltage = rospy.get_param("/battery/low_voltage", "22")
@@ -104,15 +104,15 @@ class RRVizTabs(QWidget):
         # Core timer
         core_clock_pub_freq = rospy.get_param("~publish_frequency", 10)
 
-        # To calculate the period for the timer to monitor if the clock cb times out we want the timer to timeout after an 
+        # To calculate the period for the timer to monitor if the clock cb times out we want the timer to timeout after an
         # additional 10%. As this maths is being done as a frequency the 10% needs to be subtracted so that on the following line
         # the period ends up being 10% longer than the clock publishing
         freq = float(core_clock_pub_freq) - (float(core_clock_pub_freq) / 100 * 10)
         self.core_clock_timer_dur = rospy.Duration(1.0 / freq)
         self.core_clock_timer = rospy.Timer(self.core_clock_timer_dur, self.core_clock_timer_cb, oneshot = True)
         self.core_clock_timer_trig = False
-        
-        # Set up timer 
+
+        # Set up timer
         self.timer_period = 1000
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.ros_is_up)
@@ -131,9 +131,9 @@ class RRVizTabs(QWidget):
         else:
             self.core_clock_timer.shutdown()
             self.core_clock_timer = rospy.Timer(self.core_clock_timer_dur, self.core_clock_timer_cb, oneshot = True)
-        
+
         self.read_time = msg
-       
+
     def ros_is_up(self):
         if self.last_received_time.data.secs == 0:
             self.last_received_time = self.read_time
@@ -158,7 +158,7 @@ class RRVizTabs(QWidget):
 
     def battery_level_update(self, msg):
         bat_level = format(msg.voltage, ".1f") + 'V'
-            
+
         if bat_level < self.low_voltage and not self.battery_state:
             self.battery_state = True
             self.low_battery_popup.emit()
