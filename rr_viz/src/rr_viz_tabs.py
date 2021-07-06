@@ -43,7 +43,6 @@ class RRVizTabs(QWidget):
         
         self.connection_status = QLabel('Lost')
         self.connection_status.setFont(QFont('Ubuntu', 14, QFont.Bold))
-        self.connection_status.setStyleSheet("color: red")
         self.connection_status.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
 
         self.battery_label = QLabel('Battery Level:')
@@ -99,100 +98,61 @@ class RRVizTabs(QWidget):
         self.core_clock_sub_name = rospy.get_param("/core_clock_sub","/clock")
         self.core_clock_sub = rospy.Subscriber(self.core_clock_sub_name, Clock, self.core_clock_cb)
         self.last_received_time = RosTime()
-        
-
-        self.read_time = RosTime()
-        self.no_time_change = 0
-        
 
         # Core timer
         core_clock_pub_freq = rospy.get_param("~publish_frequency", 10)
 
-        # # To calculate the period for the timer to monitor if the clock cb times out we want the timer to timeout after an 
-        # # additional 10%. As this maths is being done as a frequency the 10% needs to be subtracted so that on the following line
-        # # the period ends up being 10% longer than the clock publishing
+        #Set the frequency of the timer to be twice as fast as the clock frequency
         freq = float(core_clock_pub_freq) * 2
         self.core_clock_timer_dur = rospy.Duration(1.0 / freq)
         self.core_clock_timer = rospy.Timer(self.core_clock_timer_dur, self.core_clock_timer_cb, oneshot = True)
-        self.connection_latency = rospy.get_param("/core_clock_latency", "0.1")
-        # self.core_clock_timer_trig = False
-        
-        # Set up timer 
-
-        self.low_battery_popup.connect(self.bat_message_popup)
+        self.poor_connection_threshold = rospy.get_param("/core_clock_poor_connection", 3)
+        self.lost_connection_threshold = rospy.get_param("/core_clock_lost_connection", 5)
         self.first_value = False
         self.get_first_msg = False
+        self.latency = 0
+        self.read_time = RosTime()
+        self.no_time_change = 0
+     
+        self.low_battery_popup.connect(self.bat_message_popup)
+
 
     def core_clock_timer_cb(self, event):
         self.core_clock_timer = rospy.Timer(self.core_clock_timer_dur, self.core_clock_timer_cb, oneshot = True)
-        # rospy.loginfo("Trig")
+
         if self.first_value:
-            # print("timer")
             self.last_received_time.data = self.read_time.data
-            # q = self.last_received_time.to_nsec()
-            # print(q)
             self.first_value = False            
             return
-        elif self.first_value == False and self.get_first_msg:
+        elif not self.first_value and self.get_first_msg:
             time_diff = (self.read_time.data - self.last_received_time.data).to_sec()
-            print(time_diff)
-            # if(time_diff > self.connection_latency):
-            #     print("nooooo")
-            # else:
-            #     print("yess")
-
-        #     if (self.last_received_time != self.read_time):
-            #  x = 
-            #  q = x.to_sec()
-            #  print(q)   
+ 
+            if time_diff == 0:
+                self.no_time_change += 1
+                if self.no_time_change > 1:
+                    if self.latency < self.lost_connection_threshold + 2:
+                        self.latency += 1  
+            else:
+                self.no_time_change = 0
+                if self.latency > 0:
+                    self.latency -= 1
             
+            if self.latency < self.poor_connection_threshold:
+                self.connection_status.setText("Good")
+            elif self.latency >= self.lost_connection_threshold:
+                self.connection_status.setText("Lost")
+            elif self.latency >= self.poor_connection_threshold and self.latency < self.lost_connection_threshold:
+                self.connection_status.setText("Poor")
             
 
-            # rospy.loginfo("Trig")
-            # print(self.read_time)
-            # print(self.last_received_time)
-            
-            # print(self.read_time.data.nsecs - self.last_received_time.data.nsecs)
-            # if self.read_time - self.last_received_time == 0: 
-            #     self.connection_status.setText("Lost")
-            #     self.connection_status.setStyleSheet("color: red")
-            # else:
-            #     self.connection_status.setText("Good")
-            #     self.connection_status.setStyleSheet("color: green")
-
-            #self.last_received_time = self.read_time
+            self.last_received_time.data = self.read_time.data    
         
     def core_clock_cb(self, msg):
-        # rospy.loginfo("MESSAGE")
         self.timer_period = msg.update_rate
         if self.get_first_msg == False:
-            # print("first value cb")
             self.first_value = True
             self.get_first_msg = True
         self.read_time.data = msg.data
-        print(self.read_time)
-       
-    # def ros_is_up(self):
-    #     if self.last_received_time.data.secs == 0:
-    #         self.last_received_time = self.read_time
-    #         return
-
-    #     if self.read_time.data.secs - self.last_received_time.data.secs == 0:
-    #         self.no_time_change += 1
-    #     else:
-    #         self.no_time_change = 0
-
-    #     if(self.no_time_change <= 3):
-    #         self.connection_status.setText("Good")
-    #         self.connection_status.setStyleSheet("color: green")
-    #     elif self.no_time_change > 3:
-    #         self.connection_status.setText("Poor")
-    #         self.connection_status.setStyleSheet("color: orange")
-    #     else:
-    #         self.connection_status.setText("Lost")
-    #         self.connection_status.setStyleSheet("color: red")
-
-    #     self.last_received_time = self.read_time
 
     def battery_level_update(self, msg):
         bat_level = format(msg.voltage, ".1f") + 'V'
