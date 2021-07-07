@@ -93,7 +93,7 @@ class ExplosiveAceID(QWidget):
             if self.connection_attempts == 0:
                 self.status_label.setText('Not connected')
             if self.connection_attempts == -1:
-                self.status_label.setText('Please connect the ACE-ID host machine')
+                self.status_label.setText('Please connect the Arm and the ACE-ID')
 
 
     def connect(self):
@@ -104,7 +104,7 @@ class ExplosiveAceID(QWidget):
             self.connection_attempts = 0
             self.check_aceid_connection()
         except:
-            rospy.loginfo("Cannot connect to the ACE-ID host machine")
+            rospy.loginfo("Please connect the Arm and the ACE-ID")
             self.connection_attempts = -1
             self.connected = False
 
@@ -131,7 +131,7 @@ class ExplosiveAceID(QWidget):
             self.connected = False
             self.telnet_read = ""
             rospy.loginfo("Port open but ACE-ID Not found.")
-            self.status_label.setText('ACE-ID not found in host machine')
+            self.status_label.setText('Plese connect the ACE-ID to the Arm')
 
 
 
