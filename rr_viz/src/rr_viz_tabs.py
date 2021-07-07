@@ -95,7 +95,7 @@ class RRVizTabs(QWidget):
         self.battery_level_sub = rospy.Subscriber(self.battery_level_sub_name, BatteryState, self.battery_level_update)
 
         # Set up core connection variables
-        self.core_clock_sub_name = rospy.get_param("/core_clock_sub","/clock")
+        self.core_clock_sub_name = rospy.get_param("/core_clock_sub","/mk3_core/clock")
         self.core_clock_sub = rospy.Subscriber(self.core_clock_sub_name, Clock, self.core_clock_cb)
         self.last_received_time = RosTime()
 
