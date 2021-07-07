@@ -49,6 +49,7 @@ class ExplosiveAceID(QWidget):
 
         self.connect_button = QPushButton("Connect")
         self.connect_button.pressed.connect(self.connect)
+        self.connection_attempts = 0
 
         self.acquire_button = QPushButton("Begin Acquisition")
         self.acquire_button.setEnabled(False)
@@ -70,6 +71,10 @@ class ExplosiveAceID(QWidget):
         self.acquisition_timer = QTimer(self)
         self.acquisition_timer.timeout.connect(self._acquisition_timer)
 
+        self.connection_timer_period = 500
+        self.connection_timer = QTimer(self)
+        self.connection_timer.timeout.connect(self._connection_timer)
+
         self.results_timer_period = 1000
         self.results_timer = QTimer(self)
         self.results_timer.timeout.connect(self._results_timer)
@@ -85,22 +90,50 @@ class ExplosiveAceID(QWidget):
             self.status_label.setText('Connected')
         else:
             self.acquire_button.setEnabled(True)
-            self.status_label.setText('Not connected')
-            #try to connect all the time #Note this is a blocking call that lags all Rviz
-            #self.connect()
-        pass
+            if self.connection_attempts == 0:
+                self.status_label.setText('Not connected')
+            if self.connection_attempts == -1:
+                self.status_label.setText('Please connect the ACE-ID host machine')
+
 
     def connect(self):
         self.tn.close()
         try:
-            self.tn.open(self.ace_id_hostname,self.ace_id_port,100)
-            #The timout does not seem to work
-            #TODO the above means that the pi is connected to the system, but we still need to check if the ACE-ID is connected to the pi
-            #TODO check if the ace-id is connected to the pi
-            self.connected = True
+            self.connection_attempts = 1
+            self.tn.open(self.ace_id_hostname,self.ace_id_port,timeout=1)
+            self.connection_attempts = 0
+            self.check_aceid_connection()
         except:
             rospy.loginfo("Cannot connect to the ACE-ID host machine")
+            self.connection_attempts = -1
             self.connected = False
+
+    def check_aceid_connection(self):
+        self.tn.write("id" + "\n")
+        self.connection_timer.start(self.connection_timer_period)
+
+    def _connection_timer(self):
+        self.connection_attempts =  self.connection_attempts + 1
+        rospy.loginfo("ACE-ID Waiting for ID and firmware version.")
+        self.status_label.setText('Port open, trying to connect.')
+        self.telnet_read = self.telnet_read + self.tn.read_very_eager()
+        self.telnet_read = self.telnet_read.replace("\n",'')
+        substrings = self.telnet_read.split("\r")
+        for i in range(len(substrings)):
+            if substrings[i].find("SERIAL") > 1:
+                rospy.loginfo("ACE-ID found.")
+                self.telnet_read = ""
+                self.connected = True
+                self.connection_timer.stop()
+                self.connection_attempts = 0
+        if self.connection_attempts > 5:
+            self.connection_timer.stop()
+            self.connected = False
+            self.telnet_read = ""
+            rospy.loginfo("Port open but ACE-ID Not found.")
+            self.status_label.setText('To connect plug in the device to the USB cable and click connect again.')
+
+
 
     def _acquisition_timer(self):
         rospy.loginfo("ACE-ID Waiting for acquisition.")
