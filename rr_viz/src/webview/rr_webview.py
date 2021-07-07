@@ -120,13 +120,13 @@ class RRQWebView(QWidget):
             return url
 
         def _load(self, url):
-            print("Loading -> " + url)
+            rospy.loginfo("Loading -> " + url)
             self.url_loading_state = "Not started"
             self.setUrl(QUrl(url))
             self.is_finished_loading = False
 
         def _on_load_finished(self,sucess):
-            print("Finished Loading -> " + self.url().toString())
+            rospy.loginfo("Finished Loading -> " + self.url().toString())
             if sucess:
                 self.url_loading_state = "Finished"
             else:
@@ -134,22 +134,22 @@ class RRQWebView(QWidget):
             self.is_finished_loading = True
 
         def _on_load_started(self):
-            print("Started Loading -> " + self.url().toString())
+            rospy.loginfo("Started Loading -> " + self.url().toString())
             self.url_loading_state = "Started"
             self.is_finished_loading = False
 
         def _on_load_progress(self,load):
             self.current_url_loading_progress = load
-            print("URL loaded: " + str(load) + "%")
+            rospy.loginfo("URL loaded: " + str(load) + "%")
             pass
 
         def _on_url_change(self):
-            print("Web page URL changed to:")
+            rospy.loginfo("Web page URL changed to:")
             self.current_url = self.url().toString()
-            print(self.current_url)
+            rospy.loginfo(self.current_url)
 
         def _login(self):
-            print("Logging into the GUI")
+            rospy.loginfo("Logging into the GUI")
             frame = self.page().currentFrame()
             frame.evaluateJavaScript("document.getElementById('mat-input-0').value = 'advanced'")
             frame.evaluateJavaScript("document.getElementById('mat-input-1').value = 'symetricas'")

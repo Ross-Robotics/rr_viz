@@ -49,6 +49,7 @@ class ExplosiveAceID(QWidget):
 
         self.connect_button = QPushButton("Connect")
         self.connect_button.pressed.connect(self.connect)
+        self.connection_attempts = 0
 
         self.acquire_button = QPushButton("Begin Acquisition")
         self.acquire_button.setEnabled(False)
@@ -70,6 +71,10 @@ class ExplosiveAceID(QWidget):
         self.acquisition_timer = QTimer(self)
         self.acquisition_timer.timeout.connect(self._acquisition_timer)
 
+        self.connection_timer_period = 500
+        self.connection_timer = QTimer(self)
+        self.connection_timer.timeout.connect(self._connection_timer)
+
         self.results_timer_period = 1000
         self.results_timer = QTimer(self)
         self.results_timer.timeout.connect(self._results_timer)
@@ -84,26 +89,60 @@ class ExplosiveAceID(QWidget):
                 self.connect_button.setEnabled(True)
             self.status_label.setText('Connected')
         else:
-            self.acquire_button.setEnabled(False)
-            self.status_label.setText('Not connected')
-        pass
+            self.acquire_button.setEnabled(True)
+            if self.connection_attempts == 0:
+                self.status_label.setText('Not connected')
+            if self.connection_attempts == -1:
+                self.status_label.setText('Please connect the Arm and the ACE-ID')
+
 
     def connect(self):
+        self.tn.close()
         try:
-            self.tn.open(self.ace_id_hostname,self.ace_id_port)
-            self.connected = True
+            self.connection_attempts = 1
+            self.tn.open(self.ace_id_hostname,self.ace_id_port,timeout=1)
+            self.connection_attempts = 0
+            self.check_aceid_connection()
         except:
-            print("Cannot connect to the ACE-ID host machine")
+            rospy.loginfo("Please connect the Arm and the ACE-ID")
+            self.connection_attempts = -1
             self.connected = False
 
+    def check_aceid_connection(self):
+        self.tn.write("id" + "\n")
+        self.connection_timer.start(self.connection_timer_period)
+
+    def _connection_timer(self):
+        self.connection_attempts =  self.connection_attempts + 1
+        rospy.loginfo("ACE-ID Waiting for ID and firmware version.")
+        self.status_label.setText('Port open, trying to connect.')
+        self.telnet_read = self.telnet_read + self.tn.read_very_eager()
+        self.telnet_read = self.telnet_read.replace("\n",'')
+        substrings = self.telnet_read.split("\r")
+        for i in range(len(substrings)):
+            if substrings[i].find("SERIAL") > 1:
+                rospy.loginfo("ACE-ID found.")
+                self.telnet_read = ""
+                self.connected = True
+                self.connection_timer.stop()
+                self.connection_attempts = 0
+        if self.connection_attempts > 5:
+            self.connection_timer.stop()
+            self.connected = False
+            self.telnet_read = ""
+            rospy.loginfo("Port open but ACE-ID Not found.")
+            self.status_label.setText('Plese connect the ACE-ID to the Arm')
+
+
+
     def _acquisition_timer(self):
-        print("ACE-ID Waiting for acquisition.")
+        rospy.loginfo("ACE-ID Waiting for acquisition.")
         self.telnet_read = self.telnet_read + self.tn.read_very_eager()
         self.telnet_read = self.telnet_read.replace("\n",'')
         substrings = self.telnet_read.split("\r")
         for i in range(len(substrings)):
             if substrings[i] == "DONE":
-                print("ACE-ID Acquisition FINISHED.")
+                rospy.loginfo("ACE-ID Acquisition FINISHED.")
                 self.telnet_read = ""
                 self.started_acquisition = False
                 self.acquisition_timer.stop()
@@ -115,12 +154,12 @@ class ExplosiveAceID(QWidget):
         pass
 
     def _results_timer(self):
-        print("ACE-ID Waiting for results.")
+        rospy.loginfo("ACE-ID Waiting for results.")
         self.telnet_read = self.telnet_read + self.tn.read_very_eager()
         got_materials = False
         for line in self.telnet_read.split("\n"):
             if "Quality" in line:
-                print("ACE-ID Results received.")
+                rospy.loginfo("ACE-ID Results received.")
                 got_materials = True
                 result_line = line.strip()
                 result_line = result_line.split("] = ")[1].split("] [Contribution")[0]
@@ -132,7 +171,7 @@ class ExplosiveAceID(QWidget):
                 self.fill_table()
         if not got_materials:
             self.results_number = 0
-            print("ACE-ID No materials found.")
+            rospy.loginfo("ACE-ID No materials found.")
             self.results_timer.stop()
             self.fill_table()
 
@@ -205,10 +244,15 @@ Getting search results...
     def acquire(self):
         if self.connected == True:
             if self.started_acquisition == False:
-                self.tn.write("RC Start" + "\n")
-                self.started_acquisition = True
-                self.acquisition_timer.start(self.acquisition_timer_period)
-                self.acquire_button.setEnabled(False)
-                self.connect_button.setEnabled(False)
+                try:
+                    self.tn.write("RC Start" + "\n")
+                    self.started_acquisition = True
+                    self.acquisition_timer.start(self.acquisition_timer_period)
+                    self.acquire_button.setEnabled(False)
+                    self.connect_button.setEnabled(False)
+                except:
+                    rospy.loginfo("Cant begin acquisition because ACE-ID not connected")
+                    self.connected == False
+
 
             self.clear_table()

@@ -96,7 +96,7 @@ class RRQWebViewTab(QWidget):
             self.browser.ExecuteJavascript("document.getElementById('login-button').click()")
 
         def _browser_loading(self):
-            print("BROWSER LOADING...")
+            rospy.loginfo("BROWSER LOADING...")
 
         def embedBrowser(self):
             self.hidden_window = QWindow()
