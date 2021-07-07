@@ -43,7 +43,7 @@ class RRVizTabs(QWidget):
         
         self.connection_status = QLabel('Lost')
         self.connection_status.setFont(QFont('Ubuntu', 14, QFont.Bold))
-        self.connection_status.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        self.connection_status.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
 
         self.battery_label = QLabel('Battery Level:')
         self.battery_label.setFont(QFont('Ubuntu', 14, QFont.Bold))
