@@ -69,6 +69,7 @@ class EnvironmentalSensingModule(QWidget):
         self.vis_topic_sub = rospy.Subscriber(self.vis_topic_name, Illuminance, self.vis_update)
 
         self.degree_symbol = u'\N{DEGREE SIGN}'
+        
     def ir_update(self, msg):
         self.ir_data_label.setText("IR: " + format(msg.illuminance, ".2f") + " Lux")
 

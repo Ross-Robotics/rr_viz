@@ -40,16 +40,3 @@ As a placeholder I've added a launch file for rviz textured sphere (a submodule 
 To configure rviz textured sphere you can change the topic names and image transport, fov of every camera and blend angle. Make sure that the image feed that you use is cropped to only contain a square with the camera fisheye view.
 My prefered method of tuning the view is to add the camera topics and then look at the line where the two views are joined. Then I modify the fov of two cameras to get the two images to merge nicely in the intersection section.
 In some cases the cameras won't be perfectly symmetric so please make sure you get a good overlap on all sides of 360 rig.
-
-## fping
-RRVIZ requires fping to be installed on the ocu
-To do this use:
-pip install fping
-
-and then follow the instructions on the following link
-https://github.com/NetworkEng/fping/tree/csv 
-
-fping: Version 3.13csv
-
-
-On the github instructions I followed the IPv6 support 
