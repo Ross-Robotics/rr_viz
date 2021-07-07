@@ -131,7 +131,7 @@ class ExplosiveAceID(QWidget):
             self.connected = False
             self.telnet_read = ""
             rospy.loginfo("Port open but ACE-ID Not found.")
-            self.status_label.setText('To connect plug in the device to the USB cable and click connect again.')
+            self.status_label.setText('ACE-ID not found in host machine')
 
 
 
