@@ -47,7 +47,7 @@ class RRVizTabs(QWidget):
 
         self.connection_status = QLabel('Lost')
         self.connection_status.setFont(QFont('Ubuntu', 14, QFont.Bold))
-        self.connection_status.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        self.connection_status.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
 
         self.battery_label = QLabel('Battery Level:')
         self.battery_label.setFont(QFont('Ubuntu', 14, QFont.Bold))
@@ -99,18 +99,18 @@ class RRVizTabs(QWidget):
 
         # Core timer
         core_clock_pub_freq = rospy.get_param("~publish_frequency", 10)
-
+        self.first_value = False
+        self.get_first_msg = False
+        self.latency = 0
+        self.read_time = RosTime()
+        self.no_time_change = 0
+        
         #Set the frequency of the timer to be twice as fast as the clock frequency
         freq = float(core_clock_pub_freq) * 2
         self.core_clock_timer_dur = rospy.Duration(1.0 / freq)
         self.core_clock_timer = rospy.Timer(self.core_clock_timer_dur, self.core_clock_timer_cb, oneshot = True)
         self.poor_connection_threshold = rospy.get_param("/core_clock_poor_connection", 3)
         self.lost_connection_threshold = rospy.get_param("/core_clock_lost_connection", 5)
-        self.first_value = False
-        self.get_first_msg = False
-        self.latency = 0
-        self.read_time = RosTime()
-        self.no_time_change = 0
      
         self.low_battery_popup.connect(self.bat_message_popup)
 
