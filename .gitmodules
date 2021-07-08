@@ -1,3 +1,6 @@
 [submodule "submodules/rviz_textured_sphere"]
 	path = submodules/rviz_textured_sphere
 	url = https://github.com/UTNuclearRoboticsPublic/rviz_textured_sphere.git
+[submodule "submodules/rr_viz_plugins"]
+	path = submodules/rr_viz_plugins
+	url = https://github.com/Ross-Robotics/rr_viz_plugins
