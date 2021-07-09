@@ -107,21 +107,17 @@ class RRVizTabs(QWidget):
         self.read_time = RosTime()
         self.no_time_change = 0
         freq = float(self.clock_freq) * 2
-        self.timer_dur = rospy.Duration(1.0 / freq)
+        self.timer_period = 1.0 / freq
 
         # Connection callbacks
         self.clock_sub = rospy.Subscriber(self.clock_topic, Clock, self.clock_cb)
-        self.timer = rospy.Timer(self.timer_dur, self.clock_timer_cb, oneshot = True)
+        self.timer = QTimer.singleShot(self.timer_period, self.clock_timer_cb)
 
-    def clock_timer_cb(self, event):
-        freq = float(self.clock_freq) * 2
-        self.timer_dur = rospy.Duration(1.0 / freq)
-        self.timer = rospy.Timer(self.timer_dur, self.clock_timer_cb, oneshot = True)
 
+    def clock_timer_cb(self):
         if self.first_value:
             self.last_received_time.data = self.read_time.data
             self.first_value = False            
-            return
         elif not self.first_value and self.get_first_msg:
             time_diff = (self.read_time.data - self.last_received_time.data).to_sec()
  
@@ -142,7 +138,11 @@ class RRVizTabs(QWidget):
             elif self.latency >= self.poor_connection_threshold and self.latency < self.lost_connection_threshold:
                 self.connection_status.setText("Poor")
             
-            self.last_received_time.data = self.read_time.data    
+            self.last_received_time.data = self.read_time.data   
+
+        freq = float(self.clock_freq) * 2
+        self.timer_period = 1.0 / freq
+        self.timer = QTimer.singleShot(self.timer_period, self.clock_timer_cb) 
         
     def clock_cb(self, msg):
         self.clock_freq = msg.update_rate
