@@ -1,7 +1,8 @@
 #!/usr/bin/env python
-from PyQt5.QtWidgets import QTabWidget, QVBoxLayout, QWidget, QHBoxLayout, QLabel
+from PyQt5.QtWidgets import QTabWidget, QVBoxLayout, QWidget, QHBoxLayout, QLabel, QMessageBox
 from PyQt5.QtGui import QPixmap, QFont
 from PyQt5.QtCore import Qt, QTimer
+from PyQt5 import QtCore
 
 from rviz_tabs import RvizTabs
 from ross.rr_interactive_tools import RRInteractiveTools
@@ -9,9 +10,13 @@ from ross.esm.environmental_sensing_module import EnvironmentalSensingModule
 import managers.file_management as file_management
 import subprocess
 from sensor_msgs.msg import BatteryState
+from rr_custom_msgs.msg import Clock
+from std_msgs.msg import Time as RosTime
 import rospy
 
 class RRVizTabs(QWidget):
+    low_battery_popup = QtCore.pyqtSignal()
+
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
         self.main_window_layout = QVBoxLayout(self)
@@ -36,10 +41,9 @@ class RRVizTabs(QWidget):
         self.connection_label_text.setFont(QFont('Ubuntu', 14, QFont.Bold))
         self.connection_label_text.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         
-        self.connection_status = QLabel('Connection lost')
+        self.connection_status = QLabel('Connecting')
         self.connection_status.setFont(QFont('Ubuntu', 14, QFont.Bold))
-        self.connection_status.setStyleSheet("color: red")
-        self.connection_status.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        self.connection_status.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
 
         self.battery_label = QLabel('Battery Level:')
         self.battery_label.setFont(QFont('Ubuntu', 14, QFont.Bold))
@@ -80,46 +84,83 @@ class RRVizTabs(QWidget):
         self.main_window_layout.addWidget(self.main_window_tabs)
         self.setLayout(self.main_window_layout)
 
-        # Set up topic subscribers
-        self.battery_level_sub_name = "/vesc_driver/battery"
-        self.battery_level_sub = rospy.Subscriber(self.battery_level_sub_name, BatteryState, self.battery_level_update)
-
         # Get Battery levels 
         self.good_voltage = rospy.get_param("/battery/good_voltage", "31")
         self.ok_voltage = rospy.get_param("/battery/ok_voltage", "26")
         self.low_voltage = rospy.get_param("/battery/low_voltage", "22")
+        self.battery_state = False
 
-        # Variables required to detect if connected to ROS MASTER
-        self.ros_loss_triggered = True
-        self.rosMasterIP = '192.168.10.100'
-        self.subprocess_command = 'fping -nV -t 50 ' + self.rosMasterIP
-        self.fp_status = "alive"  
+        # Set up battery callbacks
+        self.battery_topic = rospy.get_param("/battery/level", "/vesc_driver/battery")
+        self.battery_sub = rospy.Subscriber(self.battery_topic, BatteryState, self.battery_cb)
+        self.low_battery_popup.connect(self.bat_message_popup)
 
-        # Set up timer 
-        self.timer_period = 1500
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.ros_is_up)
-        self.timer.start(self.timer_period)
+        # Set up Connection variables
+        self.clock_topic = rospy.get_param("/core_clock_sub","/mk3_core/clock")
+        self.clock_freq = rospy.get_param("~publish_frequency", 10)
+        self.poor_connection_threshold = rospy.get_param("/core_clock_poor_connection", 3)
+        self.lost_connection_threshold = rospy.get_param("/core_clock_lost_connection", 5)
+        self.last_received_time = RosTime()
+        self.first_value = False
+        self.get_first_msg = False
+        self.latency = 0
+        self.read_time = RosTime()
+        self.no_time_change = 0
+        freq = float(self.clock_freq) * 2
+        self.timer_period = 1.0 / freq
 
-    def ros_is_up(self):
-        process = subprocess.Popen(self.subprocess_command, shell=True, stdout=subprocess.PIPE)
-        stdout = process.communicate()[0]
+        # Connection callbacks
+        self.clock_sub = rospy.Subscriber(self.clock_topic, Clock, self.clock_cb)
+        self.timer = QTimer.singleShot(self.timer_period, self.clock_timer_cb)
 
-        if not self.fp_status in stdout and not self.ros_loss_triggered:
-            self.connection_status.setText("Connection lost")
-            self.connection_status.setStyleSheet("color: red")
-            self.ros_loss_triggered = True
-        elif self.fp_status in stdout and self.ros_loss_triggered:
-            self.connection_status.setText("Connected")
-            self.connection_status.setStyleSheet("color: green")
-            self.ros_loss_triggered = False
 
-    def battery_level_update(self, msg):
+    def clock_timer_cb(self):
+        if self.first_value:
+            self.last_received_time.data = self.read_time.data
+            self.first_value = False            
+        elif not self.first_value and self.get_first_msg:
+            time_diff = (self.read_time.data - self.last_received_time.data).to_sec()
+ 
+            if time_diff == 0:
+                self.no_time_change += 1
+                if self.no_time_change > 1:
+                    if self.latency < self.lost_connection_threshold + 2:
+                        self.latency += 1  
+            else:
+                self.no_time_change = 0
+                if self.latency > 0:
+                    self.latency -= 1
+            
+            if self.latency < self.poor_connection_threshold:
+                self.connection_status.setText("Good")
+            elif self.latency >= self.lost_connection_threshold:
+                self.connection_status.setText("Lost")
+            elif self.latency >= self.poor_connection_threshold and self.latency < self.lost_connection_threshold:
+                self.connection_status.setText("Poor")
+            
+            self.last_received_time.data = self.read_time.data   
+
+        freq = float(self.clock_freq) * 2
+        self.timer_period = 1.0 / freq
+        self.timer = QTimer.singleShot(self.timer_period, self.clock_timer_cb) 
+        
+    def clock_cb(self, msg):
+        self.clock_freq = msg.update_rate
+        if self.get_first_msg == False:
+            self.first_value = True
+            self.get_first_msg = True
+        self.read_time.data = msg.data
+
+    def battery_cb(self, msg):
         bat_level = format(msg.voltage, ".1f") + 'V'
-        self.battery_level.setText(bat_level)
-        if bat_level >= self.ok_voltage:
-            self.battery_level.setStyleSheet("color: green")
-        elif bat_level <= self.ok_voltage and bat_level >= self.low_voltage:
-            self.battery_level.setStyleSheet("color: orange")
+            
+        if bat_level < self.low_voltage and not self.battery_state:
+            self.battery_state = True
+            self.low_battery_popup.emit()
         else:
-            self.battery_level.setStyleSheet("color: red")
+            self.battery_level.setText(bat_level)
+
+    def bat_message_popup(self):
+        msg = QMessageBox()
+        msg.setText("Battery Low! Please change now!")
+        msg.exec_()
