@@ -44,8 +44,8 @@ class RRVizTabs(QWidget):
         self.connection_label_text = QLabel('Connection status:')
         self.connection_label_text.setFont(QFont('Ubuntu', 14, QFont.Bold))
         self.connection_label_text.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
-
-        self.connection_status = QLabel('Lost')
+        
+        self.connection_status = QLabel('Connecting')
         self.connection_status.setFont(QFont('Ubuntu', 14, QFont.Bold))
         self.connection_status.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
 
@@ -88,40 +88,34 @@ class RRVizTabs(QWidget):
         self.low_voltage = rospy.get_param("/battery/low_voltage", "22")
         self.battery_state = False
 
-        # Set up topic subscribers
-        self.battery_level_sub_name = rospy.get_param("/battery/level", "/vesc_driver/battery")
-        self.battery_level_sub = rospy.Subscriber(self.battery_level_sub_name, BatteryState, self.battery_level_update)
+        # Set up battery callbacks
+        self.battery_topic = rospy.get_param("/battery/level", "/vesc_driver/battery")
+        self.battery_sub = rospy.Subscriber(self.battery_topic, BatteryState, self.battery_cb)
+        self.low_battery_popup.connect(self.bat_message_popup)
 
-        # Set up core connection variables
-        self.core_clock_sub_name = rospy.get_param("/core_clock_sub","/mk3_core/clock")
-        self.core_clock_sub = rospy.Subscriber(self.core_clock_sub_name, Clock, self.core_clock_cb)
+        # Set up Connection variables
+        self.clock_topic = rospy.get_param("/core_clock_sub","/mk3_core/clock")
+        self.clock_freq = rospy.get_param("~publish_frequency", 10)
+        self.poor_connection_threshold = rospy.get_param("/core_clock_poor_connection", 3)
+        self.lost_connection_threshold = rospy.get_param("/core_clock_lost_connection", 5)
         self.last_received_time = RosTime()
-
-        # Core timer
-        core_clock_pub_freq = rospy.get_param("~publish_frequency", 10)
         self.first_value = False
         self.get_first_msg = False
         self.latency = 0
         self.read_time = RosTime()
         self.no_time_change = 0
-        
-        #Set the frequency of the timer to be twice as fast as the clock frequency
-        freq = float(core_clock_pub_freq) * 2
-        self.core_clock_timer_dur = rospy.Duration(1.0 / freq)
-        self.core_clock_timer = rospy.Timer(self.core_clock_timer_dur, self.core_clock_timer_cb, oneshot = True)
-        self.poor_connection_threshold = rospy.get_param("/core_clock_poor_connection", 3)
-        self.lost_connection_threshold = rospy.get_param("/core_clock_lost_connection", 5)
-     
-        self.low_battery_popup.connect(self.bat_message_popup)
+        freq = float(self.clock_freq) * 2
+        self.timer_period = 1.0 / freq
+
+        # Connection callbacks
+        self.clock_sub = rospy.Subscriber(self.clock_topic, Clock, self.clock_cb)
+        self.timer = QTimer.singleShot(self.timer_period, self.clock_timer_cb)
 
 
-    def core_clock_timer_cb(self, event):
-        self.core_clock_timer = rospy.Timer(self.core_clock_timer_dur, self.core_clock_timer_cb, oneshot = True)
-
+    def clock_timer_cb(self):
         if self.first_value:
             self.last_received_time.data = self.read_time.data
             self.first_value = False            
-            return
         elif not self.first_value and self.get_first_msg:
             time_diff = (self.read_time.data - self.last_received_time.data).to_sec()
  
@@ -142,17 +136,20 @@ class RRVizTabs(QWidget):
             elif self.latency >= self.poor_connection_threshold and self.latency < self.lost_connection_threshold:
                 self.connection_status.setText("Poor")
             
+            self.last_received_time.data = self.read_time.data   
 
-            self.last_received_time.data = self.read_time.data    
+        freq = float(self.clock_freq) * 2
+        self.timer_period = 1.0 / freq
+        self.timer = QTimer.singleShot(self.timer_period, self.clock_timer_cb) 
         
-    def core_clock_cb(self, msg):
-        self.timer_period = msg.update_rate
+    def clock_cb(self, msg):
+        self.clock_freq = msg.update_rate
         if self.get_first_msg == False:
             self.first_value = True
             self.get_first_msg = True
         self.read_time.data = msg.data
 
-    def battery_level_update(self, msg):
+    def battery_cb(self, msg):
         bat_level = format(msg.voltage, ".1f") + 'V'
 
         if bat_level < self.low_voltage and not self.battery_state:
