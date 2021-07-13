@@ -38,6 +38,9 @@ class EmergencyStop(QWidget):
         self.h_layout = QHBoxLayout()
         self.enable_eStop_button = QPushButton('Emergency Stop')
         self.enable_eStop_button.pressed.connect(self.enable_eStop)
+        self.enable_eStop_button.setStyleSheet("color: white;"
+                        "background-color: red;"
+                        "font-weight: bold;")
         self.enable_eStop_button.setEnabled(False)
 
         self.disable_eStop_button = QPushButton('Reset Emergency Stop')
@@ -72,11 +75,18 @@ class EmergencyStop(QWidget):
         eStop_req = SetBoolRequest()
         eStop_req.data = True
         self.trigger_service(eStop_req)
+        self.disable_eStop_button.setStyleSheet("color: white;"
+                        "background-color: green;"
+                        "font-weight: bold;")
+
 
     def disable_eStop(self):
         eStop_req = SetBoolRequest()
         eStop_req.data = False
         self.trigger_service(eStop_req)
+        self.enable_eStop_button.setStyleSheet("color: white;"
+                                "background-color: red;"
+                                "font-weight: bold;")
 
     def trigger_service(self, req):
         try:
@@ -105,9 +115,6 @@ class EmergencyStop(QWidget):
     def layout_estop_enable_btn(self, enabled):
         if enabled:
             self.enable_eStop_button.setEnabled(True)
-            self.enable_eStop_button.setStyleSheet("color: white;"
-                                                    "background-color: red;"
-                                                    "font-weight: bold;")
         else:
             self.enable_eStop_button.setEnabled(False)
             self.enable_eStop_button.setStyleSheet("")
@@ -115,9 +122,6 @@ class EmergencyStop(QWidget):
     def layout_estop_disable_btn(self, enabled):
         if enabled:
             self.disable_eStop_button.setEnabled(True)
-            self.disable_eStop_button.setStyleSheet("color: white;"
-                                    "background-color: green;"
-                                    "font-weight: bold;")
         else:
             self.disable_eStop_button.setEnabled(False)
             self.disable_eStop_button.setStyleSheet("")   
