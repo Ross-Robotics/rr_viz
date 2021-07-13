@@ -45,22 +45,17 @@ class RRQWebViewTab(QWidget):
     def _window_manager(self):
         self.cef_widget.resizeWindow(self.cef_container.width() ,self.cef_container.height())
         if self.cef_widget.browser.GetUrl() == '':
-            rospy.loginfo("Web view tab loading login page")
+            rospy.loginfo("Web view tab -> loading login page")
             self.cef_container.setHidden(True)
             self.logo_label.setHidden(False)
             self.status_label.setHidden(False)
         elif self.cef_widget.browser.GetUrl().find("/ui/en/login?redirectUrl=") > 0 :
-            rospy.loginfo("Web view tab autenticating")
+            rospy.loginfo("Web view tab -> autenticating")
             self.cef_widget._login()
         else:
             self.cef_container.setHidden(False)
             self.logo_label.setHidden(True)
             self.status_label.setHidden(True)
-
-        # rospy.loginfo(self.cef_widget.browser.GetUrl())
-        # rospy.loginfo(self.cef_widget.browser.GetUrl().find("/ui/en/login?redirectUrl="))
-
-
 
     class CefWidget(QWidget):
         def __init__(self, parent=None):
