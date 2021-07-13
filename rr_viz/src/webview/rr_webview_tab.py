@@ -45,13 +45,20 @@ class RRQWebViewTab(QWidget):
     def _window_manager(self):
         self.cef_widget.resizeWindow(self.cef_container.width() ,self.cef_container.height())
         if self.cef_widget.browser.GetUrl() == '':
+            rospy.loginfo("Web view tab loading login page")
             self.cef_container.setHidden(True)
             self.logo_label.setHidden(False)
             self.status_label.setHidden(False)
+        elif self.cef_widget.browser.GetUrl().find("/ui/en/login?redirectUrl=") > 0 :
+            rospy.loginfo("Web view tab autenticating")
+            self.cef_widget._login()
         else:
             self.cef_container.setHidden(False)
             self.logo_label.setHidden(True)
             self.status_label.setHidden(True)
+
+        # rospy.loginfo(self.cef_widget.browser.GetUrl())
+        # rospy.loginfo(self.cef_widget.browser.GetUrl().find("/ui/en/login?redirectUrl="))
 
 
 
@@ -59,7 +66,7 @@ class RRQWebViewTab(QWidget):
         def __init__(self, parent=None):
             # noinspection PyArgumentList
             super(self.__class__, self).__init__(parent)
-            self.gui_hostname = rospy.get_param("~gui_hostname", "10.42.0.1")
+            self.gui_hostname = rospy.get_param("~gui_hostname", "192.168.10.120")
             self.gui_url_dict = {
                 "host_page":"/ui/en/",
                 "host_login_transition":"/ui/en/login",
@@ -85,10 +92,9 @@ class RRQWebViewTab(QWidget):
 
         def _cef_on_timer(self):
             cef.MessageLoopWork()
-            if(self.browser.GetUrl() == self._url_builder(self.gui_hostname,self.gui_url_dict.get("login_page"))):
-                self._login()
             if self.browser.GetUrl() == '':
                 self.browser.LoadUrl(self._url_builder(self.gui_hostname,self.gui_url_dict.get("host_page")))
+
 
         def _login(self):
             self.browser.ExecuteJavascript("document.getElementById('mat-input-0').value = 'advanced'")
@@ -101,7 +107,7 @@ class RRQWebViewTab(QWidget):
         def embedBrowser(self):
             self.hidden_window = QWindow()
             self.window_info.SetAsChild(int(self.hidden_window.winId()))
-            self.browser = cef.CreateBrowserSync(self.window_info, url="http://10.42.0.59")
+            self.browser = cef.CreateBrowserSync(self.window_info, url="http://192.168.10.120")
 
         def resizeWindow(self,width,height):
             self.browser.SetBounds(0,0,width,height)
