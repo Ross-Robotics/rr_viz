@@ -95,9 +95,9 @@ class RRVizTabs(QWidget):
 
         # Set up Connection variables
         self.clock_topic = rospy.get_param("/core_clock_sub","/mk3_core/clock")
-        self.clock_freq = rospy.get_param("~publish_frequency", 10)
-        self.poor_connection_threshold = rospy.get_param("/core_clock_poor_connection", 3)
-        self.lost_connection_threshold = rospy.get_param("/core_clock_lost_connection", 5)
+        self.clock_freq = rospy.get_param("/mk3_core/core_clock_publisher/publish_frequency", 10)
+        self.poor_connection_threshold = rospy.get_param("/core_clock_poor_connection", 10)
+        self.lost_connection_threshold = rospy.get_param("/core_clock_lost_connection", 20)
         self.last_received_time = RosTime()
         self.first_value = False
         self.get_first_msg = False
@@ -109,7 +109,9 @@ class RRVizTabs(QWidget):
 
         # Connection callbacks
         self.clock_sub = rospy.Subscriber(self.clock_topic, Clock, self.clock_cb)
-        self.timer = QTimer.singleShot(self.timer_period, self.clock_timer_cb)
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.clock_timer_cb)
+        self.timer.start(self.timer_period)
 
 
     def clock_timer_cb(self):
@@ -137,10 +139,6 @@ class RRVizTabs(QWidget):
                 self.connection_status.setText("Poor")
             
             self.last_received_time.data = self.read_time.data   
-
-        freq = float(self.clock_freq) * 2
-        self.timer_period = 1.0 / freq
-        self.timer = QTimer.singleShot(self.timer_period, self.clock_timer_cb) 
         
     def clock_cb(self, msg):
         self.clock_freq = msg.update_rate
