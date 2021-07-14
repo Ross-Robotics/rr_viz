@@ -46,7 +46,7 @@ class RRQWebViewTab(QWidget):
         self.cef_widget.resizeWindow(self.cef_container.width() ,self.cef_container.height())
         if self.cef_widget.browser.GetUrl() == '':
             rospy.loginfo("Web view tab -> loading login page")
-            self.cef_widget.browser.LoadUrl(self._url_builder(self.gui_hostname,self.gui_url_dict.get("host_page")))
+            self.cef_widget.browser.LoadUrl(self.cef_widget._url_builder(self.cef_widget.gui_hostname,self.cef_widget.gui_url_dict.get("host_page")))
             self.cef_container.setHidden(True)
             self.logo_label.setHidden(False)
             self.status_label.setHidden(False)
@@ -76,7 +76,7 @@ class RRQWebViewTab(QWidget):
             self.hidden_window = None  # Required for PyQt5 on Linux
             self.browser = cef.PyBrowser()
             self.window_info = cef.WindowInfo()
-            self.cef_timer_period = 10
+            self.cef_timer_period = 200
             self.cef_timer = QTimer(self)
             self.cef_timer.timeout.connect(self._cef_on_timer)
             self.cef_timer.start(self.cef_timer_period)
@@ -88,6 +88,7 @@ class RRQWebViewTab(QWidget):
 
         def _cef_on_timer(self):
             cef.MessageLoopWork()
+
 
 
         def _login(self):
