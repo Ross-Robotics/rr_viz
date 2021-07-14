@@ -112,6 +112,7 @@ class RRQWebView(QWidget):
                     self._load( self.current_url)
             else:
                 self.gui_state = "VeriFinder not connected"
+                self.is_hidden = False
 
         def find_serial_number(self,s,ch):
             x = [i for i, ltr in enumerate(s) if ltr == ch]
