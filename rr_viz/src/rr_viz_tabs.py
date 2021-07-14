@@ -76,8 +76,8 @@ class RRVizTabs(QWidget):
         self.rr_interactive_tools_tab.v_layout2.addLayout(self.status_h_layout,1)
 
         # Add rr interactive tools to layout
-        self.rr_interactive_tools_tab.v_layout2.addWidget(RRInteractiveTools(self),5)
-        self.rr_interactive_tools_tab.v_layout2.addWidget(RRQWebView(self),4, Qt.AlignCenter)
+        self.rr_interactive_tools_tab.v_layout2.addWidget(RRInteractiveTools(self), 4)
+        self.rr_interactive_tools_tab.v_layout2.addWidget(RRQWebView(self), 5, Qt.AlignCenter)
 
         # Add vertical layouts to the horizontal layout
         self.rr_interactive_tools_tab.h_layout.addLayout(self.rr_interactive_tools_tab.v_layout1, 7)
