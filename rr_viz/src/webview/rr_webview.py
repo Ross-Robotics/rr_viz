@@ -97,7 +97,7 @@ class RRQWebView(QWidget):
                     self._login()
                 elif self.current_url.find(self.gui_url_dict.get("remote_screen")) >= 0:
                     if self.is_finished_loading:
-                        if self._remove_control_gui_elements() or self.gui_state == "Remote screen fully loaded":
+                        if self._remove_control_gui_elements() or self.gui_state == "Remote screen fully loaded" or self.gui_state == "VeriFinder not connected":
                             self.gui_state = "Remote screen fully loaded"
                             self.is_hidden = False
                         else:
