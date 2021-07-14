@@ -34,6 +34,7 @@ class SlamSupervisor(QWidget):
         self.save_map_srv = rospy.ServiceProxy(self.slam_sup_name+"/save_map", String)
         self.delete_map_srv = rospy.ServiceProxy(self.slam_sup_name+"/delete_map", String)
         self.save_map_image_srv = rospy.ServiceProxy(self.slam_sup_name+"/save_map_image", String)
+        self.reset_dose_map_srv = rospy.ServiceProxy("", Trigger)
         self.active_nodes_sub = rospy.Subscriber(self.slam_sup_name+"/active_nodes", StringArray, self.active_nodes_sub_cb)
         
         self.active_nodes = []
@@ -188,6 +189,12 @@ class SlamSupervisor(QWidget):
                 rospy.Duration(.1), lambda _: self.waitTillDead_and_execute(self.run_mapping), oneshot=True)
         else:
             rospy.logwarn("Failed calling slam_killnodes_srv")
+
+        trig_resp = self.reset_dose_map_srv.call(TriggerRequest())
+        if trig_resp.success:
+            rospy.loginfo(trig_resp.message)
+        else:
+            rospy.logwarn("Failed calling reset dose map ")
     
     def run_mapping(self):
         trig_resp = self.launch_mapping_srv.call(TriggerRequest())
@@ -209,6 +216,12 @@ class SlamSupervisor(QWidget):
                 rospy.Duration(.1), lambda _: self.waitTillDead_and_execute(self.run_localization), oneshot=True)
         else:
             rospy.logerr("Failed calling slam_killnodes_srv")
+
+        trig_resp = self.reset_dose_map_srv.call(TriggerRequest())
+        if trig_resp.success:
+            rospy.loginfo(trig_resp.message)
+        else:
+            rospy.logwarn("Failed calling reset dose map ")
 
     def run_localization(self):
         _str = StringRequest()
