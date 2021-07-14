@@ -6,6 +6,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 import rospy
 import managers.file_management as file_management
+from rr_custom_msgs.msg import Ping
 
 class RRQWebViewTab(QWidget):
     def __init__(self, parent):
@@ -14,7 +15,7 @@ class RRQWebViewTab(QWidget):
         self.loading_layout = QVBoxLayout(self)
         self.projectS_logo = file_management.get_rrviz_resdir()+ "/projectS_logo.png"
         pixmap = QPixmap(self.projectS_logo)
-        self.status_label = QLabel('Connecting to VeriFinder')
+        self.status_label = QLabel('VeriFinder not connected ...')
         self.status_label.setFont(QFont('Ubuntu',20,QFont.Bold))
         self.status_label.setHidden(True)
         self.status_label.setAlignment(Qt.AlignCenter)
@@ -44,19 +45,25 @@ class RRQWebViewTab(QWidget):
 
     def _window_manager(self):
         self.cef_widget.resizeWindow(self.cef_container.width() ,self.cef_container.height())
-        if self.cef_widget.browser.GetUrl() == '':
-            rospy.loginfo("Web view tab -> loading login page")
-            self.cef_widget.browser.LoadUrl(self.cef_widget._url_builder(self.cef_widget.gui_hostname,self.cef_widget.gui_url_dict.get("host_page")))
+        if self.cef_widget.connection_msg.connected == True:
+            if self.cef_widget.browser.GetUrl() == '':
+                rospy.loginfo("Web view tab -> loading login page")
+                self.cef_widget.browser.LoadUrl(self.cef_widget._url_builder(self.cef_widget.gui_hostname,self.cef_widget.gui_url_dict.get("host_page")))
+                self.cef_container.setHidden(True)
+                self.logo_label.setHidden(False)
+                self.status_label.setHidden(False)
+            elif self.cef_widget.browser.GetUrl().find("/ui/en/login?redirectUrl=") > 0 :
+                rospy.loginfo("Web view tab -> autenticating")
+                self.cef_widget._login()
+            else:
+                self.cef_container.setHidden(False)
+                self.logo_label.setHidden(True)
+                self.status_label.setHidden(True)
+        else:
+            rospy.loginfo("Web view tab -> VeriFinder not connected")
             self.cef_container.setHidden(True)
             self.logo_label.setHidden(False)
             self.status_label.setHidden(False)
-        elif self.cef_widget.browser.GetUrl().find("/ui/en/login?redirectUrl=") > 0 :
-            rospy.loginfo("Web view tab -> autenticating")
-            self.cef_widget._login()
-        else:
-            self.cef_container.setHidden(False)
-            self.logo_label.setHidden(True)
-            self.status_label.setHidden(True)
 
     class CefWidget(QWidget):
         def __init__(self, parent=None):
@@ -71,6 +78,12 @@ class RRQWebViewTab(QWidget):
                 "home_page":"/ui/en/hosts/" + self.gui_hostname,
                 "remote_screen":"/ui/en/hosts/" + self.gui_hostname + "/remote-control"
             }
+
+            #ROS stuff
+            self.connection_sub = rospy.Subscriber("/dose_sensor_connection/ping_data", Ping, self.callback)
+            self.connection_msg = Ping()
+            self.connection_msg.connected = False
+
             cef.Initialize()
             self.parent = parent
             self.hidden_window = None  # Required for PyQt5 on Linux
@@ -81,6 +94,8 @@ class RRQWebViewTab(QWidget):
             self.cef_timer.timeout.connect(self._cef_on_timer)
             self.cef_timer.start(self.cef_timer_period)
 
+        def callback(self, data):
+            self.connection_msg = data
 
         def _url_builder(self,hostname,page):
             url = "http://" + hostname + page

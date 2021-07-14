@@ -7,6 +7,7 @@ from PyQt5.QtWebKitWidgets import QWebView
 from PyQt5.QtWebKitWidgets import QWebPage
 import rospy
 import managers.file_management as file_management
+from rr_custom_msgs.msg import Ping
 
 class RRQWebView(QWidget):
     def __init__(self, parent):
@@ -16,7 +17,7 @@ class RRQWebView(QWidget):
         self.setMaximumWidth(400)
         self.projectS_logo = file_management.get_rrviz_resdir()+ "/projectS_logo.png"
         pixmap = QPixmap(self.projectS_logo)
-        self.status_label = QLabel('Connecting to remote screen')
+        self.status_label = QLabel('VeriFinder not connected')
         self.status_label.setFont(QFont('Ubuntu',20,QFont.Bold))
         self.status_label.setHidden(True)
         self.status_label.setAlignment(Qt.AlignCenter)
@@ -47,10 +48,16 @@ class RRQWebView(QWidget):
         def __init__(self, parent=None):
             super(self.__class__, self).__init__(parent)
             # gui variables
-            self.gui_hostname = rospy.get_param("~gui_hostname", "10.42.0.1")
+            self.gui_hostname = rospy.get_param("~gui_hostname", "192.168.10.120")
             self.gui_serial_number = rospy.get_param("~gui_serial_number", "sn23n-180004")
             self.url_loading_state = "Not started"
-            self.gui_state = "Connecting"
+            self.gui_state = "VeriFinder not connected"
+
+            #ROS stuff
+            self.connection_sub = rospy.Subscriber("/dose_sensor_connection/ping_data", Ping, self.callback)
+            self.connection_msg = Ping()
+            self.connection_msg.connected = False
+
             self.current_url_loading_progress = 0
             self.is_finished_loading = False
             self.is_hidden = True
@@ -77,28 +84,34 @@ class RRQWebView(QWidget):
             self.setHidden(self.is_hidden)
             self.timer.start(self.timer_period)
 
+        def callback(self, data):
+            self.connection_msg = data
+
         def _gui_manager(self):
             self.setHidden(self.is_hidden)
-            if self.current_url == "None":
-                self.load_page("host_page")
-            elif self.current_url.find(self.gui_url_dict.get("login_page")) >= 0:
-                self.gui_state = "Logging into the GUI"
-                self._login()
-            elif self.current_url.find(self.gui_url_dict.get("remote_screen")) >= 0:
-                if self.is_finished_loading:
-                    if self._remove_control_gui_elements() or self.gui_state == "Remote screen fully loaded":
-                        self.gui_state = "Remote screen fully loaded"
-                        self.is_hidden = False
-                    else:
-                        self.gui_state = "Configuring GUI"
-            elif self.current_url.find(self.gui_url_dict.get("home_page")) >= 0:
-                if self.is_finished_loading:
-                    self.gui_state = "Opening remote screen"
-                    self.find_serial_number(self.current_url,'/')
-                    self.gui_url_dict.update(remote_screen = "/ui/en/hosts/" + self.gui_serial_number + "/remote-control")
-                    self.load_page("remote_screen")
-            if self.url_loading_state == "Failed":
-                self._load( self.current_url)
+            if self.connection_msg.connected == True:
+                if self.current_url == "None":
+                    self.load_page("host_page")
+                elif self.current_url.find(self.gui_url_dict.get("login_page")) >= 0:
+                    self.gui_state = "Logging into the GUI"
+                    self._login()
+                elif self.current_url.find(self.gui_url_dict.get("remote_screen")) >= 0:
+                    if self.is_finished_loading:
+                        if self._remove_control_gui_elements() or self.gui_state == "Remote screen fully loaded":
+                            self.gui_state = "Remote screen fully loaded"
+                            self.is_hidden = False
+                        else:
+                            self.gui_state = "Configuring GUI"
+                elif self.current_url.find(self.gui_url_dict.get("home_page")) >= 0:
+                    if self.is_finished_loading:
+                        self.gui_state = "Opening remote screen"
+                        self.find_serial_number(self.current_url,'/')
+                        self.gui_url_dict.update(remote_screen = "/ui/en/hosts/" + self.gui_serial_number + "/remote-control")
+                        self.load_page("remote_screen")
+                if self.url_loading_state == "Failed":
+                    self._load( self.current_url)
+            else:
+                self.gui_state = "VeriFinder not connected"
 
         def find_serial_number(self,s,ch):
             x = [i for i, ltr in enumerate(s) if ltr == ch]
