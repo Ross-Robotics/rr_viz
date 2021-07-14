@@ -34,7 +34,7 @@ class SlamSupervisor(QWidget):
         self.save_map_srv = rospy.ServiceProxy(self.slam_sup_name+"/save_map", String)
         self.delete_map_srv = rospy.ServiceProxy(self.slam_sup_name+"/delete_map", String)
         self.save_map_image_srv = rospy.ServiceProxy(self.slam_sup_name+"/save_map_image", String)
-        self.reset_dose_map_srv = rospy.ServiceProxy("", Trigger)
+        self.reset_dose_map_srv = rospy.ServiceProxy("/costmap_value_mapper/rest_map", Trigger)
         self.active_nodes_sub = rospy.Subscriber(self.slam_sup_name+"/active_nodes", StringArray, self.active_nodes_sub_cb)
         
         self.active_nodes = []
