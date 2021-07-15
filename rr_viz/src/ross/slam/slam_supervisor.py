@@ -34,7 +34,8 @@ class SlamSupervisor(QWidget):
         self.save_map_srv = rospy.ServiceProxy(self.slam_sup_name+"/save_map", String)
         self.delete_map_srv = rospy.ServiceProxy(self.slam_sup_name+"/delete_map", String)
         self.save_map_image_srv = rospy.ServiceProxy(self.slam_sup_name+"/save_map_image", String)
-        self.reset_dose_map_srv = rospy.ServiceProxy("/costmap_value_mapper/rest_map", Trigger)
+        self.reset_dose_map_srv = rospy.ServiceProxy("/costmap_value_mapper/reset_map", Trigger)
+        self.save_dose_map_srv = rospy.ServiceProxy("/costmap_value_mapper/get_screenshot", String)
         self.active_nodes_sub = rospy.Subscriber(self.slam_sup_name+"/active_nodes", StringArray, self.active_nodes_sub_cb)
         
         self.active_nodes = []
@@ -146,8 +147,12 @@ class SlamSupervisor(QWidget):
         self.save_map_image_button = QPushButton('Save Map Image')
         self.save_map_image_button.pressed.connect(self.save_map_image)
 
+        self.save_dose_map_button = QPushButton("Save Dose Map")
+        self.save_dose_map_button.pressed.connect(self.save_dose_map)
+
         self.h_layout_save_map.addWidget(self.save_map_button)
         self.h_layout_save_map.addWidget(self.save_map_image_button)
+        self.h_layout_save_map.addWidget(self.save_dose_map_button)
 
         self.v_layout.addLayout(self.h_layout_save_map)
 
@@ -316,6 +321,28 @@ class SlamSupervisor(QWidget):
                 rospy.loginfo_throttle(1, "Map saver running")
                 r.sleep()
             rospy.loginfo("Map saved")
+
+    def save_dose_map(self):
+        map_name, ok = QInputDialog.getText(self, "Dose file name"," Specify file name to save the dose map:")
+        if ok:
+            if map_name != '':
+                map_name = string.replace(map_name, '.', '_')
+            else:
+                map_name = self.default_map_name
+            
+            map_name = 'dose_' + map_name
+
+            save_map_image_dir = file_management.get_map_images_dir()
+            map_path = save_map_image_dir + '/' +  map_name
+
+            _str = StringRequest()
+            _str.string = map_path
+
+            trig_resp = self.save_dose_map_srv.call(_str)
+
+            rospy.loginfo(trig_resp.message)
+            if not trig_resp.success:
+                rospy.logerr("Failed calling slam_save_map_srv")
 
     def map_list_update(self):
         if self.isEnabled() and not rospy.is_shutdown():
