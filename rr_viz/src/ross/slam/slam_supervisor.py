@@ -336,7 +336,7 @@ class SlamSupervisor(QWidget):
             map_path = save_map_image_dir + '/' +  map_name
 
             _str = StringRequest()
-            _str.string = map_path
+            _str.str = map_path
 
             trig_resp = self.save_dose_map_srv.call(_str)
 
