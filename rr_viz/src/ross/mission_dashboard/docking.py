@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from PyQt5.QtWidgets import QVBoxLayout, QWidget, QLabel, QPushButton
+from PyQt5.QtWidgets import QVBoxLayout, QWidget, QLabel, QPushButton, QHBoxLayout
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 
@@ -13,8 +13,11 @@ class Docking(QWidget):
         # Setup services
         self.set_pose_srv_name = "/robot_interface/save_dock_approach"
         self.set_pose_srv = rospy.ServiceProxy(self.set_pose_srv_name, Trigger)
+        self.home_arm_srv_name = "/mk3_g_arm/go_to_home"
+        self.home_arm_srv = rospy.ServiceProxy(self.home_arm_srv_name, Trigger)
 
-        self.v_layout= QVBoxLayout()
+        self.v_layout = QVBoxLayout()
+        self.h_layout = QHBoxLayout()
 
         # Title
         self.title_label = QLabel('Docking')
@@ -22,11 +25,17 @@ class Docking(QWidget):
         self.title_label.setAlignment(Qt.AlignRight)
         self.v_layout.addWidget(self.title_label)
 
-        # Button
+        # Buttons
+        self.home_arm_button = QPushButton('Home Arm')
+        self.home_arm_button.pressed.connect(self.home_arm)
+
         self.set_pose_button = QPushButton('Set Home Pose')
         self.set_pose_button.pressed.connect(self.set_pose)
 
-        self.v_layout.addWidget(self.set_pose_button)
+        self.h_layout.addWidget(self.home_arm_button)
+        self.h_layout.addWidget(self.set_pose_button)
+
+        self.v_layout.addLayout(self.h_layout)
 
         self.setLayout(self.v_layout)
 
@@ -39,4 +48,15 @@ class Docking(QWidget):
                 rospy.logerr(msg)
         except:
             msg = "Service '" + self.set_pose_srv_name + "' unavailable"
+            rospy.logwarn(msg)
+
+    def home_arm(self):
+        try:
+            trig_resp = self.home_arm_srv.call(TriggerRequest())
+            rospy.loginfo(trig_resp.message)
+            if not trig_resp.success:
+                msg = "Failed to call '" + self.home_arm_srv_name + "' service"
+                rospy.logerr(msg)
+        except:
+            msg = "Service '" + self.home_arm_srv_name + "' unavailable"
             rospy.logwarn(msg)
