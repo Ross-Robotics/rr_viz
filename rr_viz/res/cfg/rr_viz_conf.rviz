@@ -6,6 +6,7 @@ Panels:
       Expanded:
         - /Global Options1
         - /TF1/Frames1
+        - /MapColour1
       Splitter Ratio: 0.45410627126693726
     Tree Height: 419
   - Class: rviz/Selection
@@ -104,7 +105,7 @@ Visualization Manager:
       Color: 255; 0; 0
       Color Transformer: FlatColor
       Decay Time: 0
-      Enabled: true
+      Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Max Intensity: 47
@@ -121,7 +122,7 @@ Visualization Manager:
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
-      Value: true
+      Value: false
     - Alpha: 1
       Class: rviz/PointStamped
       Color: 204; 41; 204
@@ -300,9 +301,19 @@ Visualization Manager:
       Class: rviz/Map
       Color Scheme: costmap
       Draw Behind: false
-      Enabled: true
+      Enabled: false
       Name: GLobal_costmap
       Topic: /move_base/global_costmap/costmap
+      Unreliable: false
+      Use Timestamp: false
+      Value: false
+    - Alpha: 0.699999988079071
+      Class: rr_viz_plugins/MapColour
+      Color Scheme: colourmap
+      Draw Behind: false
+      Enabled: true
+      Name: MapColour
+      Topic: /costmap_value_mapper/value_map
       Unreliable: false
       Use Timestamp: false
       Value: true
@@ -375,5 +386,5 @@ Window Geometry:
   Views:
     collapsed: true
   Width: 965
-  X: 9
+  X: 67
   Y: 9
