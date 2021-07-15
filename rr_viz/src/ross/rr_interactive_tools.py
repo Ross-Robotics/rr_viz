@@ -19,10 +19,10 @@ class RRInteractiveTools(QWidget):
         self.slam_supervisor_tab = QWidget()
         self.explosive_sensor_tab = QWidget()
 
+        self.tabs.addTab(self.explosive_sensor_tab, "ACE-ID")
         self.tabs.addTab(self.mission_editor_tab, "Mission Editor")
         self.tabs.addTab(self.slam_supervisor_tab, "Slam Supervisor")
         self.tabs.addTab(self.mission_dashboard_tab, "Mission Dashboard")
-        self.tabs.addTab(self.explosive_sensor_tab, "ACE-ID")
         
         self.mission_editor_tab.layout = QVBoxLayout()
         self.mission_editor_tab.layout.addWidget(MissionEditor(self))
