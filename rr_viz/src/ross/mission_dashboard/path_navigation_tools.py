@@ -90,7 +90,7 @@ class PathNavigationTools(QWidget):
         self.record_state_checker.start()
 
         self.follow_state_checker = rr_qt_helper.StateCheckerTimer(
-            self.is_record_up, self.set_enable_follow, Hz=1./3.)
+            self.is_follow_up, self.set_enable_follow, Hz=1./3.)
         self.follow_state_checker.start()
 
     def start_recording(self):

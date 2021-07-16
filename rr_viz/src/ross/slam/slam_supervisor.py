@@ -15,6 +15,7 @@ import managers.file_management as file_management
 
 class SlamSupervisor(QWidget):
     set_enable_panel = QtCore.pyqtSignal(bool)
+    enable_dose_mapper = QtCore.pyqtSignal(bool)
 
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
@@ -160,16 +161,34 @@ class SlamSupervisor(QWidget):
 
         self.setEnabled(False)
         self.set_enable_panel.connect(self.setEnabled)
+        self.enable_dose_mapper.connect(self.enable_dose)
 
         # Setup state checker:
         self.state_checker = rr_qt_helper.StateCheckerTimer(
             self.is_slam_supervisor_up, self.set_enable_panel, Hz=1./3.)
         self.state_checker.start()
 
+        self.dose_mapper_checker = rr_qt_helper.StateCheckerTimer(self.is_dose_mapper_up, self.enable_dose_mapper, Hz=1./3.)
+        self.dose_mapper_checker.start()
+
         # Map update
         self.map_list_update_timer = QtCore.QTimer(self)
         self.map_list_update_timer.timeout.connect(self.map_list_update)
         self.map_list_update_timer.start(1000)
+
+    def enable_dose(self, enabled):
+        self.save_dose_map_button.setEnabled(enabled)
+
+    def is_dose_mapper_up(self):
+        if rospy.is_shutdown():
+            return False
+        try:
+            rospy.wait_for_service(
+                "/costmap_value_mapper/get_screenshot", rospy.Duration(3))
+            return True
+        except:
+            # Exit if theres no service
+            return False
 
     def is_slam_supervisor_up(self):
         if rospy.is_shutdown():
