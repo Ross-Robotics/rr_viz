@@ -5,7 +5,7 @@ from PyQt5.QtCore import Qt
 
 import rospy
 from std_srvs.srv import Trigger, TriggerRequest
-from rr_custom_msgs.message import GoToHomeAction, GoToHomeGoal
+from rr_custom_msgs.msg import GoToHomeAction, GoToHomeGoal
 
 class Docking(QWidget):
     def __init__(self, parent):
