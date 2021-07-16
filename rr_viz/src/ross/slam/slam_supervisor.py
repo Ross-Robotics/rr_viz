@@ -15,7 +15,7 @@ import managers.file_management as file_management
 
 class SlamSupervisor(QWidget):
     set_enable_panel = QtCore.pyqtSignal(bool)
-    enable_dose_mapper = QtCore.pyqtSignal(bool)
+    # enable_dose_mapper = QtCore.pyqtSignal(bool)
 
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
@@ -36,7 +36,7 @@ class SlamSupervisor(QWidget):
         self.delete_map_srv = rospy.ServiceProxy(self.slam_sup_name+"/delete_map", String)
         self.save_map_image_srv = rospy.ServiceProxy(self.slam_sup_name+"/save_map_image", String)
         self.reset_dose_map_srv = rospy.ServiceProxy("/costmap_value_mapper/reset_map", Trigger)
-        self.save_dose_map_srv = rospy.ServiceProxy("/costmap_value_mapper/get_screenshot", String)
+        # self.save_dose_map_srv = rospy.ServiceProxy("/costmap_value_mapper/get_screenshot", String)
         self.active_nodes_sub = rospy.Subscriber(self.slam_sup_name+"/active_nodes", StringArray, self.active_nodes_sub_cb)
         
         self.active_nodes = []
@@ -148,12 +148,12 @@ class SlamSupervisor(QWidget):
         self.save_map_image_button = QPushButton('Save Map Image')
         self.save_map_image_button.pressed.connect(self.save_map_image)
 
-        self.save_dose_map_button = QPushButton("Save Dose Map")
-        self.save_dose_map_button.pressed.connect(self.save_dose_map)
+        # self.save_dose_map_button = QPushButton("Save Dose Map")
+        # self.save_dose_map_button.pressed.connect(self.save_dose_map)
 
         self.h_layout_save_map.addWidget(self.save_map_button)
         self.h_layout_save_map.addWidget(self.save_map_image_button)
-        self.h_layout_save_map.addWidget(self.save_dose_map_button)
+        # self.h_layout_save_map.addWidget(self.save_dose_map_button)
 
         self.v_layout.addLayout(self.h_layout_save_map)
 
@@ -161,34 +161,34 @@ class SlamSupervisor(QWidget):
 
         self.setEnabled(False)
         self.set_enable_panel.connect(self.setEnabled)
-        self.enable_dose_mapper.connect(self.enable_dose)
+        # self.enable_dose_mapper.connect(self.enable_dose)
 
         # Setup state checker:
         self.state_checker = rr_qt_helper.StateCheckerTimer(
             self.is_slam_supervisor_up, self.set_enable_panel, Hz=1./3.)
         self.state_checker.start()
 
-        self.dose_mapper_checker = rr_qt_helper.StateCheckerTimer(self.is_dose_mapper_up, self.enable_dose_mapper, Hz=1./3.)
-        self.dose_mapper_checker.start()
+        # self.dose_mapper_checker = rr_qt_helper.StateCheckerTimer(self.is_dose_mapper_up, self.enable_dose_mapper, Hz=1./3.)
+        # self.dose_mapper_checker.start()
 
         # Map update
         self.map_list_update_timer = QtCore.QTimer(self)
         self.map_list_update_timer.timeout.connect(self.map_list_update)
         self.map_list_update_timer.start(1000)
 
-    def enable_dose(self, enabled):
-        self.save_dose_map_button.setEnabled(enabled)
+    # def enable_dose(self, enabled):
+    #     self.save_dose_map_button.setEnabled(enabled)
 
-    def is_dose_mapper_up(self):
-        if rospy.is_shutdown():
-            return False
-        try:
-            rospy.wait_for_service(
-                "/costmap_value_mapper/get_screenshot", rospy.Duration(3))
-            return True
-        except:
-            # Exit if theres no service
-            return False
+    # def is_dose_mapper_up(self):
+    #     if rospy.is_shutdown():
+    #         return False
+    #     try:
+    #         rospy.wait_for_service(
+    #             "/costmap_value_mapper/get_screenshot", rospy.Duration(3))
+    #         return True
+    #     except:
+    #         # Exit if theres no service
+    #         return False
 
     def is_slam_supervisor_up(self):
         if rospy.is_shutdown():
@@ -341,27 +341,27 @@ class SlamSupervisor(QWidget):
                 r.sleep()
             rospy.loginfo("Map saved")
 
-    def save_dose_map(self):
-        map_name, ok = QInputDialog.getText(self, "Dose file name"," Specify file name to save the dose map:")
-        if ok:
-            if map_name != '':
-                map_name = string.replace(map_name, '.', '_')
-            else:
-                map_name = self.default_map_name
+    # def save_dose_map(self):
+    #     map_name, ok = QInputDialog.getText(self, "Dose file name"," Specify file name to save the dose map:")
+    #     if ok:
+    #         if map_name != '':
+    #             map_name = string.replace(map_name, '.', '_')
+    #         else:
+    #             map_name = self.default_map_name
             
-            map_name = 'dose_' + map_name
+    #         map_name = 'dose_' + map_name
 
-            save_map_image_dir = file_management.get_map_images_dir()
-            map_path = save_map_image_dir + '/' +  map_name
+    #         save_map_image_dir = file_management.get_map_images_dir()
+    #         map_path = save_map_image_dir + '/' +  map_name
 
-            _str = StringRequest()
-            _str.str = map_path
+    #         _str = StringRequest()
+    #         _str.str = map_path
 
-            trig_resp = self.save_dose_map_srv.call(_str)
+    #         trig_resp = self.save_dose_map_srv.call(_str)
 
-            rospy.loginfo(trig_resp.message)
-            if not trig_resp.success:
-                rospy.logerr("Failed calling slam_save_map_srv")
+    #         rospy.loginfo(trig_resp.message)
+    #         if not trig_resp.success:
+    #             rospy.logerr("Failed calling slam_save_map_srv")
 
     def map_list_update(self):
         if self.isEnabled() and not rospy.is_shutdown():
