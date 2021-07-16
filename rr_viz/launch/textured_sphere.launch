@@ -34,6 +34,7 @@
     <param name="loop_videofile" type="bool" value="false" />
     <param name="width" type="int" value="0" />
     <param name="height" type="int" value="0" />
+    <param name="reopen_on_read_failure" type="bool" value="true" />
   </node>
 
   <!-- rear camera -->
@@ -51,6 +52,7 @@
     <param name="loop_videofile" type="bool" value="false" />
     <param name="width" type="int" value="$(arg http_image_width)" />
     <param name="height" type="int" value="$(arg http_image_height)" />
+    <param name="reopen_on_read_failure" type="bool" value="true" />
   </node>
 
 
