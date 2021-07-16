@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QVBoxLayout, QWidget, QLabel, QPushButton, QHBoxLayo
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 
+import actionlib
 import rospy
 from std_srvs.srv import Trigger, TriggerRequest
 from rr_custom_msgs.msg import GoToHomeAction, GoToHomeGoal
@@ -15,7 +16,7 @@ class Docking(QWidget):
         self.set_pose_srv_name = "/robot_interface/save_dock_approach"
         self.set_pose_srv = rospy.ServiceProxy(self.set_pose_srv_name, Trigger)
         self.home_arm_action_name = "/mk3_g_arm/mk3_g_arm/go_to_home"
-        self.home_arm_action = rospy.SimpleActionClient(self.home_arm_action_name, GoToHomeAction)
+        self.home_arm_action = actionlib.SimpleActionClient(self.home_arm_action_name, GoToHomeAction)
 
         self.v_layout = QVBoxLayout()
         self.h_layout = QHBoxLayout()
