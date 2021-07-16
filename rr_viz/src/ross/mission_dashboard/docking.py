@@ -5,6 +5,7 @@ from PyQt5.QtCore import Qt
 
 import rospy
 from std_srvs.srv import Trigger, TriggerRequest
+from rr_custom_msgs.message import GoToHomeAction, GoToHomeGoal
 
 class Docking(QWidget):
     def __init__(self, parent):
@@ -13,8 +14,8 @@ class Docking(QWidget):
         # Setup services
         self.set_pose_srv_name = "/robot_interface/save_dock_approach"
         self.set_pose_srv = rospy.ServiceProxy(self.set_pose_srv_name, Trigger)
-        self.home_arm_srv_name = "/mk3_g_arm/go_to_home"
-        self.home_arm_srv = rospy.ServiceProxy(self.home_arm_srv_name, Trigger)
+        self.home_arm_action_name = "/mk3_g_arm/mk3_g_arm/go_to_home"
+        self.home_arm_action = rospy.SimpleActionClient(self.home_arm_action_name, GoToHomeAction)
 
         self.v_layout = QVBoxLayout()
         self.h_layout = QHBoxLayout()
@@ -51,12 +52,4 @@ class Docking(QWidget):
             rospy.logwarn(msg)
 
     def home_arm(self):
-        try:
-            trig_resp = self.home_arm_srv.call(TriggerRequest())
-            rospy.loginfo(trig_resp.message)
-            if not trig_resp.success:
-                msg = "Failed to call '" + self.home_arm_srv_name + "' service"
-                rospy.logerr(msg)
-        except:
-            msg = "Service '" + self.home_arm_srv_name + "' unavailable"
-            rospy.logwarn(msg)
+        self.go_to_home_action.send_goal(GoToHomeGoal(go_to_home=True))
