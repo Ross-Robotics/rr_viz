@@ -13,7 +13,7 @@
   <arg name="rtsp_stream_port" default="8000"/>
 
   <arg name="http_start_delay" default="2.0" />
-  <arg name="http_stream_fps" default="30"/>
+  <arg name="http_stream_fps" default="5"/>
   <arg name="http_image_queue" default="1" />
   <arg name="http_image_width" default="1600" />
   <arg name="http_image_height" default="1200" />
