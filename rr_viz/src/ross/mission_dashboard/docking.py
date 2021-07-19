@@ -53,4 +53,4 @@ class Docking(QWidget):
             rospy.logwarn(msg)
 
     def home_arm(self):
-        self.go_to_home_action.send_goal(GoToHomeGoal(go_to_home=True))
+        self.home_arm_action.send_goal(GoToHomeGoal(go_to_home=True))

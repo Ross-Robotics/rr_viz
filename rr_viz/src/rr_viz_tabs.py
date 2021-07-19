@@ -43,7 +43,7 @@ class RRVizTabs(QWidget):
         self.signal_strength_label = QLabel('Signal Strength:')
         self.signal_strength_label.setFont(QFont('Ubuntu', 11, QFont.Bold))
         self.signal_strength_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
-        
+
         self.signal_strength = QLabel('Connecting')
         self.signal_strength.setFont(QFont('Ubuntu', 11, QFont.Bold))
         self.signal_strength.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
@@ -51,7 +51,7 @@ class RRVizTabs(QWidget):
         self.latency_label = QLabel('Latency:')
         self.latency_label.setFont(QFont('Ubuntu', 11, QFont.Bold))
         self.latency_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
-        
+
         self.latency = QLabel('0')
         self.latency.setFont(QFont('Ubuntu', 11, QFont.Bold))
         self.latency.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)

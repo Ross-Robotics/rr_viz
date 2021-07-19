@@ -15,6 +15,8 @@ class RRQWebView(QWidget):
         main_layout = QHBoxLayout(self)
         self.loading_layout = QVBoxLayout(self)
         self.setMaximumWidth(400)
+        self.setMinimumHeight(400)
+
         self.projectS_logo = file_management.get_rrviz_resdir()+ "/projectS_logo.png"
         pixmap = QPixmap(self.projectS_logo)
         self.status_label = QLabel('VeriFinder not connected')
