@@ -47,8 +47,8 @@ Visualization Manager:
     - Blend angle: 15
       Class: rviz_textured_sphere/SphereDisplay
       Enabled: true
-      FOV front: 225
-      FOV rear: 225
+      FOV front: 250
+      FOV rear: 250
       Front camera image: /camera_front/cropped
       Name: SphereDisplay
       Radius: 300
@@ -56,7 +56,7 @@ Visualization Manager:
       Reference frame: <Fixed Frame>
       Ring count: 159
       Segment count: 139
-      Transport Hint: raw
+      Transport Hint: compressed
       Value: true
   Enabled: true
   Global Options:
@@ -86,25 +86,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 370.2687072753906
+      Distance: 254
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -0.024672916159033775
-        Y: -0.10656790435314178
-        Z: 0.3163977265357971
+        X: 0
+        Y: 0
+        Z: 0
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: -0.03520362824201584
+      Pitch: 0.12539833784103394
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.336819171905518
+      Yaw: 0.11539910733699799
     Saved: ~
 Window Geometry:
   Displays:
