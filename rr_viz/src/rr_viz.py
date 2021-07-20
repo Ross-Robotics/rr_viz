@@ -5,7 +5,7 @@ import rospy
 import rosgraph
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QPushButton
-from PyQt5 import QtCore
+from PyQt5 import QtCore, QtGui
 from PyQt5.QtCore import QTimer
 
 from rr_viz_tabs import RRVizTabs
@@ -16,6 +16,8 @@ class RossRoboticsRViz(QMainWindow):
     def __init__(self, parent=None):
         super(QMainWindow, self).__init__(parent)
         self.setWindowTitle("Ross Robotics RViz")
+        logo_path = file_management.get_rrviz_resdir() + "/low_level_gui.png"
+        self.setWindowIcon(QtGui.QIcon(logo_path))
         self.x = 10
         self.y = 10
         self.width = 1482
