@@ -268,6 +268,11 @@ class SlamSupervisor(QWidget):
                 rospy.Duration(1), lambda _: self.waitTillDead_and_execute(func), oneshot=True)
 
     def delete_map(self):
+        if not len(self.map_list_widget.selectedItems()):
+            self.msg_to_show = "No map selected to delete"
+            self.message_popup()
+            return
+        
         _str = StringRequest()
         _str.str = self.map_list_widget.currentItem().text().split(".")[0].strip()
 
