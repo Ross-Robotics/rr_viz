@@ -10,7 +10,7 @@ from std_msgs.msg import Bool
 class EmergencyStop(QWidget):
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
-        
+
         self.layout_init()
 
         # Set up service
@@ -33,11 +33,14 @@ class EmergencyStop(QWidget):
         self.title_label.setFont(QFont('Ubuntu', 11, QFont.Bold))
         self.title_label.setAlignment(Qt.AlignRight)
         self.v_layout.addWidget(self.title_label)
-        
+
         # Buttons
         self.h_layout = QHBoxLayout()
         self.enable_eStop_button = QPushButton('Emergency Stop')
         self.enable_eStop_button.pressed.connect(self.enable_eStop)
+        self.enable_eStop_button.setStyleSheet("color: white;"
+                        "background-color: red;"
+                        "font-weight: bold;")
         self.enable_eStop_button.setEnabled(False)
 
         self.disable_eStop_button = QPushButton('Reset Emergency Stop')
@@ -72,11 +75,18 @@ class EmergencyStop(QWidget):
         eStop_req = SetBoolRequest()
         eStop_req.data = True
         self.trigger_service(eStop_req)
+        self.disable_eStop_button.setStyleSheet("color: white;"
+                        "background-color: green;"
+                        "font-weight: bold;")
+
 
     def disable_eStop(self):
         eStop_req = SetBoolRequest()
         eStop_req.data = False
         self.trigger_service(eStop_req)
+        self.enable_eStop_button.setStyleSheet("color: white;"
+                                "background-color: red;"
+                                "font-weight: bold;")
 
     def trigger_service(self, req):
         try:
@@ -90,9 +100,9 @@ class EmergencyStop(QWidget):
             rospy.logwarn(msg)
 
     def eStop_status_update(self, msg):
-        # This watches a topic created by the Estop script which outputs whether the eStop is 
+        # This watches a topic created by the Estop script which outputs whether the eStop is
         # engaged or not. This is so that if the eStop is engaged on one of the controls then
-        # all controls know of its engaged and reflect that in their displays. 
+        # all controls know of its engaged and reflect that in their displays.
         # True = Enabled, False = Disabled
         if msg.data:
             self.layout_estop_enable_btn(False)
@@ -100,14 +110,11 @@ class EmergencyStop(QWidget):
         else:
             self.layout_estop_enable_btn(True)
             self.layout_estop_disable_btn(False)
-             
+
 
     def layout_estop_enable_btn(self, enabled):
         if enabled:
             self.enable_eStop_button.setEnabled(True)
-            self.enable_eStop_button.setStyleSheet("color: white;"
-                                                    "background-color: red;"
-                                                    "font-weight: bold;")
         else:
             self.enable_eStop_button.setEnabled(False)
             self.enable_eStop_button.setStyleSheet("")
@@ -115,9 +122,6 @@ class EmergencyStop(QWidget):
     def layout_estop_disable_btn(self, enabled):
         if enabled:
             self.disable_eStop_button.setEnabled(True)
-            self.disable_eStop_button.setStyleSheet("color: white;"
-                                    "background-color: green;"
-                                    "font-weight: bold;")
         else:
             self.disable_eStop_button.setEnabled(False)
-            self.disable_eStop_button.setStyleSheet("")   
+            self.disable_eStop_button.setStyleSheet("")
