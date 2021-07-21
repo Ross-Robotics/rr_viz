@@ -14,7 +14,7 @@ class ExplosiveAceID(QWidget):
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
 
-        self.ace_id_hostname = rospy.get_param("~ace_id_hostname", "92.207.233.130")
+        self.ace_id_hostname = rospy.get_param("~ace_id_hostname", "192.168.10.130")
         self.ace_id_port = rospy.get_param("~ace_id_port", "8007")
         self.tn = telnetlib.Telnet()
         self.telnet_read = ""
@@ -89,7 +89,7 @@ class ExplosiveAceID(QWidget):
                 self.connect_button.setEnabled(True)
             self.status_label.setText('Connected')
         else:
-            self.acquire_button.setEnabled(True)
+            self.acquire_button.setEnabled(False)
             if self.connection_attempts == 0:
                 self.status_label.setText('Not connected')
             if self.connection_attempts == -1:
@@ -97,7 +97,10 @@ class ExplosiveAceID(QWidget):
 
 
     def connect(self):
-        self.tn.close()
+        try:
+            self.tn.close()
+        except:
+            rospy.loginfo("ACE-ID telnet port cannot be closed.")
         try:
             self.connection_attempts = 1
             self.tn.open(self.ace_id_hostname,self.ace_id_port,timeout=1)
@@ -109,73 +112,107 @@ class ExplosiveAceID(QWidget):
             self.connected = False
 
     def check_aceid_connection(self):
-        self.tn.write("id" + "\n")
-        self.connection_timer.start(self.connection_timer_period)
+        try:
+            self.tn.write("id" + "\n")
+            self.connection_timer.start(self.connection_timer_period)
+        except:
+            rospy.loginfo("ACE-ID telnet port cannot be written to check connection.")
+            self.connection_attempts = -1
+            self.connected = False
+
 
     def _connection_timer(self):
-        self.connection_attempts =  self.connection_attempts + 1
-        rospy.loginfo("ACE-ID Waiting for ID and firmware version.")
-        self.status_label.setText('Port open, trying to connect.')
-        self.telnet_read = self.telnet_read + self.tn.read_very_eager()
-        self.telnet_read = self.telnet_read.replace("\n",'')
-        substrings = self.telnet_read.split("\r")
-        for i in range(len(substrings)):
-            if substrings[i].find("SERIAL") > 1:
-                rospy.loginfo("ACE-ID found.")
-                self.telnet_read = ""
-                self.connected = True
+        try:
+            self.connection_attempts =  self.connection_attempts + 1
+            rospy.loginfo("ACE-ID Waiting for ID and firmware version.")
+            self.status_label.setText('Port open, trying to connect.')
+            self.telnet_read = self.telnet_read + self.tn.read_very_eager()
+            self.telnet_read = self.telnet_read.replace("\n",'')
+            substrings = self.telnet_read.split("\r")
+            for i in range(len(substrings)):
+                if substrings[i].find("SERIAL") > 1:
+                    rospy.loginfo("ACE-ID found.")
+                    self.telnet_read = ""
+                    self.connected = True
+                    self.connection_timer.stop()
+                    self.connection_attempts = 0
+            if self.connection_attempts > 5:
                 self.connection_timer.stop()
-                self.connection_attempts = 0
-        if self.connection_attempts > 5:
-            self.connection_timer.stop()
-            self.connected = False
+                self.connected = False
+                self.telnet_read = ""
+                rospy.loginfo("Port open but ACE-ID Not found.")
+                self.status_label.setText('Plese connect the ACE-ID to the Arm')
+        except:
+            rospy.loginfo("ACE-ID telnet port cannot be read to validate connection.")
             self.telnet_read = ""
-            rospy.loginfo("Port open but ACE-ID Not found.")
-            self.status_label.setText('Plese connect the ACE-ID to the Arm')
+            self.connection_timer.stop()
+            self.connection_attempts = -1
+            self.connected = False
 
 
 
     def _acquisition_timer(self):
-        rospy.loginfo("ACE-ID Waiting for acquisition.")
-        self.telnet_read = self.telnet_read + self.tn.read_very_eager()
-        self.telnet_read = self.telnet_read.replace("\n",'')
-        substrings = self.telnet_read.split("\r")
-        for i in range(len(substrings)):
-            if substrings[i] == "DONE":
-                rospy.loginfo("ACE-ID Acquisition FINISHED.")
-                self.telnet_read = ""
-                self.started_acquisition = False
-                self.acquisition_timer.stop()
-                self.get_results()
+        try:
+            rospy.loginfo("ACE-ID Waiting for acquisition.")
+            self.telnet_read = self.telnet_read + self.tn.read_very_eager()
+            self.telnet_read = self.telnet_read.replace("\n",'')
+            substrings = self.telnet_read.split("\r")
+            for i in range(len(substrings)):
+                if substrings[i] == "DONE":
+                    rospy.loginfo("ACE-ID Acquisition FINISHED.")
+                    self.telnet_read = ""
+                    self.started_acquisition = False
+                    self.acquisition_timer.stop()
+                    self.get_results()
+        except:
+            rospy.loginfo("ACE-ID telnet port cannot be read to acquire data.")
+            self.telnet_read = ""
+            self.acquisition_timer.stop()
+            self.connection_attempts = -1
+            self.connected = False
 
     def get_results(self):
-        self.tn.write("sync results" + "\n")
-        self.results_timer.start(self.results_timer_period)
-        pass
+        try:
+            self.tn.write("sync results" + "\n")
+            self.results_timer.start(self.results_timer_period)
+        except:
+            rospy.loginfo("ACE-ID telnet port cannot be written to get results.")
+            self.telnet_read = ""
+            self.acquisition_timer.stop()
+            self.connection_attempts = -1
+            self.connected = False
 
     def _results_timer(self):
-        rospy.loginfo("ACE-ID Waiting for results.")
-        self.telnet_read = self.telnet_read + self.tn.read_very_eager()
-        got_materials = False
-        for line in self.telnet_read.split("\n"):
-            if "Quality" in line:
-                rospy.loginfo("ACE-ID Results received.")
-                got_materials = True
-                result_line = line.strip()
-                result_line = result_line.split("] = ")[1].split("] [Contribution")[0]
-                material = result_line.split(" [Quality=")[0]
-                quality = result_line.split(" [Quality=")[1]
-                self.results_dict[material] = quality
-                self.results_number = self.results_number + 1
+        try:
+            rospy.loginfo("ACE-ID Waiting for results.")
+            self.telnet_read = self.telnet_read + self.tn.read_very_eager()
+            got_materials = False
+            for line in self.telnet_read.split("\n"):
+                if "Quality" in line:
+                    rospy.loginfo("ACE-ID Results received.")
+                    got_materials = True
+                    result_line = line.strip()
+                    result_line = result_line.split("] = ")[1].split("] [Contribution")[0]
+                    material = result_line.split(" [Quality=")[0]
+                    quality = result_line.split(" [Quality=")[1]
+                    self.results_dict[material] = quality
+                    self.results_number = self.results_number + 1
+                    self.results_timer.stop()
+                    self.fill_table()
+            if not got_materials:
+                self.results_number = 0
+                rospy.loginfo("ACE-ID No materials found.")
                 self.results_timer.stop()
                 self.fill_table()
-        if not got_materials:
-            self.results_number = 0
-            rospy.loginfo("ACE-ID No materials found.")
+        except:
+            rospy.loginfo("ACE-ID telnet port cannot be read to get results.")
+            self.telnet_read = ""
             self.results_timer.stop()
-            self.fill_table()
+            self.connection_attempts = -1
+            self.connected = False
 
-        pass
+
+
 
     def _results_parser(self):
         example_string = """>sync results
