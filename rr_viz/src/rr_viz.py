@@ -111,13 +111,11 @@ class RossRoboticsRViz(QMainWindow):
 
 
     def recurring_process(self,progress_callback):
-        self.create_node()
         while 1:
             alive = self.ping("192.168.10.100",5)
-            print(alive)
-            print(pid)
             if not alive:
                 print("Robot is not reachable via Network, GUI shutting down")
+                os.system('zenity --error --no-wrap  --text="Connection to the robot connection lost. Closing GUI"')
                 os.kill(pid, signal.SIGTERM)
                 pass
         return "Finished"
