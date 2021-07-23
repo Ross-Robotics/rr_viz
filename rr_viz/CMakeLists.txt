@@ -10,7 +10,6 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   rviz_textured_sphere
   rr_custom_msgs
-  message_generation
   sensor_msgs
 )
 catkin_python_setup()
@@ -18,7 +17,7 @@ catkin_python_setup()
 
 catkin_package(
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS actionlib geometry_msgs move_base_msgs rospy std_msgs message_runtime
+  CATKIN_DEPENDS actionlib geometry_msgs move_base_msgs rospy std_msgs
 )
 
 #catkin_install_python(
