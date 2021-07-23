@@ -115,7 +115,7 @@ class RossRoboticsRViz(QMainWindow):
             alive = self.ping("192.168.10.100",5)
             if not alive:
                 print("Robot is not reachable via Network, GUI shutting down")
-                os.system('zenity --error --no-wrap  --text="Connection to the robot connection lost. Closing GUI"')
+                os.system('zenity --error --no-wrap  --text="Connection to the EXTRM lost. Closing GUI."')
                 os.kill(pid, signal.SIGTERM)
                 pass
         return "Finished"

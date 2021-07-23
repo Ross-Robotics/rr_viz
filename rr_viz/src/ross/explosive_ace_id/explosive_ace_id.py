@@ -87,8 +87,8 @@ class ExplosiveAceID(QWidget):
                 self.connect_button.setEnabled(False)
             else:
                 self.connect_button.setEnabled(True)
-            if self.started_acquisition == False:
-                self.status_label.setText('Connected')
+            # if self.started_acquisition == False:
+            #     self.status_label.setText('Connected')
         else:
             self.acquire_button.setEnabled(False)
             if self.connection_attempts == 0:
@@ -143,6 +143,8 @@ class ExplosiveAceID(QWidget):
                     self.connected = True
                     self.connection_timer.stop()
                     self.connection_attempts = 0
+                    self.status_label.setText('Connected')
+
             if self.connection_attempts > 5:
                 self.connection_timer.stop()
                 self.connected = False
@@ -162,6 +164,7 @@ class ExplosiveAceID(QWidget):
 
     def _acquisition_timer(self):
         try:
+            self.started_acquisition = True
             rospy.loginfo("ACE-ID Waiting for acquisition.")
             self.status_label.setText('ACE-ID acquiring data.')
             self.telnet_read = self.telnet_read + self.tn.read_very_eager()
@@ -277,6 +280,7 @@ Getting search results...
             self.table.setItem(row_count,1,quality_item)
         self.results_number = 0
         self.results_dict = {}
+        self.status_label.setText('Connected')
 
     def clear_table(self):
         while self.table.rowCount() > 0:
