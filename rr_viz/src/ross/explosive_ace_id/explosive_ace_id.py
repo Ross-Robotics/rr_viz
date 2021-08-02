@@ -14,7 +14,7 @@ class ExplosiveAceID(QWidget):
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
 
-        self.ace_id_hostname = rospy.get_param("~ace_id_hostname", "192.168.10.130")
+        self.ace_id_hostname = rospy.get_param("~ace_id_hostname", "192.168.10.130")#92.207.233.130
         self.ace_id_port = rospy.get_param("~ace_id_port", "8007")
         self.tn = telnetlib.Telnet()
         self.telnet_read = ""
@@ -75,7 +75,7 @@ class ExplosiveAceID(QWidget):
         self.connection_timer = QTimer(self)
         self.connection_timer.timeout.connect(self._connection_timer)
 
-        self.results_timer_period = 1000
+        self.results_timer_period = 2000
         self.results_timer = QTimer(self)
         self.results_timer.timeout.connect(self._results_timer)
 
@@ -174,7 +174,6 @@ class ExplosiveAceID(QWidget):
                 if substrings[i] == "DONE":
                     rospy.loginfo("ACE-ID Acquisition FINISHED.")
                     self.telnet_read = ""
-                    self.started_acquisition = False
                     self.acquisition_timer.stop()
                     self.get_results()
         except:
@@ -202,7 +201,9 @@ class ExplosiveAceID(QWidget):
     def _results_timer(self):
         try:
             rospy.loginfo("ACE-ID Waiting for results.")
-            self.telnet_read = self.telnet_read + self.tn.read_very_eager()
+            self.telnet_read = self.telnet_read + self.tn.read_until('\0', timeout=0.5)
+            self.started_acquisition = False
+            print(self.telnet_read)
             got_materials = False
             for line in self.telnet_read.split("\n"):
                 if "Quality" in line:
@@ -216,6 +217,9 @@ class ExplosiveAceID(QWidget):
                     self.results_number = self.results_number + 1
                     self.results_timer.stop()
                     self.fill_table()
+                if "returned" in line:
+                    number_of_materials = line.split("returned ")[1]
+                    got_materials = False
             if not got_materials:
                 self.results_number = 0
                 rospy.loginfo("ACE-ID No materials found.")
