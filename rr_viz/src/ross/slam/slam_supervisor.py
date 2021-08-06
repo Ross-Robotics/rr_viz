@@ -35,7 +35,7 @@ class SlamSupervisor(QWidget):
         self.delete_map_srv = rospy.ServiceProxy(self.slam_sup_name+"/delete_map", String)
         self.save_map_image_srv = rospy.ServiceProxy(self.slam_sup_name+"/save_map_image", String)
         self.active_nodes_sub = rospy.Subscriber(self.slam_sup_name+"/active_nodes", StringArray, self.active_nodes_sub_cb)
-        
+
         self.active_nodes = []
 
         self.v_layout = QVBoxLayout()
@@ -93,7 +93,7 @@ class SlamSupervisor(QWidget):
 
         self.delete_spacer = QLabel('')
         self.h_layout_delete_map.addWidget(self.delete_spacer, 7)
-        
+
         self.delete_map_button = QPushButton('Delete Map')
         self.delete_map_button.pressed.connect(self.delete_map)
 
@@ -130,7 +130,7 @@ class SlamSupervisor(QWidget):
         self.h_layout_mapping.addWidget(self.mapping_label)
 
         self.v_layout.addLayout(self.h_layout_mapping)
-        
+
         # Mapping button
         self.mapping_button = QPushButton('Switch to Mapping')
         self.mapping_button.pressed.connect(self.switch_to_mapping)
@@ -175,20 +175,20 @@ class SlamSupervisor(QWidget):
         except:
             # Exit if theres no service
             return False
-            
+
     def active_nodes_sub_cb(self, msg):
         self.active_nodes = msg.data
 
     def switch_to_mapping(self):
         trig_resp = self.kill_nodes_srv.call(TriggerRequest())
-        
+
         if trig_resp.success:
             rospy.loginfo(trig_resp.message)
             temp_timer = rospy.Timer(
                 rospy.Duration(.1), lambda _: self.waitTillDead_and_execute(self.run_mapping), oneshot=True)
         else:
             rospy.logwarn("Failed calling slam_killnodes_srv")
-    
+
     def run_mapping(self):
         trig_resp = self.launch_mapping_srv.call(TriggerRequest())
 
@@ -222,7 +222,7 @@ class SlamSupervisor(QWidget):
             self.loaded_map_label.setText(self.loaded_map_name)
         else:
             rospy.logerr("Failed calling slam_launch_localization_srv")
-        
+
     def waitTillDead_and_execute(self, func):
         if len(self.active_nodes) == 0:
             func()
@@ -259,7 +259,7 @@ class SlamSupervisor(QWidget):
                 rospy.loginfo(trig_resp.message)
                 if not trig_resp.success:
                     rospy.logerr("Failed calling slam delete map service")
- 
+
     def save_map(self):
         _str = StringRequest()
         map_name, ok = QInputDialog.getText(self, "Map file name", "Specify file name to save the map:")
@@ -333,11 +333,9 @@ class SlamSupervisor(QWidget):
 
         for index in range(self.map_list_widget.count()):
             local_maps.append(self.map_list_widget.item(index).text())
-        
+
         for _map in remote_list:
             if(self.slam_package == "slam_toolbox") and ".posegraph" in _map:
-                eligible_maps.append(_map)
-            elif(self.slam_package == "iris_lama") and ".yaml" in _map:
                 eligible_maps.append(_map)
             elif(self.slam_package == "rtabmap") and ".db" in _map:
                 eligible_maps.append(_map)
@@ -346,7 +344,7 @@ class SlamSupervisor(QWidget):
             if _map not in eligible_maps:
                 self.map_list_widget.takeItem(local_maps.index(_map))
                 local_maps.remove(_map)
-        
+
         for _map in eligible_maps:
             if _map not in local_maps:
                 self.map_list_widget.addItem(_map)
